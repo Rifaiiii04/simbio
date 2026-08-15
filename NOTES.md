@@ -1,0 +1,14 @@
+next update
+ADD: 
+    - project management di room chat menggunakan AI sebagai rekomendasi timeline nya, user bisa mengubah timeline nya sebelum user mengonfirmasi timelinenya dan perlu konfirmasi dari kedua belah pihak.
+    - Audio Call untuk saling mengobrol antar kedua belah nanti ada pilihan mau audio call biasa atau ingin rekomendasi topik untuk obrolan tersebut. random topik yang akan di rekomendasikan oleh AI misal partner A kebagian membahas topik asyncronus Partner B kebagian topik Color theory. topik yang di dapat harus sesuai dengan skil yang dimiliki oleh partner A dan yang ingin di kuasai oleh Partner B.
+    - ketika salah satu dari daftar project itu di klik nanti akan menampilkan project manajemen yang sudah berjalan. 
+    - membuat RoadMap belajar sesuai dengan skill yang di inginkan oleh kedua belah pihak dengan rekomendasi AI juga roadmapnya berupa list yang bisa mereka jadikan obrolan di chat atau audio call biasa. misal user A ingin belajar python user B ingin belajar belajar Component Figma. maka nanti Ai akan merekomendasikan list belajar pada masing masing user dan user dapat mencentang list tersebut selesai jika mereka sudah menyelesaikan topik list tersebut. contoh nya user A maka nanti akan memiliki list belajar python yang akan dia pelajari dan user B memiliki list belajar Component Figma yang akan dia pelajari dan masing masing bisa melihat list masing masing tapi user A tidak bisa mencentang list user B begitupun sebaliknya
+    - ketika mengirim permintaan undangan berteman nanti yang mengirim undangan tersebut akan memberikan pesan undangan juga jadi tidak asal mengirim undangan. jadi nanti siapkan template kata kata nya dan user bisa mengubah template kata kata nya sebelum mengirim undangan.
+    - tambahkan fitur report partner juga dan setiap report akan masuk ke dashboard juga jadi nanti ada halaman pengelolanya untuk mengelola report partner tersebut.
+    - ketika sedang mengobrol dan user mau kirim chat jika menggunakan @SimbiAI maka simbi akan menjawab chat tersebut di kolom chat dan kedua belah pihak juga bisa melihatnya dan pastikan warna buble chat simbi itu berbeda agar bisa memudahkan mana chat partner dan chat bubble simbi.
+    - menambahkan fitur untuk user bisa mengirimkan audio pesan di room chat 
+    - ketika ingin start fokus pastikan keduanya dalam keadaan ready maka dari itu perlu konfirmasi atau ready dari kedua belah pihak. dan ketika keduanya sudah mulai start fokus maka tidak bisa kirim chat atau kembali ke halaman menu lagi, mode focus bisa di berhentikan sementara ketika salah satu nya request untuk berhenti atau menyudahi dan salah satunya lagi setuju untuk menghentikan atau mengakhiri focus tersebut.
+
+
+UPDATE 

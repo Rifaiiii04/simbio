@@ -1,0 +1,133 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary: #FF7A30;
+    --primary-yellow: #FACC15;
+    --primary-cyan: #06B6D4;
+    --primary-lime: #84CC16;
+    --primary-pink: #EC4899;
+    --bg-warm: #FFFDF7;
+    --border-dark: #1E293B;
+  }
+}
+
+body {
+  background-color: var(--bg-warm);
+  color: #0F172A;
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Hard Neo-Brutalist Shadow Utilities */
+.neo-box {
+  background-color: #FFFFFF;
+  border: 3px solid #0F172A;
+  box-shadow: 5px 5px 0px 0px #0F172A;
+  border-radius: 20px;
+}
+
+.neo-box-sm {
+  background-color: #FFFFFF;
+  border: 2.5px solid #0F172A;
+  box-shadow: 3px 3px 0px 0px #0F172A;
+  border-radius: 16px;
+}
+
+.neo-box-orange {
+  background-color: #FF7A30;
+  color: #FFFFFF;
+  border: 3px solid #0F172A;
+  box-shadow: 5px 5px 0px 0px #0F172A;
+  border-radius: 20px;
+}
+
+.neo-box-yellow {
+  background-color: #FACC15;
+  color: #0F172A;
+  border: 3px solid #0F172A;
+  box-shadow: 5px 5px 0px 0px #0F172A;
+  border-radius: 20px;
+}
+
+.neo-box-lime {
+  background-color: #84CC16;
+  color: #0F172A;
+  border: 3px solid #0F172A;
+  box-shadow: 5px 5px 0px 0px #0F172A;
+  border-radius: 20px;
+}
+
+.neo-box-cyan {
+  background-color: #06B6D4;
+  color: #FFFFFF;
+  border: 3px solid #0F172A;
+  box-shadow: 5px 5px 0px 0px #0F172A;
+  border-radius: 20px;
+}
+
+.neo-button {
+  background-color: #FF7A30;
+  color: #FFFFFF;
+  border: 3px solid #0F172A;
+  box-shadow: 4px 4px 0px 0px #0F172A;
+  border-radius: 16px;
+  font-weight: 800;
+  transition: all 0.15s ease-in-out;
+}
+
+.neo-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #0F172A;
+}
+
+.neo-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px 0px #0F172A;
+}
+
+.neo-button-yellow {
+  background-color: #FACC15;
+  color: #0F172A;
+  border: 3px solid #0F172A;
+  box-shadow: 4px 4px 0px 0px #0F172A;
+  border-radius: 16px;
+  font-weight: 800;
+  transition: all 0.15s ease-in-out;
+}
+
+.neo-button-yellow:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #0F172A;
+}
+
+.neo-badge {
+  border: 2px solid #0F172A;
+  box-shadow: 2px 2px 0px 0px #0F172A;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+/* Playful Wiggle Animation */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+
+.animate-wiggle {
+  animation: wiggle 3s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #FFFDF7;
+}
+::-webkit-scrollbar-thumb {
+  background: #FF7A30;
+  border: 2px solid #0F172A;
+  border-radius: 6px;
+}
