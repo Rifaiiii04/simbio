@@ -48,4 +48,5 @@ export interface LLMProvider {
   generateRoadmapDraft(prompt: RoadmapGenerationPrompt): Promise<GeneratedRoadmapDraft>;
   recommendPartners(prompt: AiPartnerRecommendationPrompt): Promise<AiPartnerRecommendation[]>;
   generateAudioTopic(skillDomain: string): Promise<string>;
+  generateLearningTopics(skillName: string): Promise<Array<{ title: string; description: string }>>;
 }

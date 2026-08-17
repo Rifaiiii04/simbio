@@ -106,6 +106,10 @@ export function initWebSocketServer(httpServer: HttpServer): SocketIOServer {
       io?.to(data.partnershipId).emit('audio_session_ended');
     });
 
+    socket.on('topic_updated', (data: { partnershipId: string }) => {
+      io?.to(data.partnershipId).emit('topic_updated');
+    });
+
     socket.on('disconnect', () => {
       logger.info({ socketId: socket.id }, 'WebSocket client disconnected');
     });

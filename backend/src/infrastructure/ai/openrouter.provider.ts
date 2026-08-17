@@ -39,6 +39,15 @@ const audioTopicSchema = z.object({
   topic: z.string().min(2).max(200),
 });
 
+const learningTopicsSchema = z
+  .array(
+    z.object({
+      title: z.string().min(2),
+      description: z.string().optional(),
+    }),
+  )
+  .min(1);
+
 export class OpenRouterProvider implements LLMProvider {
   async generateRoadmapDraft(prompt: RoadmapGenerationPrompt): Promise<GeneratedRoadmapDraft> {
     const systemInstruction = `You are Simbi, a friendly capybara learning assistant for Simbioly.
@@ -224,6 +233,67 @@ Return ONLY valid JSON. No explanation, bullet list, or description.`;
       if (err instanceof SyntaxError || err instanceof z.ZodError) {
         logger.warn({ err }, 'Failed to parse AI topic output');
         throw new AppError(ErrorCode.AI_INVALID_RESPONSE, 'Invalid AI topic response format', 502);
+      }
+      logger.error({ err }, 'OpenRouter communication error');
+      throw new AppError(ErrorCode.AI_UNAVAILABLE, 'AI provider communication failed', 503);
+    }
+  }
+
+  async generateLearningTopics(skillName: string): Promise<Array<{ title: string; description: string }>> {
+    const systemInstruction = `Generate 5 concise, practical learning roadmap topics/discussion themes for learning "${skillName}".
+Each item should be a short topic title (e.g. "Color Theory & Contrast" or "RESTful API Architecture") that two learning partners can discuss or check off as a milestone.
+You MUST return ONLY a JSON array with objects matching this exact structure:
+[
+  {
+    "title": "Short Topic Title",
+    "description": "Brief 1-sentence prompt/note"
+  }
+]
+Return ONLY valid JSON array without markdown code blocks.`;
+
+    try {
+      const response = await fetch(`${env.OPENROUTER_BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://simbioly.local',
+          'X-Title': 'Simbioly',
+        },
+        body: JSON.stringify({
+          model: env.OPENROUTER_MODEL,
+          messages: [
+            { role: 'system', content: 'Respond ONLY in valid JSON array.' },
+            { role: 'user', content: systemInstruction },
+          ],
+          temperature: 0.6,
+        }),
+        signal: AbortSignal.timeout(env.OPENROUTER_TIMEOUT_MS),
+      });
+
+      if (!response.ok) {
+        logger.error({ status: response.status, text: await response.text() }, 'OpenRouter learning topics generation failed');
+        throw new AppError(ErrorCode.AI_UNAVAILABLE, 'AI service unavailable', 503);
+      }
+
+      const data = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
+      const rawContent = data.choices?.[0]?.message?.content;
+      if (!rawContent) {
+        throw new AppError(ErrorCode.AI_INVALID_RESPONSE, 'Empty response from AI', 502);
+      }
+
+      const cleanJson = rawContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const parsedJson = JSON.parse(cleanJson);
+      const validated = learningTopicsSchema.parse(parsedJson);
+      return validated.map((item) => ({
+        title: item.title,
+        description: item.description || `Learning milestone for ${skillName}`,
+      }));
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+      if (err instanceof SyntaxError || err instanceof z.ZodError) {
+        logger.warn({ err }, 'Failed to parse AI learning topics output');
+        throw new AppError(ErrorCode.AI_INVALID_RESPONSE, 'Invalid AI learning topics response format', 502);
       }
       logger.error({ err }, 'OpenRouter communication error');
       throw new AppError(ErrorCode.AI_UNAVAILABLE, 'AI provider communication failed', 503);

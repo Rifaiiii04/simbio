@@ -9,6 +9,7 @@ import { Navbar } from '@/components/shared/Navbar';
 import { SimbiAvatar } from '@/components/shared/SimbiAvatar';
 import { AudioCallModal } from '@/components/partnerships/AudioCallModal';
 import { ReportPartnerModal } from '@/components/partnerships/ReportPartnerModal';
+import { ReciprocalRoadmapCard } from '@/components/partnerships/ReciprocalRoadmapCard';
 import {
   MessageSquare,
   Send,
@@ -446,6 +447,14 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
 
           {/* RIGHT PANEL (5 Cols): Belajar Bareng Collaboration Hub */}
           <div className="lg:col-span-5 space-y-6">
+            {/* Widget: Reciprocal Learning Topics Roadmap & Checklist */}
+            <ReciprocalRoadmapCard
+              partnershipId={partnershipId}
+              myUserId={myUserId}
+              partnerName={partner?.name || 'Partner'}
+              socket={socketRef.current}
+            />
+
             {/* Widget: Shared Pomodoro Focus Session */}
             <div className="neo-box bg-[#FACC15] p-6 text-center space-y-4 shadow-[6px_6px_0px_0px_#0F172A]">
               <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-2">

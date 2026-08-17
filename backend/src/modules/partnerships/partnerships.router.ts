@@ -18,6 +18,13 @@ import {
   rejectAudioSessionHandler,
   leaveAudioSessionHandler,
 } from './audio-session.controller.js';
+import {
+  getTopicsHandler,
+  generateAiTopicsHandler,
+  addTopicHandler,
+  toggleTopicHandler,
+  deleteTopicHandler,
+} from './partnership-topics.controller.js';
 
 const router = Router();
 router.use(authenticate);
@@ -37,5 +44,12 @@ router.post('/audio-sessions/:sessionId/accept', acceptAudioSessionHandler);
 router.post('/audio-sessions/:sessionId/skip-prep', skipPrepAudioSessionHandler);
 router.post('/audio-sessions/:sessionId/reject', rejectAudioSessionHandler);
 router.post('/audio-sessions/:sessionId/leave', leaveAudioSessionHandler);
+
+// Partnership Reciprocal Learning Topics Routes
+router.get('/:id/topics', getTopicsHandler);
+router.post('/:id/topics/generate-ai', generateAiTopicsHandler);
+router.post('/:id/topics', addTopicHandler);
+router.patch('/topics/:topicId/toggle', toggleTopicHandler);
+router.delete('/topics/:topicId', deleteTopicHandler);
 
 export { router as partnershipsRouter };
