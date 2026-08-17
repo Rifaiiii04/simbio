@@ -11,6 +11,7 @@ import {
   Moon,
   LogOut,
   ShieldCheck,
+  ShieldAlert,
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -117,6 +118,16 @@ const handleLogout = () => {
         >
           <Handshake class="w-4 h-4" />
           <span>Partnerships</span>
+        </RouterLink>
+
+        <RouterLink
+          to="/reports"
+          :class="isDark ? 'text-gray-400 hover:text-white hover:bg-[#22252C]' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+          class="flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all"
+          active-class="bg-[#FF7A30]/15 !text-[#FF7A30] border border-[#FF7A30]/30 font-bold shadow-xs"
+        >
+          <ShieldAlert class="w-4 h-4 text-red-500" />
+          <span>User Reports & Ban</span>
         </RouterLink>
 
         <RouterLink

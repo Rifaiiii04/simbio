@@ -99,25 +99,48 @@ enum AudioSessionStatus {
   REJECTED
 }
 
+enum ReportReason {
+  INAPPROPRIATE_BEHAVIOR
+  SPAM
+  HARASSMENT
+  SCAM
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  RESOLVED
+  DISMISSED
+}
+
+enum ReportActionTaken {
+  NONE
+  WARNED
+  BANNED
+  DELETED
+}
+
 // -----------------------------------------------------------------------------
 // MODELS
 // -----------------------------------------------------------------------------
 
 model User {
-  id              String   @id @default(uuid())
-  email           String   @unique
+  id              String    @id @default(uuid())
+  email           String    @unique
   passwordHash    String
   name            String
-  username        String?  @unique
-  bio             String?  @db.Text
+  username        String?   @unique
+  bio             String?   @db.Text
   avatarUrl       String?
   latitude        Float?
   longitude       Float?
-  locationEnabled Boolean  @default(false)
-  role            UserRole @default(USER)
-  country         String?  @default("United States")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  locationEnabled Boolean   @default(false)
+  role            UserRole  @default(USER)
+  country         String?   @default("United States")
+  isBanned        Boolean   @default(false)
+  bannedAt        DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   userSkills         UserSkill[]
   learningGoals      LearningGoal[]
@@ -130,6 +153,8 @@ model User {
   projectContributions  ProjectContributor[]
   reviewsGiven          PartnershipReview[] @relation("Reviewer")
   reviewsReceived       PartnershipReview[] @relation("Reviewee")
+  reportsSent           UserReport[]        @relation("Reporter")
+  reportsReceived       UserReport[]        @relation("ReportedUser")
 }
 
 model SkillCategory {
@@ -271,6 +296,7 @@ model Partnership {
   reviews       PartnershipReview[]
   messages      PartnershipMessage[]
   audioSessions PartnershipAudioSession[]
+  reports       UserReport[]
 
   @@unique([requesterId, recipientId])
 }
@@ -352,3 +378,22 @@ model PartnershipAudioSession {
 
   partnership Partnership @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
 }
+
+model UserReport {
+  id            String            @id @default(uuid())
+  reporterId    String
+  reportedId    String
+  partnershipId String?
+  reason        ReportReason
+  description   String?           @db.Text
+  status        ReportStatus      @default(PENDING)
+  actionTaken   ReportActionTaken @default(NONE)
+  resolvedAt    DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  reporter    User         @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reported    User         @relation("ReportedUser", fields: [reportedId], references: [id], onDelete: Cascade)
+  partnership Partnership? @relation(fields: [partnershipId], references: [id], onDelete: SetNull)
+}
+

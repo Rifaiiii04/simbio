@@ -4,6 +4,7 @@ import UsersView from '../views/UsersView.vue'
 import SkillsView from '../views/SkillsView.vue'
 import PartnershipsView from '../views/PartnershipsView.vue'
 import AiMonitoringView from '../views/AiMonitoringView.vue'
+import ReportManagementView from '../views/ReportManagementView.vue'
 import LoginView from '../views/LoginView.vue'
 
 declare module 'vue-router' {
@@ -20,6 +21,7 @@ const router = createRouter({
     { path: '/users', name: 'users', component: UsersView },
     { path: '/skills', name: 'skills', component: SkillsView },
     { path: '/partnerships', name: 'partnerships', component: PartnershipsView },
+    { path: '/reports', name: 'reports', component: ReportManagementView },
     { path: '/ai-monitoring', name: 'ai-monitoring', component: AiMonitoringView },
   ],
 })

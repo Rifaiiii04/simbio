@@ -18,6 +18,7 @@ import { projectsRouter } from './modules/projects/projects.router.js';
 import { reviewsRouter } from './modules/reviews/reviews.router.js';
 import { discoveryRouter } from './modules/discovery/discovery.router.js';
 import { aiRouter } from './modules/ai/ai.router.js';
+import { reportsRouter } from './modules/reports/reports.router.js';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -46,6 +47,7 @@ app.use('/api/v1/projects', projectsRouter);
 app.use('/api/v1/reviews', reviewsRouter);
 app.use('/api/v1/discovery', discoveryRouter);
 app.use('/api/v1/ai', aiRouter);
+app.use('/api/v1/reports', reportsRouter);
 
 app.use(notFound);
 app.use(errorHandler);

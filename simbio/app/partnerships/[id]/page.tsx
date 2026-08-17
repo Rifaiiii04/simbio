@@ -8,6 +8,7 @@ import { apiFetch } from '@/lib/api/client';
 import { Navbar } from '@/components/shared/Navbar';
 import { SimbiAvatar } from '@/components/shared/SimbiAvatar';
 import { AudioCallModal } from '@/components/partnerships/AudioCallModal';
+import { ReportPartnerModal } from '@/components/partnerships/ReportPartnerModal';
 import {
   MessageSquare,
   Send,
@@ -25,6 +26,7 @@ import {
   Handshake,
   ShieldCheck,
   Phone,
+  ShieldAlert,
 } from 'lucide-react';
 
 interface UserSummary {
@@ -79,6 +81,9 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
   const [timerSeconds, setTimerSeconds] = useState(25 * 60);
   const [timerActive, setTimerActive] = useState(false);
   const [sessionCompletedMsg, setSessionCompletedMsg] = useState<string | null>(null);
+
+  // Report Partner Modal State
+  const [showReportModal, setShowReportModal] = useState(false);
 
   // Peer Review Form State
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -315,6 +320,14 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
               >
                 <Star className="w-4 h-4 text-[#FACC15]" />
                 <span>Give Review</span>
+              </button>
+
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="px-3 py-1.5 rounded-xl bg-white border-2 border-[#0F172A] text-xs font-black text-red-600 hover:bg-red-500 hover:text-white transition flex items-center gap-1 shadow-[2px_2px_0px_0px_#0F172A]"
+              >
+                <ShieldAlert className="w-4 h-4 text-red-600" />
+                <span>Report Partner</span>
               </button>
             </div>
           </div>
@@ -588,6 +601,16 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
             </form>
           </div>
         </div>
+      )}
+
+      {showReportModal && partner && (
+        <ReportPartnerModal
+          partnershipId={partnershipId}
+          partnerId={partner.id}
+          partnerName={partner.name}
+          onClose={() => setShowReportModal(false)}
+          onSuccess={(msg) => setReviewMsg(msg)}
+        />
       )}
     </div>
   );
