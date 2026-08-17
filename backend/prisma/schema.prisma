@@ -84,6 +84,21 @@ enum ProjectStatus {
   ARCHIVED
 }
 
+enum AudioCallMode {
+  NORMAL
+  AI_TOPIC_EXCHANGE
+}
+
+enum AudioSessionStatus {
+  WAITING
+  PREPARING
+  USER_A_TURN
+  USER_B_TURN
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
 // -----------------------------------------------------------------------------
 // MODELS
 // -----------------------------------------------------------------------------
@@ -250,11 +265,12 @@ model Partnership {
   acceptedAt  DateTime?
   updatedAt   DateTime          @updatedAt
 
-  requester User                 @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
-  recipient User                 @relation("Recipient", fields: [recipientId], references: [id], onDelete: Cascade)
-  projects  Project[]
-  reviews   PartnershipReview[]
-  messages  PartnershipMessage[]
+  requester User                     @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  recipient User                     @relation("Recipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  projects      Project[]
+  reviews       PartnershipReview[]
+  messages      PartnershipMessage[]
+  audioSessions PartnershipAudioSession[]
 
   @@unique([requesterId, recipientId])
 }
@@ -312,4 +328,27 @@ model PartnershipReview {
   reviewee    User        @relation("Reviewee", fields: [revieweeId], references: [id], onDelete: Cascade)
 
   @@unique([partnershipId, reviewerId, revieweeId])
+}
+
+model PartnershipAudioSession {
+  id               String             @id @default(uuid())
+  partnershipId    String
+  mode             AudioCallMode
+  status           AudioSessionStatus @default(WAITING)
+  requesterId      String
+  recipientId      String
+  firstSpeakerId   String?
+  secondSpeakerId  String?
+  currentSpeakerId String?
+  userATopic       String?
+  userBTopic       String?
+  userATopicStatus String?
+  userBTopicStatus String?
+  turnStartedAt    DateTime?
+  startedAt        DateTime?
+  endedAt          DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  partnership Partnership @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
 }

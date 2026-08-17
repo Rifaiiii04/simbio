@@ -7,30 +7,24 @@ import { io, Socket } from 'socket.io-client';
 import { apiFetch } from '@/lib/api/client';
 import { Navbar } from '@/components/shared/Navbar';
 import { SimbiAvatar } from '@/components/shared/SimbiAvatar';
-import { GlowCard } from '@/components/ui/GlowCard';
+import { AudioCallModal } from '@/components/partnerships/AudioCallModal';
 import {
   MessageSquare,
   Send,
   ArrowLeft,
   Sparkles,
   Zap,
-  FolderPlus,
   Play,
   Pause,
   RotateCcw,
   Clock,
   Star,
   CheckCircle2,
-  BookOpen,
-  User,
-  Lightbulb,
-  Plus,
   Globe,
   Code,
   Handshake,
-  Rocket,
   ShieldCheck,
-  Award,
+  Phone,
 } from 'lucide-react';
 
 interface UserSummary {
@@ -59,15 +53,6 @@ interface Message {
   createdAt: string;
 }
 
-interface Project {
-  id: string;
-  partnershipId: string;
-  title: string;
-  description: string | null;
-  status: 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED' | 'ARCHIVED';
-  createdAt: string;
-}
-
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
 export default function DedicatedPartnershipRoomPage({ params }: { params: Promise<{ id: string }> }) {
@@ -86,12 +71,9 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
   const socketRef = useRef<Socket | null>(null);
   const chatBottomRef = useRef<HTMLDivElement | null>(null);
 
-  // Projects State
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
-  const [newProjectTitle, setNewProjectTitle] = useState('');
-  const [newProjectDesc, setNewProjectDesc] = useState('');
-  const [creatingProject, setCreatingProject] = useState(false);
+  // Audio Call Modal State
+  const [showAudioCallModal, setShowAudioCallModal] = useState(false);
+  const [incomingAudioSession, setIncomingAudioSession] = useState<any>(null);
 
   // Shared Focus Timer State
   const [timerSeconds, setTimerSeconds] = useState(25 * 60);
@@ -127,14 +109,6 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
         const mRes = await apiFetch<{ messages: Message[] }>(`/partnerships/${partnershipId}/messages`);
         setMessages(mRes.messages);
 
-        // Load projects
-        try {
-          const prRes = await apiFetch<{ projects: Project[] }>(`/projects?partnershipId=${partnershipId}`);
-          setProjects(prRes.projects);
-        } catch (e) {
-          console.error(e);
-        }
-
         // Initialize Real-Time WebSocket connection
         const socket = io(SOCKET_URL);
         socketRef.current = socket;
@@ -151,11 +125,11 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
           });
         });
 
-        socket.on('project_created', (proj: Project) => {
-          setProjects((prev) => {
-            if (prev.some((p) => p.id === proj.id)) return prev;
-            return [proj, ...prev];
-          });
+        socket.on('incoming_audio_call', (sess: any) => {
+          if (sess && sess.requesterId !== myUserId) {
+            setIncomingAudioSession(sess);
+            setShowAudioCallModal(true);
+          }
         });
 
         socket.on('disconnect', () => {
@@ -217,50 +191,6 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
         setMessages((prev) => [...prev, res.message]);
       } catch (err) {
         console.error(err);
-      }
-    }
-  };
-
-  const handleCreateProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newProjectTitle.trim() || creatingProject) return;
-    setCreatingProject(true);
-    const title = newProjectTitle.trim();
-    const description = newProjectDesc.trim() || undefined;
-
-    if (socketRef.current && isSocketConnected) {
-      socketRef.current.emit('create_project', {
-        partnershipId,
-        senderId: myUserId,
-        title,
-        description,
-      });
-      setNewProjectTitle('');
-      setNewProjectDesc('');
-      setShowNewProjectModal(false);
-      setCreatingProject(false);
-    } else {
-      try {
-        const created = await apiFetch<{ project: Project }>('/projects', {
-          method: 'POST',
-          body: JSON.stringify({
-            partnershipId,
-            title,
-            description,
-          }),
-        });
-        setProjects((prev) => [created.project, ...prev]);
-
-        // Send automated chat message notification
-        await handleSendMessage(undefined, `Your partner created a new project: ${title}`);
-
-        setNewProjectTitle('');
-        setNewProjectDesc('');
-        setShowNewProjectModal(false);
-      } catch (err: unknown) {
-        console.error(err);
-      } finally {
-        setCreatingProject(false);
       }
     }
   };
@@ -372,11 +302,11 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
               </span>
 
               <button
-                onClick={() => setShowNewProjectModal(true)}
-                className="px-3 py-1.5 rounded-xl bg-white border-2 border-[#0F172A] text-xs font-black hover:bg-[#FACC15] transition flex items-center gap-1 shadow-[2px_2px_0px_0px_#0F172A]"
+                onClick={() => setShowAudioCallModal(true)}
+                className="px-3.5 py-1.5 rounded-xl bg-[#84CC16] text-[#0F172A] border-2 border-[#0F172A] text-xs font-black hover:bg-emerald-400 transition flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#0F172A]"
               >
-                <Plus className="w-4 h-4 text-[#FF7A30]" />
-                <span>New Project</span>
+                <Phone className="w-4 h-4" />
+                <span>Audio Call</span>
               </button>
 
               <button
@@ -412,8 +342,15 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
               </span>
             </div>
 
-            {/* Smart Action Quick Prompts (NO RAW EMOJIS - 100% Lucide Icons) */}
+            {/* Smart Action Quick Prompts */}
             <div className="flex flex-wrap gap-2 text-[11px] font-black">
+              <button
+                onClick={() => setShowAudioCallModal(true)}
+                className="px-3 py-1.5 rounded-xl bg-[#F7FEE7] text-emerald-800 border-2 border-[#0F172A] hover:bg-[#FACC15] transition flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#0F172A]"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>Start Audio Call</span>
+              </button>
               <button
                 onClick={() => handleSendMessage(undefined, "Ayo kita mulai sesi Belajar Bareng focus 25 menit!")}
                 className="px-3 py-1.5 rounded-xl bg-[#FFF5EF] text-[#FF7A30] border-2 border-[#0F172A] hover:bg-[#FACC15] transition flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#0F172A]"
@@ -427,13 +364,6 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
               >
                 <Code className="w-3.5 h-3.5" />
                 <span>Share Code</span>
-              </button>
-              <button
-                onClick={() => handleSendMessage(undefined, "Ayo buat proyek kolaborasi Belajar Bareng baru!")}
-                className="px-3 py-1.5 rounded-xl bg-[#F7FEE7] text-emerald-700 border-2 border-[#0F172A] hover:bg-[#FACC15] transition flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#0F172A]"
-              >
-                <Rocket className="w-3.5 h-3.5" />
-                <span>Propose Project</span>
               </button>
               <button
                 onClick={() => setShowReviewModal(true)}
@@ -503,7 +433,7 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
 
           {/* RIGHT PANEL (5 Cols): Belajar Bareng Collaboration Hub */}
           <div className="lg:col-span-5 space-y-6">
-            {/* Widget 1: Shared Pomodoro Focus Session */}
+            {/* Widget: Shared Pomodoro Focus Session */}
             <div className="neo-box bg-[#FACC15] p-6 text-center space-y-4 shadow-[6px_6px_0px_0px_#0F172A]">
               <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-2">
                 <div className="flex items-center gap-1.5 text-xs font-black text-[#0F172A] uppercase tracking-wider">
@@ -545,108 +475,24 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
               </div>
             </div>
 
-            {/* Widget 2: Co-Creation Projects List */}
-            <div className="neo-box p-6 space-y-4 shadow-[6px_6px_0px_0px_#0F172A]">
-              <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-2">
-                <div className="flex items-center gap-1.5 text-xs font-black text-[#06B6D4] uppercase tracking-wider">
-                  <FolderPlus className="w-4 h-4 text-[#06B6D4]" />
-                  <span>Proyek Belajar Bareng ({projects.length})</span>
-                </div>
-                <button
-                  onClick={() => setShowNewProjectModal(true)}
-                  className="px-2.5 py-1 rounded-lg bg-[#06B6D4] text-white border-2 border-[#0F172A] text-[10px] font-black flex items-center gap-1 shadow-[1.5px_1.5px_0px_0px_#0F172A] hover:bg-[#FACC15] hover:text-[#0F172A]"
-                >
-                  <Plus className="w-3 h-3" />
-                  <span>Add Project</span>
-                </button>
-              </div>
-
-              {projects.length === 0 ? (
-                <div className="p-4 text-center space-y-2 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-                  <Lightbulb className="w-6 h-6 text-[#FF7A30] mx-auto" />
-                  <p className="text-xs font-black text-[#0F172A]">No co-creation projects launched yet.</p>
-                  <button
-                    onClick={() => setShowNewProjectModal(true)}
-                    className="text-[11px] font-black text-[#FF7A30] hover:underline"
-                  >
-                    + Launch First Project Together
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-3 max-h-[260px] overflow-y-auto p-1">
-                  {projects.map((p) => (
-                    <div key={p.id} className="p-3.5 rounded-xl bg-white border-2 border-[#0F172A] space-y-2 shadow-[3px_3px_0px_0px_#0F172A]">
-                      <div className="flex items-center justify-between">
-                        <span className="neo-badge bg-[#06B6D4] text-white text-[9px] px-2 py-0.5">{p.status}</span>
-                        <span className="text-[9px] font-mono text-gray-500">{new Date(p.createdAt).toLocaleDateString()}</span>
-                      </div>
-                      <h4 className="text-xs font-black text-[#0F172A]">{p.title}</h4>
-                      {p.description && <p className="text-[11px] text-gray-600 font-bold line-clamp-2">{p.description}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <SimbiAvatar state="happy" message="Give your partner a peer review after your exchange to boost global reputation!" />
+            <SimbiAvatar state="happy" message="Start an Audio Call session or AI Topic Exchange to elevate your reciprocal skill growth!" />
           </div>
         </div>
       </main>
 
-      {/* New Project Modal */}
-      {showNewProjectModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md neo-box p-6 space-y-4 shadow-[8px_8px_0px_0px_#0F172A] bg-white">
-            <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-2">
-              <h3 className="text-base font-black text-[#0F172A]">Launch New Co-Creation Project</h3>
-              <button onClick={() => setShowNewProjectModal(false)} className="text-xs font-black">
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateProject} className="space-y-3">
-              <div>
-                <label className="block text-xs font-black mb-1">Project Title</label>
-                <input
-                  type="text"
-                  required
-                  value={newProjectTitle}
-                  onChange={(e) => setNewProjectTitle(e.target.value)}
-                  placeholder="e.g. Build Guitar Chord Visualizer App with React"
-                  className="w-full px-4 py-2.5 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-black mb-1">Project Description & Goal</label>
-                <textarea
-                  value={newProjectDesc}
-                  onChange={(e) => setNewProjectDesc(e.target.value)}
-                  rows={3}
-                  placeholder="Outline what you and your partner will build together..."
-                  className="w-full px-4 py-2.5 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowNewProjectModal(false)}
-                  className="w-1/3 py-2.5 rounded-xl bg-gray-100 border-2 border-[#0F172A] text-xs font-black"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={creatingProject}
-                  className="w-2/3 neo-button py-2.5 text-xs"
-                >
-                  {creatingProject ? 'Launching...' : 'Launch Project'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+      {/* Audio Call Modal */}
+      {showAudioCallModal && (
+        <AudioCallModal
+          partnershipId={partnershipId}
+          partner={{ id: partner.id, name: partner.name, avatarUrl: partner.avatarUrl }}
+          myUserId={myUserId}
+          socket={socketRef.current}
+          incomingSession={incomingAudioSession}
+          onClose={() => {
+            setShowAudioCallModal(false);
+            setIncomingAudioSession(null);
+          }}
+        />
       )}
 
       {/* Peer Review Modal */}

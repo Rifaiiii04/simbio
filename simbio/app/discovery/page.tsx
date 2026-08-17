@@ -8,6 +8,7 @@ import { Navbar } from '@/components/shared/Navbar';
 import { SimbiAvatar } from '@/components/shared/SimbiAvatar';
 import { GlowCard } from '@/components/ui/GlowCard';
 import { SearchableSkillSelect } from '@/components/ui/SearchableSkillSelect';
+import { ProposalModal } from '@/components/discovery/ProposalModal';
 import {
   Compass,
   Sparkles,
@@ -49,7 +50,7 @@ export default function DiscoveryPage() {
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
   const [mode, setMode] = useState<'standard' | 'ai'>('standard');
   const [loading, setLoading] = useState(true);
-  const [requestingId, setRequestingId] = useState<string | null>(null);
+  const [proposalCandidate, setProposalCandidate] = useState<Candidate | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const countries = ['All Countries', 'Indonesia', 'United States', 'Japan', 'Germany', 'United Kingdom', 'Singapore', 'Australia', 'Canada'];
@@ -142,28 +143,7 @@ export default function DiscoveryPage() {
     }
   };
 
-  const handleConnect = async (recipientId: string) => {
-    const token = localStorage.getItem('simbioly_token');
-    if (!token) {
-      router.push('/login');
-      return;
-    }
-    setRequestingId(recipientId);
-    setMessage(null);
-    try {
-      await apiFetch('/partnerships', {
-        method: 'POST',
-        body: JSON.stringify({ recipientId }),
-      });
 
-      setMessage('Partnership request sent successfully!');
-      setCandidates((prev) => prev.filter((c) => c.user.id !== recipientId));
-    } catch (err: unknown) {
-      setMessage(err instanceof Error ? err.message : 'Failed to send request');
-    } finally {
-      setRequestingId(null);
-    }
-  };
 
   // Filter candidates by debounced text query
   const filteredCandidates = candidates.filter((c) => {
@@ -408,12 +388,11 @@ export default function DiscoveryPage() {
                   )}
 
                   <button
-                    disabled={requestingId === c.user.id}
-                    onClick={() => handleConnect(c.user.id)}
+                    onClick={() => setProposalCandidate(c)}
                     className="w-full neo-button py-3 text-xs flex items-center justify-center gap-2"
                   >
                     <UserCheck className="w-4 h-4" />
-                    <span>{requestingId === c.user.id ? 'Sending Request...' : 'Connect for Exchange'}</span>
+                    <span>Connect for Exchange</span>
                   </button>
                 </div>
               </GlowCard>
@@ -421,6 +400,17 @@ export default function DiscoveryPage() {
           </div>
         )}
       </main>
+
+      {proposalCandidate && (
+        <ProposalModal
+          candidate={proposalCandidate}
+          onClose={() => setProposalCandidate(null)}
+          onSuccess={(msg) => {
+            setMessage(msg);
+            setCandidates((prev) => prev.filter((c) => c.user.id !== proposalCandidate.user.id));
+          }}
+        />
+      )}
     </div>
   );
 }

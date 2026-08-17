@@ -47,4 +47,5 @@ export interface AiPartnerRecommendation {
 export interface LLMProvider {
   generateRoadmapDraft(prompt: RoadmapGenerationPrompt): Promise<GeneratedRoadmapDraft>;
   recommendPartners(prompt: AiPartnerRecommendationPrompt): Promise<AiPartnerRecommendation[]>;
+  generateAudioTopic(skillDomain: string): Promise<string>;
 }

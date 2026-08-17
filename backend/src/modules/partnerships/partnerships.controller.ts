@@ -23,8 +23,8 @@ export async function getHandler(req: Request, res: Response, next: NextFunction
 
 export async function createHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { recipientId } = createPartnershipSchema.parse(req.body);
-    sendSuccess(res, { partnership: await service.requestPartnership(uid(req), recipientId) }, 201);
+    const { recipientId, messageText } = createPartnershipSchema.parse(req.body);
+    sendSuccess(res, { partnership: await service.requestPartnership(uid(req), recipientId, messageText) }, 201);
   } catch (err) { next(err); }
 }
 

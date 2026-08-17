@@ -20,7 +20,7 @@ export function initWebSocketServer(httpServer: HttpServer): SocketIOServer {
     // Join specific partnership chat room
     socket.on('join_room', (partnershipId: string) => {
       socket.join(partnershipId);
-      logger.info({ socketId: socket.id, partnershipId }, 'Joined partnership chat room');
+      logger.info({ socketId: socket.id, partnershipId }, 'Joined partnership room');
     });
 
     // Leave partnership chat room
@@ -52,27 +52,59 @@ export function initWebSocketServer(httpServer: HttpServer): SocketIOServer {
           const { partnershipId, senderId, title, description } = data;
           if (!partnershipId || !senderId || !title?.trim()) return;
 
-          // 1. Create project via service
           const createdProject = await projectsService.createProject(senderId, {
             partnershipId,
             title: title.trim(),
             description: description?.trim(),
           });
 
-          // 2. Broadcast project_created to all connected partners in real-time
           io?.to(partnershipId).emit('project_created', createdProject);
 
-          // 3. Automatically send announcement chat message
           const announcementText = `Your partner created a new project: ${title.trim()}`;
           const savedMessage = await partnershipsRepo.createMessage(partnershipId, senderId, announcementText);
 
-          // 4. Broadcast chat message to room
           io?.to(partnershipId).emit('receive_message', savedMessage);
         } catch (err) {
           logger.error({ err }, 'Failed to process WebSocket create_project');
         }
       }
     );
+
+    // =========================================================================
+    // WebRTC Audio Signaling & Call Invite Events
+    // =========================================================================
+
+    socket.on('incoming_audio_call', (data: { partnershipId: string; session: unknown }) => {
+      socket.to(data.partnershipId).emit('incoming_audio_call', data.session);
+    });
+
+    socket.on('audio_call_accepting', (data: { partnershipId: string }) => {
+      io?.to(data.partnershipId).emit('audio_call_accepting');
+    });
+
+    socket.on('audio_call_accepted', (data: { partnershipId: string; session: unknown }) => {
+      io?.to(data.partnershipId).emit('audio_call_accepted', data.session);
+    });
+
+    socket.on('audio_call_rejected', (data: { partnershipId: string }) => {
+      io?.to(data.partnershipId).emit('audio_call_rejected');
+    });
+
+    socket.on('audio_offer', (data: { partnershipId: string; offer: unknown }) => {
+      socket.to(data.partnershipId).emit('audio_offer', data.offer);
+    });
+
+    socket.on('audio_answer', (data: { partnershipId: string; answer: unknown }) => {
+      socket.to(data.partnershipId).emit('audio_answer', data.answer);
+    });
+
+    socket.on('ice_candidate', (data: { partnershipId: string; candidate: unknown }) => {
+      socket.to(data.partnershipId).emit('ice_candidate', data.candidate);
+    });
+
+    socket.on('audio_session_ended', (data: { partnershipId: string }) => {
+      io?.to(data.partnershipId).emit('audio_session_ended');
+    });
 
     socket.on('disconnect', () => {
       logger.info({ socketId: socket.id }, 'WebSocket client disconnected');

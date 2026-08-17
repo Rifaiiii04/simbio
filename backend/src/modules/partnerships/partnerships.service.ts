@@ -11,12 +11,19 @@ export async function getPartnership(userId: string, id: string) {
   return p;
 }
 
-export async function requestPartnership(requesterId: string, recipientId: string) {
+export async function requestPartnership(requesterId: string, recipientId: string, messageText?: string) {
   if (requesterId === recipientId) throw new AppError(ErrorCode.VALIDATION_ERROR, 'Cannot partner with yourself', 400);
   const existing = await repo.findExisting(requesterId, recipientId);
   if (existing && existing.status === 'PENDING') throw new AppError(ErrorCode.CONFLICT, 'Partnership request already exists', 409);
   if (existing && existing.status === 'ACCEPTED') throw new AppError(ErrorCode.CONFLICT, 'Already partners', 409);
-  return repo.create(requesterId, recipientId);
+
+  const partnership = await repo.create(requesterId, recipientId);
+
+  if (messageText && messageText.trim()) {
+    await repo.createMessage(partnership.id, requesterId, messageText.trim());
+  }
+
+  return partnership;
 }
 
 export async function acceptPartnership(userId: string, id: string) {
