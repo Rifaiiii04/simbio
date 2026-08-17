@@ -10,15 +10,15 @@ import { SimbiAvatar } from '@/components/shared/SimbiAvatar';
 import { AudioCallModal } from '@/components/partnerships/AudioCallModal';
 import { ReportPartnerModal } from '@/components/partnerships/ReportPartnerModal';
 import { ReciprocalRoadmapCard } from '@/components/partnerships/ReciprocalRoadmapCard';
+import { RoadmapProposalCard } from '@/components/partnerships/RoadmapProposalCard';
+import { PeerReviewModal } from '@/components/partnerships/PeerReviewModal';
+import { FocusTimerCard } from '@/components/partnerships/FocusTimerCard';
 import {
   MessageSquare,
   Send,
   ArrowLeft,
   Sparkles,
   Zap,
-  Play,
-  Pause,
-  RotateCcw,
   Clock,
   Star,
   CheckCircle2,
@@ -126,9 +126,17 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
 
         socket.on('receive_message', (msg: Message) => {
           setMessages((prev) => {
-            if (prev.some((m) => m.id === msg.id)) return prev;
+            if (prev.some((m) => m.id === msg.id)) {
+              return prev.map((m) => (m.id === msg.id ? msg : m));
+            }
             return [...prev, msg];
           });
+        });
+
+        socket.on('message_updated', (updatedMsg: Message) => {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === updatedMsg.id ? updatedMsg : m))
+          );
         });
 
         socket.on('incoming_audio_call', (sess: any) => {
@@ -198,34 +206,6 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
       } catch (err) {
         console.error(err);
       }
-    }
-  };
-
-  const handleSubmitReview = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!partnership || submittingReview) return;
-    setSubmittingReview(true);
-    setReviewMsg(null);
-    const partnerId = partnership.requesterId === myUserId ? partnership.recipientId : partnership.requesterId;
-    try {
-      await apiFetch('/reviews', {
-        method: 'POST',
-        body: JSON.stringify({
-          partnershipId,
-          revieweeId: partnerId,
-          consistency: Number(reviewConsistency),
-          communication: Number(reviewCommunication),
-          knowledgeSharing: Number(reviewKnowledge),
-          collaboration: Number(reviewCollaboration),
-          comment: reviewComment.trim() || undefined,
-        }),
-      });
-      setReviewMsg('Peer Review submitted successfully!');
-      setShowReviewModal(false);
-    } catch (err: unknown) {
-      setReviewMsg(err instanceof Error ? err.message : 'Failed to submit review');
-    } finally {
-      setSubmittingReview(false);
     }
   };
 
@@ -403,6 +383,28 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
               ) : (
                 messages.map((m) => {
                   const isMine = m.senderId === myUserId;
+                  const isProposal = m.content.includes('ROADMAP_PROPOSAL');
+
+                  if (isProposal) {
+                    return (
+                      <div key={m.id} className="flex justify-center w-full my-2">
+                        <RoadmapProposalCard
+                          partnershipId={partnershipId}
+                          myUserId={myUserId}
+                          partnerName={partner.name}
+                          messageId={m.id}
+                          content={m.content}
+                          socket={socketRef.current}
+                          onApproved={() => {
+                            apiFetch<{ messages: Message[] }>(`/partnerships/${partnershipId}/messages`).then((res) => {
+                              setMessages(res.messages);
+                            });
+                          }}
+                        />
+                      </div>
+                    );
+                  }
+
                   return (
                     <div key={m.id} className={`flex gap-2.5 items-end ${isMine ? 'flex-row-reverse' : 'flex-row'} w-full overflow-hidden`}>
                       <div className="w-8 h-8 rounded-xl bg-[#FF7A30] border-2 border-[#0F172A] text-white font-black flex items-center justify-center text-xs flex-shrink-0 shadow-[1.5px_1.5px_0px_0px_#0F172A]">
@@ -456,46 +458,7 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
             />
 
             {/* Widget: Shared Pomodoro Focus Session */}
-            <div className="neo-box bg-[#FACC15] p-6 text-center space-y-4 shadow-[6px_6px_0px_0px_#0F172A]">
-              <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-2">
-                <div className="flex items-center gap-1.5 text-xs font-black text-[#0F172A] uppercase tracking-wider">
-                  <Clock className="w-4 h-4 text-[#0F172A]" />
-                  <span>Focus Belajar Bareng</span>
-                </div>
-                <span className="neo-badge bg-white text-[#0F172A] text-[10px] px-2 py-0.5">25 Min Timer</span>
-              </div>
-
-              <div className="text-5xl font-mono font-black text-[#0F172A] py-5 bg-white rounded-2xl border-3 border-[#0F172A] shadow-[4px_4px_0px_0px_#0F172A]">
-                {formatTimer(timerSeconds)}
-              </div>
-
-              {sessionCompletedMsg && (
-                <div className="p-2.5 text-[11px] bg-[#84CC16] text-[#0F172A] font-black border-2 border-[#0F172A] rounded-xl flex items-center justify-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{sessionCompletedMsg}</span>
-                </div>
-              )}
-
-              <div className="flex justify-center gap-2">
-                <button
-                  onClick={() => setTimerActive(!timerActive)}
-                  className={`neo-button text-xs px-5 py-2.5 flex items-center gap-1.5 ${timerActive ? 'bg-[#0F172A] text-white' : ''}`}
-                >
-                  {timerActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                  <span>{timerActive ? 'Pause' : 'Start Focus'}</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setTimerActive(false);
-                    setTimerSeconds(25 * 60);
-                  }}
-                  className="px-4 py-2.5 rounded-xl bg-white border-2 border-[#0F172A] text-[#0F172A] font-black text-xs hover:bg-gray-100 transition flex items-center gap-1 shadow-[2px_2px_0px_0px_#0F172A]"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Reset</span>
-                </button>
-              </div>
-            </div>
+            <FocusTimerCard />
 
             <SimbiAvatar state="happy" message="Start an Audio Call session or AI Topic Exchange to elevate your reciprocal skill growth!" />
           </div>
@@ -518,98 +481,13 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
       )}
 
       {/* Peer Review Modal */}
-      {showReviewModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="w-full max-w-lg neo-box p-6 space-y-4 shadow-[8px_8px_0px_0px_#0F172A] bg-white max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-2">
-              <h3 className="text-base font-black text-[#0F172A]">Peer Review for {partner.name}</h3>
-              <button onClick={() => setShowReviewModal(false)} className="text-xs font-black">
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmitReview} className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div className="p-3 bg-[#FFFDF7] rounded-xl border-2 border-[#0F172A]">
-                  <label className="block text-xs font-black mb-1">Consistency (1-5 Star)</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={5}
-                    value={reviewConsistency}
-                    onChange={(e) => setReviewConsistency(Number(e.target.value))}
-                    className="w-full p-2 text-xs border-2 border-[#0F172A] rounded-lg font-bold bg-white"
-                  />
-                </div>
-
-                <div className="p-3 bg-[#FFFDF7] rounded-xl border-2 border-[#0F172A]">
-                  <label className="block text-xs font-black mb-1">Communication (1-5 Star)</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={5}
-                    value={reviewCommunication}
-                    onChange={(e) => setReviewCommunication(Number(e.target.value))}
-                    className="w-full p-2 text-xs border-2 border-[#0F172A] rounded-lg font-bold bg-white"
-                  />
-                </div>
-
-                <div className="p-3 bg-[#FFFDF7] rounded-xl border-2 border-[#0F172A]">
-                  <label className="block text-xs font-black mb-1">Knowledge Sharing (1-5 Star)</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={5}
-                    value={reviewKnowledge}
-                    onChange={(e) => setReviewKnowledge(Number(e.target.value))}
-                    className="w-full p-2 text-xs border-2 border-[#0F172A] rounded-lg font-bold bg-white"
-                  />
-                </div>
-
-                <div className="p-3 bg-[#FFFDF7] rounded-xl border-2 border-[#0F172A]">
-                  <label className="block text-xs font-black mb-1">Collaboration (1-5 Star)</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={5}
-                    value={reviewCollaboration}
-                    onChange={(e) => setReviewCollaboration(Number(e.target.value))}
-                    className="w-full p-2 text-xs border-2 border-[#0F172A] rounded-lg font-bold bg-white"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-black mb-1">Written Feedback & Testimonial</label>
-                <textarea
-                  value={reviewComment}
-                  onChange={(e) => setReviewComment(e.target.value)}
-                  rows={3}
-                  placeholder="Share how working with this partner helped your skill growth..."
-                  className="w-full px-4 py-3 text-xs bg-[#FFFDF7] rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowReviewModal(false)}
-                  className="w-1/3 py-2.5 rounded-xl bg-gray-100 border-2 border-[#0F172A] text-xs font-black"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submittingReview}
-                  className="w-2/3 neo-button py-2.5 text-xs flex items-center justify-center gap-1.5"
-                >
-                  <Star className="w-4 h-4 fill-white" />
-                  <span>Submit Peer Review</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+      {showReviewModal && partner && (
+        <PeerReviewModal
+          partnershipId={partnershipId}
+          partnerName={partner.name}
+          onClose={() => setShowReviewModal(false)}
+          onSuccess={(msg) => setReviewMsg(msg)}
+        />
       )}
 
       {showReportModal && partner && (

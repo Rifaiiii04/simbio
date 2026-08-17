@@ -21,6 +21,9 @@ import {
 import {
   getTopicsHandler,
   generateAiTopicsHandler,
+  generateProposalHandler,
+  updateProposalDraftHandler,
+  approveProposalHandler,
   addTopicHandler,
   toggleTopicHandler,
   deleteTopicHandler,
@@ -45,9 +48,12 @@ router.post('/audio-sessions/:sessionId/skip-prep', skipPrepAudioSessionHandler)
 router.post('/audio-sessions/:sessionId/reject', rejectAudioSessionHandler);
 router.post('/audio-sessions/:sessionId/leave', leaveAudioSessionHandler);
 
-// Partnership Reciprocal Learning Topics Routes
+// Partnership Reciprocal Learning Topics & Proposal Routes
 router.get('/:id/topics', getTopicsHandler);
 router.post('/:id/topics/generate-ai', generateAiTopicsHandler);
+router.post('/:id/topics/generate-proposal', generateProposalHandler);
+router.put('/:id/topics/proposals/:messageId', updateProposalDraftHandler);
+router.post('/:id/topics/proposals/:messageId/approve', approveProposalHandler);
 router.post('/:id/topics', addTopicHandler);
 router.patch('/topics/:topicId/toggle', toggleTopicHandler);
 router.delete('/topics/:topicId', deleteTopicHandler);

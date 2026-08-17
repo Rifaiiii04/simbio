@@ -90,17 +90,21 @@ export function ReciprocalRoadmapCard({
   const handleGenerateAiTopics = async () => {
     setGenerating(true);
     try {
-      const res = await apiFetch<{ topics: PartnershipTopicItem[] }>(
-        `/partnerships/${partnershipId}/topics/generate-ai`,
+      const res = await apiFetch<{ message: any }>(
+        `/partnerships/${partnershipId}/topics/generate-proposal`,
         { method: 'POST' }
       );
-      setTopics(res.topics);
       if (socket) {
-        socket.emit('topic_updated', { partnershipId });
+        socket.emit('send_message', {
+          partnershipId,
+          senderId: myUserId,
+          content: res.message.content,
+        });
       }
+      alert('Proposal AI Roadmap berhasil dikirim ke room chat! Silakan tinjau draf dan klik Approve di obrolan.');
     } catch (err) {
-      console.error('Failed to generate AI topics:', err);
-      alert('Failed to generate AI topics. Please try again.');
+      console.error('Failed to generate AI proposal:', err);
+      alert('Failed to generate AI proposal. Please try again.');
     } finally {
       setGenerating(false);
     }
@@ -320,13 +324,15 @@ export function ReciprocalRoadmapCard({
                 </div>
               </div>
 
-              <button
-                onClick={() => handleDeleteTopic(item.id)}
-                className="text-gray-400 hover:text-red-500 transition p-1"
-                title="Hapus topik"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              {isMyTopic && (
+                <button
+                  onClick={() => handleDeleteTopic(item.id)}
+                  className="text-gray-400 hover:text-red-500 transition p-1"
+                  title="Hapus topik"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
             </div>
           );
         })}

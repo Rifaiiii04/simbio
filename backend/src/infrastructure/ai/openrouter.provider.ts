@@ -240,12 +240,20 @@ Return ONLY valid JSON. No explanation, bullet list, or description.`;
   }
 
   async generateLearningTopics(skillName: string): Promise<Array<{ title: string; description: string }>> {
-    const systemInstruction = `Generate 5 concise, practical learning roadmap topics/discussion themes for learning "${skillName}".
-Each item should be a short topic title (e.g. "Color Theory & Contrast" or "RESTful API Architecture") that two learning partners can discuss or check off as a milestone.
+    const systemInstruction = `Generate 6 to 8 comprehensive, structured learning roadmap topics/discussion themes for learning "${skillName}", structured sequentially from BEGINNER to EXPERT level.
+Each topic must have a short title and a concise 1-sentence description/prompt.
+Example progression:
+1. Beginner: Core Concepts & Fundamentals
+2. Beginner: Basic Syntax & Structures
+3. Intermediate: Practical Components & Architecture
+4. Intermediate: State, Data & Error Management
+5. Advanced: Performance Optimization & Best Practices
+6. Expert: Advanced Mechanics, Tooling & Production Standards
+
 You MUST return ONLY a JSON array with objects matching this exact structure:
 [
   {
-    "title": "Short Topic Title",
+    "title": "Beginner: Topic Title",
     "description": "Brief 1-sentence prompt/note"
   }
 ]

@@ -32,6 +32,32 @@ export async function generateAiTopicsHandler(req: Request, res: Response, next:
   } catch (err) { next(err); }
 }
 
+export async function generateProposalHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id: partnershipId } = req.params as { id: string };
+    const message = await service.generateAiProposalForPartnership(uid(req), partnershipId);
+    sendSuccess(res, { message }, 201);
+  } catch (err) { next(err); }
+}
+
+export async function updateProposalDraftHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id: partnershipId, messageId } = req.params as { id: string; messageId: string };
+    const { topics } = req.body;
+    const message = await service.updateProposalDraft(uid(req), partnershipId, messageId, topics);
+    sendSuccess(res, { message });
+  } catch (err) { next(err); }
+}
+
+export async function approveProposalHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id: partnershipId, messageId } = req.params as { id: string; messageId: string };
+    const { topics } = req.body;
+    const result = await service.approveProposal(uid(req), partnershipId, messageId, topics);
+    sendSuccess(res, result);
+  } catch (err) { next(err); }
+}
+
 export async function addTopicHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id: partnershipId } = req.params as { id: string };
