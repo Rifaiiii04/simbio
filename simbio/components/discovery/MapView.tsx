@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { createPortal } from 'react-dom';
-import { apiFetch } from '@/lib/api/client';
+import { apiFetch, getAvatarUrl } from '@/lib/api/client';
 import { ProposalModal } from '@/components/discovery/ProposalModal';
 import {
   MapPin,
@@ -63,8 +63,6 @@ interface LocationStatus {
   longitude: number | null;
 }
 
-const AVATAR_FALLBACK = 'https://api.dicebear.com/7.x/thumbs/svg?seed=';
-
 // Self Marker (Blue Pulse)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createSelfMarker(L: any, lat: number, lng: number): any {
@@ -103,7 +101,7 @@ function createSelfMarker(L: any, lat: number, lng: number): any {
 // Partner Marker: Differentiates Connected vs Non-Connected
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createPartnerMarker(L: any, u: MapUser): any {
-  const avatarSrc = u.avatarUrl || `${AVATAR_FALLBACK}${u.id}`;
+  const avatarSrc = getAvatarUrl(u.avatarUrl, u.id);
   const isConnected = !!u.isConnected;
   const isPending = !!u.isPending;
 
@@ -132,7 +130,7 @@ function createPartnerMarker(L: any, u: MapUser): any {
         box-shadow:0 4px 14px ${shadowColor};
         overflow:hidden;
       ">
-        <img src="${avatarSrc}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='${AVATAR_FALLBACK}${u.id}'" />
+        <img src="${avatarSrc}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://api.dicebear.com/7.x/thumbs/svg?seed=${u.id}'" />
       </div>
       <div style="
         margin-top:3px;background:${badgeBg};backdrop-filter:blur(4px);
@@ -592,7 +590,7 @@ export function MapView() {
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div className="w-10 h-10 rounded-xl font-bold flex items-center justify-center text-xs shrink-0 overflow-hidden border border-emerald-400 bg-emerald-100 text-emerald-800">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={u.avatarUrl || `${AVATAR_FALLBACK}${u.id}`} alt={u.name} className="w-full h-full object-cover" />
+                            <img src={getAvatarUrl(u.avatarUrl, u.id)} alt={u.name} className="w-full h-full object-cover" />
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1">
@@ -666,7 +664,7 @@ export function MapView() {
               <div className="sm:col-span-5 relative bg-slate-950 min-h-[240px] sm:min-h-[380px]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={selectedUser.avatarUrl || `${AVATAR_FALLBACK}${selectedUser.id}`}
+                  src={getAvatarUrl(selectedUser.avatarUrl, selectedUser.id)}
                   alt={selectedUser.name}
                   className="w-full h-full object-cover object-top"
                 />

@@ -22,7 +22,7 @@ export async function apiFetch<T>(
   const token = typeof window !== 'undefined' ? localStorage.getItem('simbioly_token') : null;
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
     ...(options.headers as Record<string, string>),
   };
 
@@ -60,4 +60,13 @@ export async function apiFetch<T>(
   }
 
   return json.data as T;
+}
+
+export function getAvatarUrl(avatarUrl?: string | null, seed: string = 'user'): string {
+  if (!avatarUrl) return `https://api.dicebear.com/7.x/thumbs/svg?seed=${seed}`;
+  if (avatarUrl.startsWith('/uploads')) {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001';
+    return `${baseUrl}${avatarUrl}`;
+  }
+  return avatarUrl;
 }

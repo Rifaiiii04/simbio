@@ -176,40 +176,40 @@ export function SkillSwapDeck() {
                 </div>
 
                 {/* Bottom Info + Skills + Buttons */}
-                <div className="relative p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 z-10 text-white shrink-0">
+                <div className="relative p-3 sm:p-6 lg:p-8 space-y-2 sm:space-y-4 z-10 text-white shrink-0">
                   {/* User name & username */}
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-black text-white text-2xl sm:text-3xl lg:text-4xl tracking-tight drop-shadow-md">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <h3 className="font-black text-white text-xl sm:text-3xl lg:text-4xl tracking-tight drop-shadow-md">
                         {activeCandidate.user.name}
                       </h3>
-                      <ShieldCheck className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-400 drop-shadow-md shrink-0" />
+                      <ShieldCheck className="w-5 h-5 sm:w-7 sm:h-7 text-emerald-400 drop-shadow-md shrink-0" />
                     </div>
                     {activeCandidate.user.username && (
-                      <p className="text-xs sm:text-sm font-semibold text-slate-300 mt-0.5">
+                      <p className="text-[11px] sm:text-sm font-semibold text-slate-300">
                         @{activeCandidate.user.username}
                       </p>
                     )}
                     {activeCandidate.user.bio && (
-                      <p className="text-xs sm:text-sm text-slate-200 italic line-clamp-1 opacity-90 mt-1">
+                      <p className="text-[11px] sm:text-sm text-slate-200 italic line-clamp-1 opacity-90 mt-0.5 sm:mt-1">
                         &quot;{activeCandidate.user.bio}&quot;
                       </p>
                     )}
                   </div>
 
                   {/* Reciprocal Skill Matrix */}
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3 bg-black/55 backdrop-blur-md p-3 sm:p-4 rounded-2xl border border-white/15">
+                  <div className="grid grid-cols-2 gap-1.5 sm:gap-3 bg-black/55 backdrop-blur-md p-2.5 sm:p-4 rounded-2xl border border-white/15">
                     <div>
-                      <span className="text-[10px] sm:text-xs font-bold uppercase text-emerald-300 flex items-center gap-1 mb-1.5">
+                      <span className="text-[9px] sm:text-xs font-bold uppercase text-emerald-300 flex items-center gap-1 mb-1">
                         <BookOpen className="w-3 h-3 text-emerald-400" />
                         Mengajar:
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {activeCandidate.teachSkills.length === 0 ? (
-                          <span className="text-slate-400 text-[10px] sm:text-xs italic">Belum dicantumkan</span>
+                          <span className="text-slate-400 text-[9px] sm:text-xs italic">Belum dicantumkan</span>
                         ) : (
                           activeCandidate.teachSkills.slice(0, 3).map((s) => (
-                            <span key={s.id} className="soft-badge bg-emerald-500/30 text-emerald-100 border-emerald-400/40 text-[10px] sm:text-xs px-2 py-0.5 font-bold">
+                            <span key={s.id} className="soft-badge bg-emerald-500/30 text-emerald-100 border-emerald-400/40 text-[9px] sm:text-xs px-1.5 sm:px-2 py-0.5 font-bold">
                               {s.name}
                             </span>
                           ))
@@ -217,16 +217,16 @@ export function SkillSwapDeck() {
                       </div>
                     </div>
                     <div>
-                      <span className="text-[10px] sm:text-xs font-bold uppercase text-orange-300 flex items-center gap-1 mb-1.5">
+                      <span className="text-[9px] sm:text-xs font-bold uppercase text-orange-300 flex items-center gap-1 mb-1">
                         <Award className="w-3 h-3 text-orange-400" />
                         Mau Belajar:
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {activeCandidate.learnSkills.length === 0 ? (
-                          <span className="text-slate-400 text-[10px] sm:text-xs italic">Belum dicantumkan</span>
+                          <span className="text-slate-400 text-[9px] sm:text-xs italic">Belum dicantumkan</span>
                         ) : (
                           activeCandidate.learnSkills.slice(0, 3).map((s) => (
-                            <span key={s.id} className="soft-badge bg-orange-500/30 text-orange-100 border-orange-400/40 text-[10px] sm:text-xs px-2 py-0.5 font-bold">
+                            <span key={s.id} className="soft-badge bg-orange-500/30 text-orange-100 border-orange-400/40 text-[9px] sm:text-xs px-1.5 sm:px-2 py-0.5 font-bold">
                               {s.name}
                             </span>
                           ))
@@ -236,20 +236,20 @@ export function SkillSwapDeck() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <button
                       onClick={() => handleNextCandidate('left')}
-                      className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/15 backdrop-blur-md border border-white/30 text-white flex items-center justify-center hover:bg-white/30 hover:scale-105 active:scale-95 transition-all shadow-lg shrink-0"
+                      className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-white/15 backdrop-blur-md border border-white/30 text-white flex items-center justify-center hover:bg-white/30 hover:scale-105 active:scale-95 transition-all shadow-lg shrink-0 cursor-pointer"
                       title="Skip"
                     >
-                      <X className="w-6 h-6 text-white" />
+                      <X className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                     </button>
                     <button
                       onClick={() => setProposalCandidate(activeCandidate)}
-                      className="flex-1 h-12 sm:h-14 rounded-2xl bg-gradient-to-r from-[#FF6B30] to-orange-500 hover:from-[#E0531A] hover:to-orange-600 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl hover:scale-[1.01] active:scale-[0.98] transition-all"
+                      className="flex-1 h-10 sm:h-14 rounded-2xl bg-gradient-to-r from-[#FF6B30] to-orange-500 hover:from-[#E0531A] hover:to-orange-600 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 shadow-xl hover:scale-[1.01] active:scale-[0.98] transition-all cursor-pointer"
                     >
                       <UserCheck className="w-4 h-4 sm:w-5 sm:h-5 text-white shrink-0" />
-                      <span>⚡ Hubungkan Exchange (Match)</span>
+                      <span>Hubungkan Exchange</span>
                     </button>
                   </div>
                 </div>

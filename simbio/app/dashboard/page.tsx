@@ -50,8 +50,8 @@ export default function UserDashboard() {
   return (
     <div className="h-screen flex flex-col bg-[#F8FAFC] text-slate-900 overflow-hidden">
       <Navbar />
-      {/* flex-1 + flex flex-col means this fills all remaining height below navbar */}
-      <main className="flex-1 flex flex-col overflow-hidden px-4 py-3">
+      {/* flex-1 + flex flex-col means this fills all remaining height below navbar with safe clearance for mobile bottom navbar */}
+      <main className="flex-1 flex flex-col overflow-hidden px-3 sm:px-4 pt-2 pb-20 md:pb-3">
         <SkillSwapDeck />
       </main>
       <SimbiAvatar

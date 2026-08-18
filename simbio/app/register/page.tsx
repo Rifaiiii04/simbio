@@ -28,6 +28,7 @@ export default function RegisterPage() {
       });
 
       localStorage.setItem('simbioly_token', res.token);
+      localStorage.setItem('simbioly_user', JSON.stringify(res.user));
       router.push('/onboarding');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Registration failed');

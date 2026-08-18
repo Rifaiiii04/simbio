@@ -65,6 +65,24 @@ export async function updateLocationHandler(
   }
 }
 
+export async function uploadAvatarHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    if (!req.user) throw new AppError(ErrorCode.UNAUTHORIZED, 'Authentication required', 401);
+    if (!req.file) {
+      throw new AppError(ErrorCode.VALIDATION_ERROR, 'No image file uploaded', 400);
+    }
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    const user = await usersRepo.updateProfile(req.user.id, { avatarUrl });
+    sendSuccess(res, { user, avatarUrl });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function getUserHandler(
   req: Request,
   res: Response,

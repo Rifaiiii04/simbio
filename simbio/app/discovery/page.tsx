@@ -129,7 +129,7 @@ export default function DiscoveryPage() {
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-orange-100 selection:text-[#FF6B30]">
       <Navbar />
 
-      <main className="flex-1 w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-3 space-y-3">
+      <main className="flex-1 w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-3 pb-24 md:pb-6 space-y-3">
         {/* Header */}
         <div className="soft-card p-3.5 sm:p-4 bg-white border border-slate-200/80 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="space-y-0.5">
@@ -191,195 +191,224 @@ export default function DiscoveryPage() {
           </div>
         )}
 
-        {/* LIST VIEW */}
+        {/* LIST VIEW (SIDEBAR FILTER + CANDIDATE GRID) */}
         {view === 'list' && (
-          <>
-            {/* Filter Toolbar */}
-            <div className="soft-card p-4 sm:p-5 bg-white/95 backdrop-blur-md space-y-3 shadow-sm border border-slate-200/80 sticky top-[73px] z-40 transition-all">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wider">
+          <div className="flex flex-col lg:flex-row gap-4 items-start w-full">
+            {/* 1. NON-STICKY FILTER SIDEBAR (LEFT) */}
+            <aside className="w-full lg:w-72 shrink-0 bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2 text-xs font-black text-slate-800 uppercase tracking-wider">
                   <SlidersHorizontal className="w-4 h-4 text-[#FF6B30]" />
-                  <span>Sistem Filter DB Deterministik</span>
+                  <span>Filter Pencarian</span>
                 </div>
                 {(selectedSkillId || selectedCountry || searchKeyword) && (
                   <button
-                    onClick={() => { setSearchKeyword(''); handleFilter('', 'All Countries'); }}
-                    className="text-xs font-bold text-[#FF6B30] hover:underline"
+                    onClick={() => {
+                      setSearchKeyword('');
+                      handleFilter('', 'All Countries');
+                    }}
+                    className="text-xs font-bold text-[#FF6B30] hover:underline cursor-pointer"
                   >
-                    Reset Filter
+                    Reset
                   </button>
                 )}
               </div>
 
-              <div className="grid sm:grid-cols-3 gap-3">
-                {/* Search */}
+              {/* Search */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700">Pencarian Cepat</label>
                 <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="text"
                     value={searchKeyword}
                     onChange={(e) => setSearchKeyword(e.target.value)}
-                    placeholder="Cari nama partner atau skill..."
-                    className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 font-medium focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
-                  />
-                </div>
-
-                {/* Country */}
-                <div className="relative">
-                  <select
-                    value={selectedCountry || 'All Countries'}
-                    onChange={(e) => handleFilter(undefined, e.target.value)}
-                    className="w-full px-4 py-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 font-medium text-slate-900 focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
-                  >
-                    <option value="All Countries">Semua Negara (Global)</option>
-                    {countries.slice(1).map((c) => (
-                      <option key={c} value={c}>Negara: {c}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Skill Filter */}
-                <div>
-                  <SearchableSkillSelect
-                    skills={skills}
-                    selectedSkillId={selectedSkillId}
-                    onSelectSkill={(id) => handleFilter(id, undefined)}
-                    placeholder="Filter spesifik skill..."
+                    placeholder="Nama / skill..."
+                    className="w-full pl-9 pr-3.5 py-2 text-xs bg-slate-50 rounded-2xl border border-slate-200 font-medium focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Candidate Grid */}
-            {loading ? (
-              <div className="text-center py-16 text-xs text-slate-500 font-bold animate-pulse flex flex-col items-center gap-3">
-                <Sparkles className="w-8 h-8 text-[#FF6B30] animate-spin" />
-                <span>Mencari kandidat partner...</span>
-              </div>
-            ) : filteredCandidates.length === 0 ? (
-              <div className="soft-card p-10 text-center space-y-4 bg-white border border-slate-200/80">
-                <Compass className="w-12 h-12 text-[#FF6B30] mx-auto animate-spin" style={{ animationDuration: '10s' }} />
-                <div className="space-y-1">
-                  <p className="text-base font-bold text-slate-900">Tidak ada kandidat yang cocok untuk filter ini.</p>
-                  <p className="text-xs text-slate-500 font-medium max-w-md mx-auto">
-                    Coba cari negara lain atau reset filter untuk melihat seluruh kandidat aktif.
-                  </p>
-                </div>
-                <button
-                  onClick={() => { setSearchKeyword(''); handleFilter('', 'All Countries'); }}
-                  className="soft-button text-xs px-6 py-2.5 inline-flex items-center gap-1.5 shadow-2xs"
+              {/* Country */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700">Negara Domisili</label>
+                <select
+                  value={selectedCountry || 'All Countries'}
+                  onChange={(e) => handleFilter(undefined, e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs bg-slate-50 rounded-2xl border border-slate-200 font-medium text-slate-900 focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
                 >
-                  <span>Reset Semua Filter</span>
-                </button>
+                  <option value="All Countries">Semua Negara (Global)</option>
+                  {countries.slice(1).map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCandidates.map((c) => (
-                  <div
-                    key={c.user.id}
-                    className="soft-card p-6 bg-white border border-slate-200/80 space-y-5 shadow-xs hover:border-[#FF6B30]/50 hover:shadow-md transition group flex flex-col justify-between"
+
+              {/* Skill Filter */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700">Spesifik Skill</label>
+                <SearchableSkillSelect
+                  skills={skills}
+                  selectedSkillId={selectedSkillId}
+                  onSelectSkill={(id) => handleFilter(id, undefined)}
+                  placeholder="Pilih skill..."
+                />
+              </div>
+
+              {/* Result Counter */}
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-bold">
+                <span>Ditemukan:</span>
+                <span className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-xs px-2.5 py-0.5 font-black">
+                  {filteredCandidates.length} Kandidat
+                </span>
+              </div>
+            </aside>
+
+            {/* 2. CANDIDATE GRID (RIGHT) */}
+            <div className="flex-1 w-full space-y-4">
+              {loading ? (
+                <div className="text-center py-16 text-xs text-slate-500 font-bold animate-pulse flex flex-col items-center gap-3">
+                  <Sparkles className="w-8 h-8 text-[#FF6B30] animate-spin" />
+                  <span>Mencari kandidat partner...</span>
+                </div>
+              ) : filteredCandidates.length === 0 ? (
+                <div className="soft-card p-10 text-center space-y-4 bg-white border border-slate-200/80">
+                  <Compass className="w-12 h-12 text-[#FF6B30] mx-auto animate-spin" style={{ animationDuration: '10s' }} />
+                  <div className="space-y-1">
+                    <p className="text-base font-bold text-slate-900">Tidak ada kandidat yang cocok untuk filter ini.</p>
+                    <p className="text-xs text-slate-500 font-medium max-w-md mx-auto">
+                      Coba cari negara lain atau reset filter untuk melihat seluruh kandidat aktif.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSearchKeyword('');
+                      handleFilter('', 'All Countries');
+                    }}
+                    className="soft-button text-xs px-6 py-2.5 inline-flex items-center gap-1.5 shadow-2xs"
                   >
-                    <div className="space-y-4">
-                      {/* Header */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3.5">
-                          <div className="w-13 h-13 rounded-2xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-lg shadow-2xs flex-shrink-0 overflow-hidden">
-                            {c.user.avatarUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={c.user.avatarUrl} alt={c.user.name} className="w-full h-full object-cover" />
-                            ) : (
-                              c.user.name.charAt(0)
-                            )}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <h3 className="font-black text-slate-900 text-lg group-hover:text-[#FF6B30] transition">{c.user.name}</h3>
-                              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span>Reset Semua Filter</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {filteredCandidates.map((c) => (
+                    <div
+                      key={c.user.id}
+                      className="soft-card p-5 bg-white border border-slate-200/80 space-y-4 shadow-xs hover:border-[#FF6B30]/50 hover:shadow-md transition group flex flex-col justify-between"
+                    >
+                      <div className="space-y-3">
+                        {/* Header */}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-11 h-11 rounded-2xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-base shadow-2xs shrink-0 overflow-hidden">
+                              {c.user.avatarUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={c.user.avatarUrl} alt={c.user.name} className="w-full h-full object-cover" />
+                              ) : (
+                                c.user.name.charAt(0)
+                              )}
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-                              {c.user.username && <span>@{c.user.username}</span>}
-                              {c.user.country && (
-                                <span className="soft-badge bg-sky-50 text-sky-700 border-sky-200 px-2 py-0.5 text-[10px] flex items-center gap-1">
-                                  <Globe className="w-3 h-3" />
-                                  <span>{c.user.country}</span>
-                                </span>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <h3 className="font-black text-slate-900 text-base group-hover:text-[#FF6B30] transition truncate">
+                                  {c.user.name}
+                                </h3>
+                                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-slate-500 font-medium truncate">
+                                {c.user.username && <span>@{c.user.username}</span>}
+                                {c.user.country && (
+                                  <span className="soft-badge bg-sky-50 text-sky-700 border-sky-200 px-1.5 py-0.2 text-[9px] flex items-center gap-1">
+                                    <Globe className="w-2.5 h-2.5" />
+                                    <span>{c.user.country}</span>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-xs px-2 py-0.5 font-bold flex items-center gap-1 shrink-0">
+                            <Zap className="w-3 h-3 text-emerald-600" />
+                            <span>{c.matchScore} pts</span>
+                          </span>
+                        </div>
+
+                        {c.user.bio && (
+                          <p className="text-xs text-slate-600 font-medium italic line-clamp-2 bg-slate-50/50 p-2 rounded-xl border border-slate-100">
+                            &quot;{c.user.bio}&quot;
+                          </p>
+                        )}
+
+                        {c.distanceKm != null && (
+                          <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
+                            <MapPin className="w-3 h-3 text-[#FF6B30]" />
+                            <span>{c.distanceKm} km dari lokasimu</span>
+                          </div>
+                        )}
+
+                        {/* Skill Matrix */}
+                        <div className="space-y-2 bg-slate-50 p-3 rounded-2xl border border-slate-200/60 text-xs">
+                          <div>
+                            <div className="flex items-center gap-1 text-[10px] font-bold uppercase text-emerald-700 mb-1">
+                              <BookOpen className="w-3 h-3 text-emerald-600" />
+                              <span>Bisa Mengajar:</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {c.teachSkills.length === 0 ? (
+                                <span className="text-slate-400 italic text-[10px]">Belum dicantumkan</span>
+                              ) : (
+                                c.teachSkills.map((s) => (
+                                  <span
+                                    key={s.id}
+                                    className="soft-badge bg-emerald-50 text-emerald-800 border-emerald-200 text-[10px] px-2 py-0.5 font-bold"
+                                  >
+                                    {s.name} ({s.level})
+                                  </span>
+                                ))
+                              )}
+                            </div>
+                          </div>
+                          <div className="pt-1.5 border-t border-slate-200/60">
+                            <div className="flex items-center gap-1 text-[10px] font-bold uppercase text-[#FF6B30] mb-1">
+                              <Award className="w-3 h-3 text-[#FF6B30]" />
+                              <span>Ingin Belajar:</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {c.learnSkills.length === 0 ? (
+                                <span className="text-slate-400 italic text-[10px]">Belum dicantumkan</span>
+                              ) : (
+                                c.learnSkills.map((s) => (
+                                  <span
+                                    key={s.id}
+                                    className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-[10px] px-2 py-0.5 font-bold"
+                                  >
+                                    {s.name} ({s.level})
+                                  </span>
+                                ))
                               )}
                             </div>
                           </div>
                         </div>
-                        <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-xs px-2.5 py-1 font-bold flex items-center gap-1 shrink-0">
-                          <Zap className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{c.matchScore} pts</span>
-                        </span>
                       </div>
 
-                      {c.user.bio && (
-                        <p className="text-xs text-slate-600 font-medium italic line-clamp-2 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
-                          &quot;{c.user.bio}&quot;
-                        </p>
-                      )}
-
-                      {c.distanceKm != null && (
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                          <MapPin className="w-3.5 h-3.5 text-[#FF6B30]" />
-                          <span>{c.distanceKm} km dari lokasimu</span>
-                        </div>
-                      )}
-
-                      {/* Skill Matrix */}
-                      <div className="space-y-2.5 bg-slate-50 p-4 rounded-2xl border border-slate-200/60 text-xs">
-                        <div>
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-emerald-700 mb-1.5">
-                            <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>Bisa Mengajar (Teach):</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {c.teachSkills.length === 0 ? (
-                              <span className="text-slate-400 italic text-[11px]">Belum dicantumkan</span>
-                            ) : (
-                              c.teachSkills.map((s) => (
-                                <span key={s.id} className="soft-badge bg-emerald-50 text-emerald-800 border-emerald-200 text-[10px] px-2.5 py-0.5 font-bold">
-                                  {s.name} ({s.level})
-                                </span>
-                              ))
-                            )}
-                          </div>
-                        </div>
-                        <div className="pt-2 border-t border-slate-200/60">
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-[#FF6B30] mb-1.5">
-                            <Award className="w-3.5 h-3.5 text-[#FF6B30]" />
-                            <span>Ingin Dipelajari (Learn):</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {c.learnSkills.length === 0 ? (
-                              <span className="text-slate-400 italic text-[11px]">Belum dicantumkan</span>
-                            ) : (
-                              c.learnSkills.map((s) => (
-                                <span key={s.id} className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-[10px] px-2.5 py-0.5 font-bold">
-                                  {s.name} ({s.level})
-                                </span>
-                              ))
-                            )}
-                          </div>
-                        </div>
+                      {/* Footer */}
+                      <div className="pt-2 border-t border-slate-100">
+                        <button
+                          onClick={() => setProposalCandidate(c)}
+                          className="w-full soft-button py-2.5 text-xs flex items-center justify-center gap-1.5 shadow-2xs font-bold"
+                        >
+                          <UserCheck className="w-3.5 h-3.5 text-white" />
+                          <span>⚡ Hubungkan Exchange</span>
+                        </button>
                       </div>
                     </div>
-
-                    {/* Footer */}
-                    <div className="pt-3 border-t border-slate-100">
-                      <button
-                        onClick={() => setProposalCandidate(c)}
-                        className="w-full soft-button py-3 text-xs flex items-center justify-center gap-2 shadow-2xs font-bold"
-                      >
-                        <UserCheck className="w-4 h-4 text-white" />
-                        <span>⚡ Hubungkan Exchange</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </main>
 

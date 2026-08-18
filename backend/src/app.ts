@@ -19,6 +19,7 @@ import { reviewsRouter } from './modules/reviews/reviews.router.js';
 import { discoveryRouter } from './modules/discovery/discovery.router.js';
 import { aiRouter } from './modules/ai/ai.router.js';
 import { reportsRouter } from './modules/reports/reports.router.js';
+import path from 'path';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -26,9 +27,14 @@ const corsOrigins = env.CORS_ORIGINS.split(',').map((o) => o.trim());
 
 const app = express();
 
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }),
+);
 app.use(cors({ origin: corsOrigins, credentials: true }));
 app.use(express.json({ limit: '1mb' }));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Routes
 app.use('/api/v1/health', healthRouter);
