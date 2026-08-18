@@ -306,11 +306,16 @@ model Partnership {
 model PartnershipMessage {
   id            String   @id @default(uuid())
   partnershipId String
-  senderId      String
+  senderId      String?
+  senderType    String   @default("USER")
+  senderName    String?
   content       String   @db.Text
+  replyToId     String?
   createdAt     DateTime @default(now())
 
-  partnership Partnership @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  partnership Partnership         @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  replyTo     PartnershipMessage? @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies     PartnershipMessage[] @relation("MessageReplies")
 }
 
 model Project {

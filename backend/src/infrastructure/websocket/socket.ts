@@ -3,6 +3,7 @@ import { Server as SocketIOServer, Socket } from 'socket.io';
 import { logger } from '../logger/index.js';
 import * as partnershipsRepo from '../../modules/partnerships/partnerships.repository.js';
 import * as projectsService from '../../modules/projects/projects.service.js';
+import { processSimbiAiMention } from '../../modules/partnerships/simbi-ai.service.js';
 
 let io: SocketIOServer | null = null;
 
@@ -29,16 +30,33 @@ export function initWebSocketServer(httpServer: HttpServer): SocketIOServer {
     });
 
     // Real-time direct message event
-    socket.on('send_message', async (data: { partnershipId: string; senderId: string; content: string }) => {
+    socket.on('send_message', async (data: { partnershipId: string; senderId: string; content: string; replyToId?: string }) => {
       try {
-        const { partnershipId, senderId, content } = data;
+        const { partnershipId, senderId, content, replyToId } = data;
         if (!partnershipId || !senderId || !content?.trim()) return;
 
         // Persist message to database
-        const savedMessage = await partnershipsRepo.createMessage(partnershipId, senderId, content.trim());
+        const savedMessage = await partnershipsRepo.createMessage({
+          partnershipId,
+          senderId,
+          content: content.trim(),
+          replyToId: replyToId || null,
+        });
 
         // Broadcast real-time message to all clients in the partnership room
         io?.to(partnershipId).emit('receive_message', savedMessage);
+
+        // Process @SimbiAI mention if present in user message
+        if (/@simbiai/i.test(content)) {
+          processSimbiAiMention({
+            partnershipId,
+            senderId,
+            userMessageId: savedMessage.id,
+            userContent: content.trim(),
+            replyToId: replyToId || null,
+            io,
+          });
+        }
       } catch (err) {
         logger.error({ err }, 'Failed to process WebSocket message');
       }
@@ -61,7 +79,11 @@ export function initWebSocketServer(httpServer: HttpServer): SocketIOServer {
           io?.to(partnershipId).emit('project_created', createdProject);
 
           const announcementText = `Your partner created a new project: ${title.trim()}`;
-          const savedMessage = await partnershipsRepo.createMessage(partnershipId, senderId, announcementText);
+          const savedMessage = await partnershipsRepo.createMessage({
+            partnershipId,
+            senderId,
+            content: announcementText,
+          });
 
           io?.to(partnershipId).emit('receive_message', savedMessage);
         } catch (err) {
@@ -112,6 +134,14 @@ export function initWebSocketServer(httpServer: HttpServer): SocketIOServer {
 
     socket.on('update_message', (data: { partnershipId: string; message: unknown }) => {
       io?.to(data.partnershipId).emit('message_updated', data.message);
+    });
+
+    socket.on('typing', (data: { partnershipId: string; userId: string; userName: string }) => {
+      socket.to(data.partnershipId).emit('partner_typing', data);
+    });
+
+    socket.on('stop_typing', (data: { partnershipId: string; userId: string }) => {
+      socket.to(data.partnershipId).emit('partner_stop_typing', data);
     });
 
     socket.on('disconnect', () => {

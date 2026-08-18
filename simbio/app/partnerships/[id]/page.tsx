@@ -10,7 +10,9 @@ import { SimbiAvatar } from '@/components/shared/SimbiAvatar';
 import { AudioCallModal } from '@/components/partnerships/AudioCallModal';
 import { ReportPartnerModal } from '@/components/partnerships/ReportPartnerModal';
 import { ReciprocalRoadmapCard } from '@/components/partnerships/ReciprocalRoadmapCard';
-import { RoadmapProposalCard } from '@/components/partnerships/RoadmapProposalCard';
+import { ChatMessageItem, type Message } from '@/components/partnerships/ChatMessageItem';
+import { MentionDropdown } from '@/components/partnerships/MentionDropdown';
+import { TypingIndicatorBubble } from '@/components/partnerships/TypingIndicatorBubble';
 import { PeerReviewModal } from '@/components/partnerships/PeerReviewModal';
 import { FocusTimerCard } from '@/components/partnerships/FocusTimerCard';
 import {
@@ -28,6 +30,8 @@ import {
   ShieldCheck,
   Phone,
   ShieldAlert,
+  CornerDownRight,
+  X,
 } from 'lucide-react';
 
 interface UserSummary {
@@ -48,14 +52,6 @@ interface Partnership {
   recipient: UserSummary;
 }
 
-interface Message {
-  id: string;
-  partnershipId: string;
-  senderId: string;
-  content: string;
-  createdAt: string;
-}
-
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
 export default function DedicatedPartnershipRoomPage({ params }: { params: Promise<{ id: string }> }) {
@@ -70,9 +66,14 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
   // Real-Time Chat States
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessageText, setNewMessageText] = useState('');
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+  const [isPartnerTyping, setIsPartnerTyping] = useState(false);
+  const [isSimbiAiTyping, setIsSimbiAiTyping] = useState(false);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const chatBottomRef = useRef<HTMLDivElement | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Audio Call Modal State
   const [showAudioCallModal, setShowAudioCallModal] = useState(false);
@@ -139,6 +140,12 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
           );
         });
 
+        socket.on('partner_typing', () => setIsPartnerTyping(true));
+        socket.on('partner_stop_typing', () => setIsPartnerTyping(false));
+        socket.on('simbi_ai_typing', (data: { isTyping: boolean }) => {
+          setIsSimbiAiTyping(data.isTyping);
+        });
+
         socket.on('incoming_audio_call', (sess: any) => {
           if (sess && sess.requesterId !== myUserId) {
             setIncomingAudioSession(sess);
@@ -184,23 +191,52 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const handleInputChange = (val: string) => {
+    setNewMessageText(val);
+
+    if (val.endsWith('@') || /@\w*$/.test(val)) {
+      setShowMentionDropdown(true);
+    } else {
+      setShowMentionDropdown(false);
+    }
+
+    if (socketRef.current && isSocketConnected) {
+      socketRef.current.emit('typing', { partnershipId, userId: myUserId, userName: 'Saya' });
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        socketRef.current?.emit('stop_typing', { partnershipId, userId: myUserId });
+      }, 2000);
+    }
+  };
+
+  const handleSelectMention = (mentionLabel: string) => {
+    setNewMessageText((prev) => prev.replace(/@\w*$/, mentionLabel + ' '));
+    setShowMentionDropdown(false);
+  };
+
   const handleSendMessage = async (e?: React.FormEvent, customContent?: string) => {
     if (e) e.preventDefault();
     const content = (customContent || newMessageText).trim();
     if (!content) return;
+
+    const currentReplyToId = replyingTo?.id || null;
     setNewMessageText('');
+    setReplyingTo(null);
+    setShowMentionDropdown(false);
 
     if (socketRef.current && isSocketConnected) {
+      socketRef.current.emit('stop_typing', { partnershipId, userId: myUserId });
       socketRef.current.emit('send_message', {
         partnershipId,
         senderId: myUserId,
         content,
+        replyToId: currentReplyToId,
       });
     } else {
       try {
         const res = await apiFetch<{ message: Message }>(`/partnerships/${partnershipId}/messages`, {
           method: 'POST',
-          body: JSON.stringify({ content }),
+          body: JSON.stringify({ content, replyToId: currentReplyToId }),
         });
         setMessages((prev) => [...prev, res.message]);
       } catch (err) {
@@ -381,66 +417,73 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
                   </div>
                 </div>
               ) : (
-                messages.map((m) => {
-                  const isMine = m.senderId === myUserId;
-                  const isProposal = m.content.includes('ROADMAP_PROPOSAL');
-
-                  if (isProposal) {
-                    return (
-                      <div key={m.id} className="flex justify-center w-full my-2">
-                        <RoadmapProposalCard
-                          partnershipId={partnershipId}
-                          myUserId={myUserId}
-                          partnerName={partner.name}
-                          messageId={m.id}
-                          content={m.content}
-                          socket={socketRef.current}
-                          onApproved={() => {
-                            apiFetch<{ messages: Message[] }>(`/partnerships/${partnershipId}/messages`).then((res) => {
-                              setMessages(res.messages);
-                            });
-                          }}
-                        />
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div key={m.id} className={`flex gap-2.5 items-end ${isMine ? 'flex-row-reverse' : 'flex-row'} w-full overflow-hidden`}>
-                      <div className="w-8 h-8 rounded-xl bg-[#FF7A30] border-2 border-[#0F172A] text-white font-black flex items-center justify-center text-xs flex-shrink-0 shadow-[1.5px_1.5px_0px_0px_#0F172A]">
-                        {isMine ? 'ME' : partner.name.charAt(0)}
-                      </div>
-
-                      <div className={`flex flex-col min-w-0 max-w-[180px] sm:max-w-[220px] md:max-w-[240px] ${isMine ? 'items-end' : 'items-start'}`}>
-                        <div
-                          className={`p-3 rounded-2xl border-2 border-[#0F172A] text-xs font-bold leading-relaxed shadow-[2.5px_2.5px_0px_0px_#0F172A] break-all [overflow-wrap:anywhere] ${
-                            isMine ? 'bg-[#FF7A30] text-white' : 'bg-white text-[#0F172A]'
-                          }`}
-                        >
-                          <p className="whitespace-pre-wrap break-all [overflow-wrap:anywhere] text-left">{m.content}</p>
-                        </div>
-                        <span className="text-[9px] text-gray-400 font-mono mt-1 px-1">
-                          {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })
+                messages.map((m) => (
+                  <ChatMessageItem
+                    key={m.id}
+                    message={m}
+                    myUserId={myUserId}
+                    partnerName={partner.name}
+                    partnershipId={partnershipId}
+                    socket={socketRef.current}
+                    onReply={(targetMsg) => setReplyingTo(targetMsg)}
+                    onApprovedProposal={() => {
+                      apiFetch<{ messages: Message[] }>(`/partnerships/${partnershipId}/messages`).then((res) => {
+                        setMessages(res.messages);
+                      });
+                    }}
+                  />
+                ))
               )}
+              <TypingIndicatorBubble
+                isSimbiAiTyping={isSimbiAiTyping}
+                isPartnerTyping={isPartnerTyping}
+                partnerName={partner.name}
+              />
               <div ref={chatBottomRef} />
             </div>
 
+            {/* Replying Preview Bar */}
+            {replyingTo && (
+              <div className="flex items-center justify-between p-2.5 bg-[#ECFEFF] border-2 border-[#06B6D4] rounded-xl text-xs font-bold text-[#0F172A] shadow-[2px_2px_0px_0px_#06B6D4]">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <CornerDownRight className="w-4 h-4 text-[#06B6D4] shrink-0" />
+                  <div className="truncate">
+                    <span className="text-[#06B6D4] font-black">
+                      Membalas {replyingTo.senderType === 'SIMBI_AI' ? 'Simbi AI' : replyingTo.senderId === myUserId ? 'Saya' : partner.name}:
+                    </span>{' '}
+                    <span className="text-gray-600 truncate">{replyingTo.content}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setReplyingTo(null)}
+                  className="p-1 hover:bg-cyan-100 rounded-lg text-gray-500 hover:text-gray-800 transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
             {/* Input Form Bar */}
-            <form onSubmit={handleSendMessage} className="flex gap-2 pt-2">
-              <input
-                type="text"
-                required
-                value={newMessageText}
-                onChange={(e) => setNewMessageText(e.target.value)}
-                placeholder="Type a real-time message, share learning resources, code snippets..."
-                className="flex-1 px-4 py-3.5 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden focus:border-[#FF7A30]"
-              />
-              <button type="submit" disabled={!newMessageText.trim()} className="neo-button px-7 text-xs flex items-center gap-1.5">
+            <form onSubmit={handleSendMessage} className="flex gap-2 pt-2 relative">
+              <div className="flex-1 relative">
+                {showMentionDropdown && (
+                  <MentionDropdown
+                    partnerName={partner.name}
+                    partnerUsername={partner.username}
+                    onSelectMention={handleSelectMention}
+                  />
+                )}
+                <input
+                  type="text"
+                  required
+                  value={newMessageText}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  placeholder="Tulis pesan atau ketik @ untuk mention @SimbiAI..."
+                  className="w-full px-4 py-3.5 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden focus:border-[#FF7A30]"
+                />
+              </div>
+              <button type="submit" disabled={!newMessageText.trim()} className="neo-button px-7 text-xs flex items-center gap-1.5 h-[48px]">
                 <Send className="w-4 h-4 text-white" />
                 <span className="font-black">Send</span>
               </button>

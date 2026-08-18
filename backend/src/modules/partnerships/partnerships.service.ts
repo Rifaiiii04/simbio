@@ -20,7 +20,11 @@ export async function requestPartnership(requesterId: string, recipientId: strin
   const partnership = await repo.create(requesterId, recipientId);
 
   if (messageText && messageText.trim()) {
-    await repo.createMessage(partnership.id, requesterId, messageText.trim());
+    await repo.createMessage({
+      partnershipId: partnership.id,
+      senderId: requesterId,
+      content: messageText.trim(),
+    });
   }
 
   return partnership;
@@ -53,9 +57,14 @@ export async function getPartnershipMessages(userId: string, partnershipId: stri
   return repo.getMessages(partnershipId);
 }
 
-export async function sendPartnershipMessage(userId: string, partnershipId: string, content: string) {
+export async function sendPartnershipMessage(userId: string, partnershipId: string, content: string, replyToId?: string) {
   const p = await getPartnership(userId, partnershipId);
   if (p.status !== 'ACCEPTED') throw new AppError(ErrorCode.VALIDATION_ERROR, 'Partnership must be active to send messages', 400);
   if (!content.trim()) throw new AppError(ErrorCode.VALIDATION_ERROR, 'Message content cannot be empty', 400);
-  return repo.createMessage(partnershipId, userId, content.trim());
+  return repo.createMessage({
+    partnershipId,
+    senderId: userId,
+    content: content.trim(),
+    replyToId: replyToId || null,
+  });
 }

@@ -36,11 +36,47 @@ export async function getMessages(partnershipId: string) {
   return prisma.partnershipMessage.findMany({
     where: { partnershipId },
     orderBy: { createdAt: 'asc' },
+    include: {
+      replyTo: {
+        select: {
+          id: true,
+          content: true,
+          senderId: true,
+          senderType: true,
+          senderName: true,
+        },
+      },
+    },
   });
 }
 
-export async function createMessage(partnershipId: string, senderId: string, content: string) {
+export async function createMessage(data: {
+  partnershipId: string;
+  senderId?: string | null;
+  senderType?: string;
+  senderName?: string | null;
+  content: string;
+  replyToId?: string | null;
+}) {
   return prisma.partnershipMessage.create({
-    data: { partnershipId, senderId, content },
+    data: {
+      partnershipId: data.partnershipId,
+      senderId: data.senderId ?? null,
+      senderType: data.senderType || 'USER',
+      senderName: data.senderName ?? null,
+      content: data.content,
+      replyToId: data.replyToId ?? null,
+    },
+    include: {
+      replyTo: {
+        select: {
+          id: true,
+          content: true,
+          senderId: true,
+          senderType: true,
+          senderName: true,
+        },
+      },
+    },
   });
 }

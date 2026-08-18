@@ -49,4 +49,5 @@ export interface LLMProvider {
   recommendPartners(prompt: AiPartnerRecommendationPrompt): Promise<AiPartnerRecommendation[]>;
   generateAudioTopic(skillDomain: string): Promise<string>;
   generateLearningTopics(skillName: string): Promise<Array<{ title: string; description: string }>>;
+  generateChatResponse(systemPrompt: string, userQuery: string): Promise<string>;
 }

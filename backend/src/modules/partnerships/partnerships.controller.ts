@@ -59,7 +59,7 @@ export async function getMessagesHandler(req: Request, res: Response, next: Next
 export async function sendMessageHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id } = req.params as { id: string };
-    const { content } = req.body as { content: string };
-    sendSuccess(res, { message: await service.sendPartnershipMessage(uid(req), id, content) }, 201);
+    const { content, replyToId } = req.body as { content: string; replyToId?: string };
+    sendSuccess(res, { message: await service.sendPartnershipMessage(uid(req), id, content, replyToId) }, 201);
   } catch (err) { next(err); }
 }

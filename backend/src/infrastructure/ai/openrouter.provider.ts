@@ -307,4 +307,44 @@ Return ONLY valid JSON array without markdown code blocks.`;
       throw new AppError(ErrorCode.AI_UNAVAILABLE, 'AI provider communication failed', 503);
     }
   }
+
+  async generateChatResponse(systemInstruction: string, userPrompt: string): Promise<string> {
+    try {
+      const response = await fetch(`${env.OPENROUTER_BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://simbioly.local',
+          'X-Title': 'Simbioly',
+        },
+        body: JSON.stringify({
+          model: env.OPENROUTER_MODEL,
+          messages: [
+            { role: 'system', content: systemInstruction },
+            { role: 'user', content: userPrompt },
+          ],
+          temperature: 0.7,
+        }),
+        signal: AbortSignal.timeout(env.OPENROUTER_TIMEOUT_MS),
+      });
+
+      if (!response.ok) {
+        logger.error({ status: response.status }, 'OpenRouter chat completion failed');
+        throw new AppError(ErrorCode.AI_UNAVAILABLE, 'AI service unavailable', 503);
+      }
+
+      const data = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
+      const rawContent = data.choices?.[0]?.message?.content;
+      if (!rawContent) {
+        throw new AppError(ErrorCode.AI_INVALID_RESPONSE, 'Empty response from AI', 502);
+      }
+
+      return rawContent.trim();
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+      logger.error({ err }, 'OpenRouter chat completion error');
+      throw new AppError(ErrorCode.AI_UNAVAILABLE, 'AI provider communication failed', 503);
+    }
+  }
 }
