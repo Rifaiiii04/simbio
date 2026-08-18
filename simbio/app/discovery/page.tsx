@@ -143,8 +143,6 @@ export default function DiscoveryPage() {
     }
   };
 
-
-
   // Filter candidates by debounced text query
   const filteredCandidates = candidates.filter((c) => {
     if (!debouncedKeyword.trim()) return true;
@@ -157,24 +155,24 @@ export default function DiscoveryPage() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FFFDF7] text-[#0F172A] selection:bg-[#FACC15]">
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-orange-100 selection:text-[#FF6B30]">
       <Navbar />
 
-      <main className="flex-1 max-w-6xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Header Title */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-tight">Skill Discovery & Matching</h1>
-            <p className="text-xs text-gray-700 font-bold mt-1">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Skill Discovery & Matching</h1>
+            <p className="text-xs text-slate-500 font-medium mt-1">
               Switch between deterministic DB matching and AI smart partner recommendations.
             </p>
           </div>
           <Link
             href="/partnerships"
-            className="px-5 py-2.5 rounded-xl bg-white border-2 border-[#0F172A] text-[#0F172A] text-xs font-black hover:bg-[#FACC15] transition flex items-center gap-1.5 w-fit shadow-[3px_3px_0px_0px_#0F172A]"
+            className="px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-800 text-xs font-bold hover:bg-slate-50 transition flex items-center gap-1.5 w-fit shadow-2xs"
           >
             <span>My Partnerships</span>
-            <ArrowRight className="w-4 h-4 text-[#FF7A30]" />
+            <ArrowRight className="w-4 h-4 text-[#FF6B30]" />
           </Link>
         </div>
 
@@ -182,10 +180,10 @@ export default function DiscoveryPage() {
         <div className="flex gap-3">
           <button
             onClick={() => handleFilter(selectedSkillId, selectedCountry)}
-            className={`flex-1 py-3.5 px-4 rounded-2xl border-3 border-[#0F172A] font-black text-xs flex items-center justify-center gap-2 transition ${
+            className={`flex-1 py-3 px-4 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition ${
               mode === 'standard'
-                ? 'bg-[#FF7A30] text-white shadow-[4px_4px_0px_0px_#0F172A]'
-                : 'bg-white text-[#0F172A] hover:bg-[#FACC15]'
+                ? 'bg-[#FF6B30] text-white border-[#FF6B30] shadow-xs'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
             }`}
           >
             <SlidersHorizontal className="w-4 h-4" />
@@ -194,10 +192,10 @@ export default function DiscoveryPage() {
 
           <button
             onClick={handleFetchAiRecommendations}
-            className={`flex-1 py-3.5 px-4 rounded-2xl border-3 border-[#0F172A] font-black text-xs flex items-center justify-center gap-2 transition ${
+            className={`flex-1 py-3 px-4 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition ${
               mode === 'ai'
-                ? 'bg-[#06B6D4] text-white shadow-[4px_4px_0px_0px_#0F172A]'
-                : 'bg-white text-[#0F172A] hover:bg-[#FACC15]'
+                ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
             }`}
           >
             <Bot className="w-4 h-4" />
@@ -216,17 +214,17 @@ export default function DiscoveryPage() {
         />
 
         {message && (
-          <div className="p-3 text-xs text-[#0F172A] bg-[#84CC16] rounded-xl border-2 border-[#0F172A] flex items-center gap-2 font-black shadow-[3px_3px_0px_0px_#0F172A]">
-            <CheckCircle2 className="w-4 h-4" />
+          <div className="p-3 text-xs text-emerald-800 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center gap-2 font-bold shadow-2xs">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>{message}</span>
           </div>
         )}
 
         {/* Filter Controls Bar */}
-        <div className="neo-box p-4 sm:p-6 space-y-4 shadow-[6px_6px_0px_0px_#0F172A]">
-          <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-3">
-            <div className="flex items-center gap-2 text-xs font-black text-[#0F172A] uppercase tracking-wider">
-              {mode === 'ai' ? <Bot className="w-4 h-4 text-[#06B6D4]" /> : <SlidersHorizontal className="w-4 h-4 text-[#FF7A30]" />}
+        <div className="soft-card p-4 sm:p-6 space-y-4 bg-white">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wider">
+              {mode === 'ai' ? <Bot className="w-4 h-4 text-sky-600" /> : <SlidersHorizontal className="w-4 h-4 text-[#FF6B30]" />}
               <span>{mode === 'ai' ? 'AI Recommendation Engine Results' : 'Smart DB Filter System'}</span>
             </div>
             {(selectedSkillId || selectedCountry || searchKeyword) && (
@@ -235,7 +233,7 @@ export default function DiscoveryPage() {
                   setSearchKeyword('');
                   handleFilter('', 'All Countries');
                 }}
-                className="text-[11px] font-black text-[#FF7A30] hover:underline"
+                className="text-[11px] font-bold text-[#FF6B30] hover:underline"
               >
                 Reset Filters
               </button>
@@ -245,13 +243,13 @@ export default function DiscoveryPage() {
           <div className="grid sm:grid-cols-3 gap-3">
             {/* 1. Search Bar with 300ms Debounce */}
             <div className="relative">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
                 type="text"
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 placeholder="Search partner name or skill..."
-                className="w-full pl-10 pr-4 py-3 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden focus:border-[#FF7A30]"
+                className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 font-medium focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
               />
             </div>
 
@@ -260,7 +258,7 @@ export default function DiscoveryPage() {
               <select
                 value={selectedCountry || 'All Countries'}
                 onChange={(e) => handleFilter(undefined, e.target.value)}
-                className="w-full px-4 py-3 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold text-[#0F172A] focus:outline-hidden focus:border-[#FF7A30] shadow-[3px_3px_0px_0px_#0F172A]"
+                className="w-full px-4 py-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 font-medium text-slate-900 focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
               >
                 <option value="All Countries">Global (All Countries)</option>
                 {countries.slice(1).map((c) => (
@@ -285,16 +283,16 @@ export default function DiscoveryPage() {
 
         {/* Candidates Grid Display */}
         {loading ? (
-          <div className="text-center py-12 text-xs text-gray-500 font-black animate-pulse flex flex-col items-center gap-3">
-            <Sparkles className="w-8 h-8 text-[#FF7A30] animate-spin" />
+          <div className="text-center py-12 text-xs text-slate-500 font-bold animate-pulse flex flex-col items-center gap-3">
+            <Sparkles className="w-8 h-8 text-[#FF6B30] animate-spin" />
             <span>{mode === 'ai' ? 'Simbi AI is analyzing reciprocal partner synergies...' : 'Searching matching candidates...'}</span>
           </div>
         ) : filteredCandidates.length === 0 ? (
-          <div className="neo-box p-10 text-center space-y-4 shadow-[6px_6px_0px_0px_#0F172A]">
-            <Compass className="w-12 h-12 text-[#FF7A30] mx-auto animate-spin" style={{ animationDuration: '10s' }} />
+          <div className="soft-card p-10 text-center space-y-4 bg-white">
+            <Compass className="w-12 h-12 text-[#FF6B30] mx-auto animate-spin" style={{ animationDuration: '10s' }} />
             <div className="space-y-1">
-              <p className="text-base font-black text-[#0F172A]">No matching learners found for this filter.</p>
-              <p className="text-xs text-gray-600 font-bold max-w-md mx-auto">
+              <p className="text-base font-bold text-slate-900">No matching learners found for this filter.</p>
+              <p className="text-xs text-slate-500 font-medium max-w-md mx-auto">
                 Try searching for another country or reset your filters to see all active skill exchange candidates!
               </p>
             </div>
@@ -303,27 +301,27 @@ export default function DiscoveryPage() {
                 setSearchKeyword('');
                 handleFilter('', 'All Countries');
               }}
-              className="neo-button text-xs px-5 py-2.5 inline-flex items-center gap-1.5"
+              className="soft-button text-xs px-5 py-2.5 inline-flex items-center gap-1.5 shadow-2xs"
             >
               <span>Reset All Filters</span>
             </button>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCandidates.map((c) => (
               <GlowCard key={c.user.id}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-2xl bg-[#FF7A30] border-2.5 border-[#0F172A] text-white font-black flex items-center justify-center text-sm shadow-[2.5px_2.5px_0px_0px_#0F172A]">
+                      <div className="w-11 h-11 rounded-2xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-sm shadow-2xs">
                         {c.user.name.charAt(0)}
                       </div>
                       <div>
-                        <h3 className="font-black text-[#0F172A] text-base">{c.user.name}</h3>
-                        <div className="flex items-center gap-2 text-[10px] text-gray-600 font-bold">
+                        <h3 className="font-bold text-slate-900 text-base">{c.user.name}</h3>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-500 font-medium">
                           {c.user.username && <span>@{c.user.username}</span>}
                           {c.user.country && (
-                            <span className="neo-badge bg-[#06B6D4] text-white px-2 py-0.5 flex items-center gap-1">
+                            <span className="soft-badge bg-sky-50 text-sky-700 border-sky-200 px-2 py-0.5 flex items-center gap-1">
                               <Globe className="w-3 h-3" />
                               <span>{c.user.country}</span>
                             </span>
@@ -332,29 +330,29 @@ export default function DiscoveryPage() {
                       </div>
                     </div>
 
-                    <span className="neo-badge bg-[#FACC15] text-[#0F172A] text-[10px] px-3 py-1 flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-[#0F172A]" />
+                    <span className="soft-badge bg-amber-50 text-amber-800 border-amber-200 text-[10px] px-3 py-1 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-600" />
                       <span>{c.aiMatchScore ? `${c.aiMatchScore}% AI Synergy` : `${c.matchScore} pts`}</span>
                     </span>
                   </div>
 
-                  {c.user.bio && <p className="text-xs text-gray-700 font-bold italic line-clamp-2">&quot;{c.user.bio}&quot;</p>}
+                  {c.user.bio && <p className="text-xs text-slate-600 font-medium italic line-clamp-2">&quot;{c.user.bio}&quot;</p>}
 
                   {/* AI Smart Rationale & Project Idea Card (When in AI Mode) */}
                   {mode === 'ai' && (c.aiReasoning || c.suggestedProjectIdea) && (
-                    <div className="p-3.5 rounded-xl bg-[#FFF5EF] border-2 border-[#0F172A] space-y-2 text-xs font-bold shadow-[2px_2px_0px_0px_#0F172A]">
+                    <div className="p-3.5 rounded-xl bg-orange-50/60 border border-orange-200 space-y-2 text-xs font-medium shadow-2xs">
                       {c.aiReasoning && (
                         <div>
-                          <span className="text-[10px] font-black uppercase text-[#FF7A30] flex items-center gap-1">
-                            <Bot className="w-3 h-3 text-[#FF7A30]" />
+                          <span className="text-[10px] font-bold uppercase text-[#FF6B30] flex items-center gap-1">
+                            <Bot className="w-3 h-3 text-[#FF6B30]" />
                             <span>Why AI Matched You:</span>
                           </span>
-                          <p className="text-gray-800 text-[11px] mt-0.5">{c.aiReasoning}</p>
+                          <p className="text-slate-700 text-[11px] mt-0.5">{c.aiReasoning}</p>
                         </div>
                       )}
                       {c.suggestedProjectIdea && (
-                        <div className="pt-1 border-t border-orange-200">
-                          <span className="text-[10px] font-black uppercase text-indigo-600 flex items-center gap-1">
+                        <div className="pt-1 border-t border-orange-200/60">
+                          <span className="text-[10px] font-bold uppercase text-indigo-600 flex items-center gap-1">
                             <Lightbulb className="w-3 h-3 text-indigo-600" />
                             <span>Suggested Co-Creation Project:</span>
                           </span>
@@ -365,31 +363,31 @@ export default function DiscoveryPage() {
                   )}
 
                   {/* Teach & Learn Skills */}
-                  <div className="space-y-2 text-xs bg-[#FFFDF7] p-3.5 rounded-xl border-2 border-[#0F172A]">
+                  <div className="space-y-2 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200/60">
                     <div>
-                      <span className="text-[10px] font-black uppercase text-emerald-600 mr-1.5">Can Teach:</span>
-                      <span className="font-black text-[#0F172A]">
+                      <span className="text-[10px] font-bold uppercase text-emerald-700 mr-1.5">Can Teach:</span>
+                      <span className="font-semibold text-slate-900">
                         {c.teachSkills.map((s) => `${s.name} (${s.level})`).join(', ') || 'None listed'}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[10px] font-black uppercase text-[#FF7A30] mr-1.5">Wants to Learn:</span>
-                      <span className="font-black text-[#0F172A]">
+                      <span className="text-[10px] font-bold uppercase text-[#FF6B30] mr-1.5">Wants to Learn:</span>
+                      <span className="font-semibold text-slate-900">
                         {c.learnSkills.map((s) => `${s.name} (${s.level})`).join(', ') || 'None listed'}
                       </span>
                     </div>
                   </div>
 
                   {c.distanceKm != null && (
-                    <p className="text-[10px] text-gray-600 font-black flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-[#FF7A30]" />
+                    <p className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-[#FF6B30]" />
                       <span>Distance: {c.distanceKm} km away</span>
                     </p>
                   )}
 
                   <button
                     onClick={() => setProposalCandidate(c)}
-                    className="w-full neo-button py-3 text-xs flex items-center justify-center gap-2"
+                    className="w-full soft-button py-2.5 text-xs flex items-center justify-center gap-2 shadow-xs"
                   >
                     <UserCheck className="w-4 h-4" />
                     <span>Connect for Exchange</span>

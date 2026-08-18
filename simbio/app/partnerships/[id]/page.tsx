@@ -7,6 +7,7 @@ import { io, Socket } from 'socket.io-client';
 import { apiFetch } from '@/lib/api/client';
 import { Navbar } from '@/components/shared/Navbar';
 import { SimbiAvatar } from '@/components/shared/SimbiAvatar';
+import { RoomHeader } from '@/components/partnerships/RoomHeader';
 import { AudioCallModal } from '@/components/partnerships/AudioCallModal';
 import { ReportPartnerModal } from '@/components/partnerships/ReportPartnerModal';
 import { ReciprocalRoadmapCard } from '@/components/partnerships/ReciprocalRoadmapCard';
@@ -18,20 +19,17 @@ import { FocusTimerCard } from '@/components/partnerships/FocusTimerCard';
 import {
   MessageSquare,
   Send,
-  ArrowLeft,
   Sparkles,
-  Zap,
   Clock,
   Star,
   CheckCircle2,
-  Globe,
   Code,
   Handshake,
-  ShieldCheck,
   Phone,
-  ShieldAlert,
   CornerDownRight,
   X,
+  BookOpen,
+  Zap,
 } from 'lucide-react';
 
 interface UserSummary {
@@ -76,6 +74,9 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
   const chatBottomRef = useRef<HTMLDivElement | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Right Panel Active Tab State ('ROADMAP' | 'FOCUS')
+  const [sidebarTab, setSidebarTab] = useState<'ROADMAP' | 'FOCUS'>('ROADMAP');
+
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isFocusModeActive) {
@@ -87,26 +88,11 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isFocusModeActive]);
 
-  // Audio Call Modal State
+  // Audio Call & Review Modal States
   const [showAudioCallModal, setShowAudioCallModal] = useState(false);
   const [incomingAudioSession, setIncomingAudioSession] = useState<any>(null);
-
-  // Shared Focus Timer State
-  const [timerSeconds, setTimerSeconds] = useState(25 * 60);
-  const [timerActive, setTimerActive] = useState(false);
-  const [sessionCompletedMsg, setSessionCompletedMsg] = useState<string | null>(null);
-
-  // Report Partner Modal State
   const [showReportModal, setShowReportModal] = useState(false);
-
-  // Peer Review Form State
   const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewConsistency, setReviewConsistency] = useState(5);
-  const [reviewCommunication, setReviewCommunication] = useState(5);
-  const [reviewKnowledge, setReviewKnowledge] = useState(5);
-  const [reviewCollaboration, setReviewCollaboration] = useState(5);
-  const [reviewComment, setReviewComment] = useState('');
-  const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewMsg, setReviewMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -124,11 +110,9 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
         const pRes = await apiFetch<{ partnership: Partnership }>(`/partnerships/${partnershipId}`);
         setPartnership(pRes.partnership);
 
-        // Load initial chat messages
         const mRes = await apiFetch<{ messages: Message[] }>(`/partnerships/${partnershipId}/messages`);
         setMessages(mRes.messages);
 
-        // Initialize Real-Time WebSocket connection
         const socket = io(SOCKET_URL);
         socketRef.current = socket;
 
@@ -186,18 +170,6 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
       }
     };
   }, [partnershipId, router]);
-
-  // Pomodoro Timer tick
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (timerActive && timerSeconds > 0) {
-      interval = setInterval(() => setTimerSeconds((prev) => prev - 1), 1000);
-    } else if (timerSeconds === 0) {
-      setTimerActive(false);
-      setSessionCompletedMsg('25-Minute Focus Session Completed! Logged to DB.');
-    }
-    return () => clearInterval(interval);
-  }, [timerActive, timerSeconds]);
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -257,20 +229,14 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
     }
   };
 
-  const formatTimer = (secs: number) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
-
   if (loading || !partnership) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#FFFDF7]">
+      <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
         <Navbar />
         <div className="flex-1 flex items-center justify-center p-4">
-          <div className="text-[#FF7A30] font-black text-sm animate-pulse flex items-center gap-2">
+          <div className="text-[#FF6B30] font-bold text-sm animate-pulse flex items-center gap-2">
             <Sparkles className="w-5 h-5 animate-spin" />
-            <span>Loading Belajar Bareng workspace...</span>
+            <span>Memuat Room Belajar Bareng...</span>
           </div>
         </div>
       </div>
@@ -280,157 +246,86 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
   const partner = partnership.requesterId === myUserId ? partnership.recipient : partnership.requester;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FFFDF7] text-[#0F172A] selection:bg-[#FACC15]">
+    <div className="h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-orange-100 selection:text-[#FF6B30] overflow-hidden">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6 flex flex-col">
-        {/* Top Room Command Header */}
-        <div className="neo-box bg-[#FFFDF7] p-4 sm:p-6 space-y-4 shadow-[6px_6px_0px_0px_#0F172A]">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Link
-                href="/partnerships"
-                onClick={(e) => {
-                  if (isFocusModeActive) {
-                    e.preventDefault();
-                    alert('🔒 Mode Fokus Sedang Berjalan! Anda tidak dapat keluar dari room chat ini hingga sesi fokus selesai atau jeda disetujui kedua belah pihak.');
-                  }
-                }}
-                className="w-10 h-10 rounded-xl bg-white border-2 border-[#0F172A] flex items-center justify-center text-[#0F172A] hover:bg-[#FACC15] transition shadow-[2.5px_2.5px_0px_0px_#0F172A]"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#FF7A30] border-3 border-[#0F172A] text-white font-black flex items-center justify-center text-lg shadow-[3px_3px_0px_0px_#0F172A]">
-                  {partner.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={partner.avatarUrl} alt={partner.name} className="w-full h-full object-cover rounded-2xl" />
-                  ) : (
-                    partner.name.charAt(0)
-                  )}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-xl sm:text-2xl font-black text-[#0F172A] tracking-tight">{partner.name}</h1>
-                    <span className="neo-badge bg-[#84CC16] text-[#0F172A] text-[10px] px-2.5 py-0.5 flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3" />
-                      <span>Verified Partner</span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
-                    {partner.username && <span className="text-[#FF7A30] font-black">@{partner.username}</span>}
-                    {partner.country && (
-                      <span className="neo-badge bg-[#06B6D4] text-white px-2 py-0.5 text-[9px] flex items-center gap-1">
-                        <Globe className="w-3 h-3" />
-                        <span>{partner.country}</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Live Socket Badge & Quick Action Header Controls */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={`neo-badge text-xs px-3 py-1.5 font-black flex items-center gap-1.5 ${
-                  isSocketConnected ? 'bg-[#84CC16] text-[#0F172A]' : 'bg-[#FACC15] text-[#0F172A]'
-                }`}
-              >
-                <Zap className="w-4 h-4" />
-                <span>{isSocketConnected ? 'Real-Time WebSocket Stream' : 'Connecting WebSocket...'}</span>
-              </span>
-
-              <button
-                onClick={() => setShowAudioCallModal(true)}
-                className="px-3.5 py-1.5 rounded-xl bg-[#84CC16] text-[#0F172A] border-2 border-[#0F172A] text-xs font-black hover:bg-emerald-400 transition flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#0F172A]"
-              >
-                <Phone className="w-4 h-4" />
-                <span>Audio Call</span>
-              </button>
-
-              <button
-                onClick={() => setShowReviewModal(true)}
-                className="px-3 py-1.5 rounded-xl bg-white border-2 border-[#0F172A] text-xs font-black hover:bg-[#FACC15] transition flex items-center gap-1 shadow-[2px_2px_0px_0px_#0F172A]"
-              >
-                <Star className="w-4 h-4 text-[#FACC15]" />
-                <span>Give Review</span>
-              </button>
-
-              <button
-                onClick={() => setShowReportModal(true)}
-                className="px-3 py-1.5 rounded-xl bg-white border-2 border-[#0F172A] text-xs font-black text-red-600 hover:bg-red-500 hover:text-white transition flex items-center gap-1 shadow-[2px_2px_0px_0px_#0F172A]"
-              >
-                <ShieldAlert className="w-4 h-4 text-red-600" />
-                <span>Report Partner</span>
-              </button>
-            </div>
-          </div>
-        </div>
+      <main className="flex-1 w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col h-[calc(100vh-70px)] overflow-hidden gap-3">
+        {/* Full-Width Compact Top Room Command Header */}
+        <RoomHeader
+          partner={partner}
+          isFocusModeActive={isFocusModeActive}
+          isSocketConnected={isSocketConnected}
+          onOpenAudioCall={() => setShowAudioCallModal(true)}
+          onOpenReview={() => setShowReviewModal(true)}
+          onOpenReport={() => setShowReportModal(true)}
+        />
 
         {reviewMsg && (
-          <div className="p-3.5 text-xs text-[#0F172A] bg-[#84CC16] rounded-xl border-2 border-[#0F172A] flex items-center gap-2 font-black shadow-[3px_3px_0px_0px_#0F172A]">
-            <CheckCircle2 className="w-4 h-4" />
+          <div className="p-2.5 text-xs text-emerald-800 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center gap-2 font-bold shadow-2xs shrink-0">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>{reviewMsg}</span>
           </div>
         )}
 
-        {/* Split Screen Workspace Layout: Left (Chat Stream) vs Right (Collaboration Hub) */}
-        <div className="grid lg:grid-cols-12 gap-6 items-start">
-          {/* LEFT PANEL (7 Cols): Primary Real-Time Live Chat Stream */}
-          <div className="lg:col-span-7 neo-box bg-white p-6 space-y-4 shadow-[8px_8px_0px_0px_#0F172A] flex flex-col min-h-[620px]">
-            {/* Chat Stream Header */}
-            <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-3">
-              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#0F172A]">
-                <MessageSquare className="w-4.5 h-4.5 text-[#FF7A30]" />
-                <span>Real-Time WebSocket Obrolan Belajar</span>
+        {/* WhatsApp Web Style Full-Height Workspace Canvas */}
+        <div className="grid lg:grid-cols-12 gap-4 flex-1 h-full min-h-0 overflow-hidden">
+          {/* LEFT PANEL (7 Cols): WhatsApp Web Style Full-Height Live Chat Studio */}
+          <div className="lg:col-span-7 soft-card bg-white border border-slate-200/80 shadow-xs flex flex-col h-full min-h-0 overflow-hidden">
+            {/* Chat Stream Header Bar */}
+            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700">
+                <MessageSquare className="w-4 h-4 text-[#FF6B30]" />
+                <span>WebSocket Chat Canvas</span>
               </div>
-              <span className="neo-badge bg-[#FACC15] text-[#0F172A] text-[10px] px-2.5 py-0.5">
+              <span className="soft-badge bg-slate-100 text-slate-700 text-[10px] px-2.5 py-0.5">
                 {messages.length} Messages
               </span>
             </div>
 
-            {/* Smart Action Quick Prompts */}
-            <div className="flex flex-wrap gap-2 text-[11px] font-black">
+            {/* Smart Quick Action Prompts Bar */}
+            <div className="px-4 py-2 bg-white border-b border-slate-100 flex gap-2 overflow-x-auto text-xs font-bold shrink-0 scrollbar-none">
               <button
                 onClick={() => setShowAudioCallModal(true)}
-                className="px-3 py-1.5 rounded-xl bg-[#F7FEE7] text-emerald-800 border-2 border-[#0F172A] hover:bg-[#FACC15] transition flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#0F172A]"
+                className="px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition flex items-center gap-1.5 shadow-2xs whitespace-nowrap"
               >
-                <Phone className="w-3.5 h-3.5" />
-                <span>Start Audio Call</span>
+                <Phone className="w-4 h-4" />
+                <span>Mulai Audio Call</span>
               </button>
               <button
-                onClick={() => handleSendMessage(undefined, "Ayo kita mulai sesi Belajar Bareng focus 25 menit!")}
-                className="px-3 py-1.5 rounded-xl bg-[#FFF5EF] text-[#FF7A30] border-2 border-[#0F172A] hover:bg-[#FACC15] transition flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#0F172A]"
+                onClick={() => {
+                  setSidebarTab('FOCUS');
+                  handleSendMessage(undefined, "Ayo kita mulai sesi Belajar Bareng focus 25 menit!");
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-orange-50 text-[#FF6B30] border border-orange-200 hover:bg-orange-100 transition flex items-center gap-1.5 shadow-2xs whitespace-nowrap"
               >
-                <Clock className="w-3.5 h-3.5" />
-                <span>Focus Session</span>
+                <Clock className="w-4 h-4" />
+                <span>Focus Session 25m</span>
               </button>
               <button
                 onClick={() => handleSendMessage(undefined, "Ini repository kodingan / tautan materi belajar kita!")}
-                className="px-3 py-1.5 rounded-xl bg-[#F0F9FF] text-[#06B6D4] border-2 border-[#0F172A] hover:bg-[#FACC15] transition flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#0F172A]"
+                className="px-3.5 py-1.5 rounded-xl bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition flex items-center gap-1.5 shadow-2xs whitespace-nowrap"
               >
-                <Code className="w-3.5 h-3.5" />
-                <span>Share Code</span>
+                <Code className="w-4 h-4" />
+                <span>Bagikan Kode</span>
               </button>
               <button
                 onClick={() => setShowReviewModal(true)}
-                className="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-700 border-2 border-[#0F172A] hover:bg-[#FACC15] transition flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#0F172A]"
+                className="px-3.5 py-1.5 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition flex items-center gap-1.5 shadow-2xs whitespace-nowrap"
               >
-                <Star className="w-3.5 h-3.5" />
-                <span>Give Review</span>
+                <Star className="w-4 h-4" />
+                <span>Review Partner</span>
               </button>
             </div>
 
-            {/* Message Log Box */}
-            <div className="flex-1 overflow-y-auto space-y-3.5 p-4 bg-[#FFFDF7] rounded-2xl border-2 border-[#0F172A] min-h-[380px] max-h-[480px]">
+            {/* Full-Height Scrollable Chat Messages Container (High Readability text-sm) */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-slate-50/40 min-h-0">
               {messages.length === 0 ? (
-                <div className="text-center py-20 space-y-3">
-                  <Handshake className="w-12 h-12 text-[#FF7A30] mx-auto animate-bounce" style={{ animationDuration: '3s' }} />
+                <div className="text-center py-16 space-y-3">
+                  <Handshake className="w-12 h-12 text-[#FF6B30] mx-auto animate-bounce" style={{ animationDuration: '3s' }} />
                   <div className="space-y-1">
-                    <p className="text-base font-black text-[#0F172A]">Real-Time Chat Stream Initialized!</p>
-                    <p className="text-xs text-gray-600 font-bold max-w-xs mx-auto">
-                      Send a message or click one of the quick action buttons above to start exchanging knowledge with {partner.name}!
+                    <p className="text-base font-bold text-slate-900">WebSocket Room Active!</p>
+                    <p className="text-sm text-slate-500 font-medium max-w-xs mx-auto">
+                      Kirim pesan atau pilih aksi cepat untuk mulai bertukar ilmu dengan {partner.name}!
                     </p>
                   </div>
                 </div>
@@ -462,28 +357,28 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
 
             {/* Replying Preview Bar */}
             {replyingTo && (
-              <div className="flex items-center justify-between p-2.5 bg-[#ECFEFF] border-2 border-[#06B6D4] rounded-xl text-xs font-bold text-[#0F172A] shadow-[2px_2px_0px_0px_#06B6D4]">
+              <div className="px-4 py-2 bg-sky-50 border-t border-sky-200 flex items-center justify-between text-xs font-bold text-slate-900 shrink-0">
                 <div className="flex items-center gap-2 overflow-hidden">
-                  <CornerDownRight className="w-4 h-4 text-[#06B6D4] shrink-0" />
+                  <CornerDownRight className="w-4 h-4 text-sky-600 shrink-0" />
                   <div className="truncate">
-                    <span className="text-[#06B6D4] font-black">
+                    <span className="text-sky-700 font-bold">
                       Membalas {replyingTo.senderType === 'SIMBI_AI' ? 'Simbi AI' : replyingTo.senderId === myUserId ? 'Saya' : partner.name}:
                     </span>{' '}
-                    <span className="text-gray-600 truncate">{replyingTo.content}</span>
+                    <span className="text-slate-600 truncate font-medium">{replyingTo.content}</span>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setReplyingTo(null)}
-                  className="p-1 hover:bg-cyan-100 rounded-lg text-gray-500 hover:text-gray-800 transition"
+                  className="p-1 hover:bg-sky-100 rounded-lg text-slate-400 hover:text-slate-800 transition"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             )}
 
-            {/* Input Form Bar */}
-            <form onSubmit={handleSendMessage} className="flex gap-2 pt-2 relative">
+            {/* Anchored Bottom Input Form (High Readability text-sm) */}
+            <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-slate-100 flex gap-2.5 relative shrink-0">
               <div className="flex-1 relative">
                 {showMentionDropdown && !isFocusModeActive && (
                   <MentionDropdown
@@ -503,45 +398,84 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
                       ? '🔒 Mode Fokus Aktif (Distraction-Free Mode). Chat dikunci hingga fokus selesai...'
                       : 'Tulis pesan atau ketik @ untuk mention @SimbiAI...'
                   }
-                  className="w-full px-4 py-3.5 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden focus:border-[#FF7A30] disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 text-sm bg-slate-50 rounded-xl border border-slate-200 font-medium text-slate-900 focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                 />
               </div>
               <button
                 type="submit"
                 disabled={isFocusModeActive || !newMessageText.trim()}
-                className="neo-button px-7 text-xs flex items-center gap-1.5 h-[48px] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="soft-button px-7 text-sm font-bold flex items-center gap-2 h-[46px] disabled:opacity-50 disabled:cursor-not-allowed shrink-0 shadow-2xs"
               >
                 <Send className="w-4 h-4 text-white" />
-                <span className="font-black">Send</span>
+                <span>Kirim</span>
               </button>
             </form>
           </div>
 
-          {/* RIGHT PANEL (5 Cols): Belajar Bareng Collaboration Hub */}
-          <div className="lg:col-span-5 space-y-6">
-            {/* Widget: Reciprocal Learning Topics Roadmap & Checklist */}
-            <ReciprocalRoadmapCard
-              partnershipId={partnershipId}
-              myUserId={myUserId}
-              partnerName={partner?.name || 'Partner'}
-              socket={socketRef.current}
-            />
+          {/* RIGHT PANEL (5 Cols): Instant Access Tabbed Collaboration Hub (No Scroll Required!) */}
+          <div className="lg:col-span-5 flex flex-col h-full min-h-0 space-y-3">
+            {/* Header Tab Switcher (Instant 1-Click Access for Focus & Roadmap) */}
+            <div className="p-1 bg-white rounded-2xl border border-slate-200/80 shadow-2xs grid grid-cols-2 gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setSidebarTab('ROADMAP')}
+                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
+                  sidebarTab === 'ROADMAP'
+                    ? 'bg-[#FF6B30] text-white shadow-2xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>Roadmap & Checklist</span>
+              </button>
 
-            {/* Widget: Shared Pomodoro Focus Session */}
-            <FocusTimerCard
-              partnershipId={partnershipId}
-              myUserId={myUserId}
-              partnerName={partner?.name || 'Partner'}
-              socket={socketRef.current}
-              onFocusStateChange={(isActive) => setIsFocusModeActive(isActive)}
-            />
+              <button
+                type="button"
+                onClick={() => setSidebarTab('FOCUS')}
+                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 relative ${
+                  sidebarTab === 'FOCUS'
+                    ? 'bg-[#FF6B30] text-white shadow-2xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Clock className="w-4 h-4" />
+                <span>Focus Session (Sync)</span>
+                {isFocusModeActive && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping absolute right-3 top-3" />
+                )}
+              </button>
+            </div>
 
-            <SimbiAvatar state="happy" message="Start an Audio Call session or AI Topic Exchange to elevate your reciprocal skill growth!" />
+            {/* Tabbed Content Container (Fills Full Height, Zero Scroll Needed) */}
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-3">
+              {sidebarTab === 'ROADMAP' ? (
+                <ReciprocalRoadmapCard
+                  partnershipId={partnershipId}
+                  myUserId={myUserId}
+                  partnerName={partner?.name || 'Partner'}
+                  socket={socketRef.current}
+                />
+              ) : (
+                <FocusTimerCard
+                  partnershipId={partnershipId}
+                  myUserId={myUserId}
+                  partnerName={partner?.name || 'Partner'}
+                  socket={socketRef.current}
+                  onFocusStateChange={(isActive) => setIsFocusModeActive(isActive)}
+                />
+              )}
+
+              {/* Simbi Mascot Advice Bubble */}
+              <SimbiAvatar
+                state="happy"
+                message="Gunakan tab di atas untuk berganti antara Checklist Topik & Pomodoro Focus Timer tanpa perlu scroll!"
+              />
+            </div>
           </div>
         </div>
       </main>
 
-      {/* Audio Call Modal */}
+      {/* Modals */}
       {showAudioCallModal && (
         <AudioCallModal
           partnershipId={partnershipId}
@@ -556,7 +490,6 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
         />
       )}
 
-      {/* Peer Review Modal */}
       {showReviewModal && partner && (
         <PeerReviewModal
           partnershipId={partnershipId}

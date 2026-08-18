@@ -151,26 +151,26 @@ export function FocusTimerCard({
   };
 
   return (
-    <div className="neo-box bg-[#FACC15] p-5 text-center space-y-4 shadow-[6px_6px_0px_0px_#0F172A] relative overflow-hidden">
+    <div className="soft-card p-5 bg-gradient-to-br from-amber-50/80 via-white to-orange-50/80 border border-amber-200/80 text-center space-y-4 shadow-xs relative overflow-hidden">
       {/* Header Bar */}
-      <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-2">
-        <div className="flex items-center gap-1.5 text-xs font-black text-[#0F172A] uppercase tracking-wider">
-          <Clock className="w-4 h-4 text-[#0F172A]" />
+      <div className="flex items-center justify-between border-b border-amber-200/60 pb-2">
+        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider">
+          <Clock className="w-4 h-4 text-[#FF6B30]" />
           <span>Focus Belajar Bareng (Sync)</span>
         </div>
-        <span className="neo-badge bg-white text-[#0F172A] text-[10px] px-2 py-0.5 font-mono font-bold">
+        <span className="soft-badge bg-white text-slate-800 border-amber-200 text-[10px] font-mono">
           25 Min Pomodoro
         </span>
       </div>
 
       {/* Synchronized Timer Display */}
-      <div className="text-5xl font-mono font-black text-[#0F172A] py-4 bg-white rounded-2xl border-3 border-[#0F172A] shadow-[4px_4px_0px_0px_#0F172A]">
+      <div className="text-5xl font-mono font-bold text-slate-900 py-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
         {formatTimer(timerSeconds)}
       </div>
 
       {sessionCompletedMsg && (
-        <div className="p-2.5 text-[11px] bg-[#84CC16] text-[#0F172A] font-black border-2 border-[#0F172A] rounded-xl flex items-center justify-center gap-1.5">
-          <CheckCircle2 className="w-4 h-4" />
+        <div className="p-2.5 text-[11px] bg-emerald-50 text-emerald-800 font-bold border border-emerald-200 rounded-xl flex items-center justify-center gap-1.5 shadow-2xs">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <span>{sessionCompletedMsg}</span>
         </div>
       )}
@@ -182,7 +182,7 @@ export function FocusTimerCard({
         <button
           type="button"
           onClick={handleProposeStart}
-          className="w-full neo-button bg-[#0F172A] text-white py-3 text-xs flex items-center justify-center gap-2"
+          className="w-full soft-button bg-slate-900 hover:bg-slate-800 text-white py-3 text-xs flex items-center justify-center gap-2 shadow-xs"
         >
           <Play className="w-4 h-4 fill-current" />
           <span>Ajukan Start Focus Session 🚀</span>
@@ -191,22 +191,22 @@ export function FocusTimerCard({
 
       {/* STATE 2: START_PROPOSED */}
       {focusState === 'START_PROPOSED' && (
-        <div className="p-3 bg-white border-2 border-[#0F172A] rounded-xl text-left space-y-2.5 shadow-[2px_2px_0px_0px_#0F172A]">
+        <div className="p-3 bg-white border border-slate-200 rounded-xl text-left space-y-2.5 shadow-xs">
           {isRequester ? (
-            <div className="flex items-center gap-2 text-xs font-black text-[#0F172A]">
-              <Clock className="w-4 h-4 text-[#FF7A30] animate-spin" />
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+              <Clock className="w-4 h-4 text-[#FF6B30] animate-spin" />
               <span>Menunggu Ready dari {partnerName}... (1/2)</span>
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs font-black text-[#0F172A]">
+              <p className="text-xs font-bold text-slate-900">
                 🔥 {proposalRequesterName || partnerName} mengajak Start Focus Session (25 Min)! Apakah kamu Siap (Ready)?
               </p>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={handleAcceptStart}
-                  className="flex-1 neo-button bg-[#84CC16] text-[#0F172A] py-2 text-xs flex items-center justify-center gap-1"
+                  className="flex-1 soft-button bg-[#10B981] hover:bg-emerald-600 text-white py-2 text-xs flex items-center justify-center gap-1"
                 >
                   <Check className="w-4 h-4 stroke-[3]" />
                   <span>Ready & Start! 🚀</span>
@@ -214,9 +214,9 @@ export function FocusTimerCard({
                 <button
                   type="button"
                   onClick={handleRejectStart}
-                  className="px-3 py-2 rounded-xl bg-gray-100 border-2 border-[#0F172A] text-xs font-black hover:bg-red-100 transition"
+                  className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold hover:bg-red-50 hover:text-red-600 transition"
                 >
-                  <X className="w-4 h-4 text-red-600" />
+                  <X className="w-4 h-4 text-slate-600 hover:text-red-600" />
                 </button>
               </div>
             </div>
@@ -227,15 +227,15 @@ export function FocusTimerCard({
       {/* STATE 3: ACTIVE (Running & Distraction Lock) */}
       {focusState === 'ACTIVE' && (
         <div className="space-y-2.5">
-          <div className="p-2.5 bg-[#ECFEFF] border-2 border-[#06B6D4] rounded-xl text-xs font-black text-[#0F172A] flex items-center justify-center gap-1.5 shadow-[2px_2px_0px_0px_#06B6D4]">
-            <Lock className="w-4 h-4 text-[#06B6D4]" />
+          <div className="p-2.5 bg-sky-50 border border-sky-200 rounded-xl text-xs font-bold text-sky-800 flex items-center justify-center gap-1.5 shadow-2xs">
+            <Lock className="w-4 h-4 text-sky-600" />
             <span>Mode Fokus Aktif (Chat & Navigasi Dikunci)</span>
           </div>
 
           <button
             type="button"
             onClick={handleProposePause}
-            className="w-full neo-button bg-[#FF7A30] text-white py-2.5 text-xs flex items-center justify-center gap-2"
+            className="w-full soft-button bg-[#FF6B30] text-white py-2.5 text-xs flex items-center justify-center gap-2"
           >
             <Pause className="w-4 h-4" />
             <span>Request Pause / End Focus</span>
@@ -245,22 +245,22 @@ export function FocusTimerCard({
 
       {/* STATE 4: PAUSE_PROPOSED */}
       {focusState === 'PAUSE_PROPOSED' && (
-        <div className="p-3 bg-white border-2 border-[#0F172A] rounded-xl text-left space-y-2.5 shadow-[2px_2px_0px_0px_#0F172A]">
+        <div className="p-3 bg-white border border-slate-200 rounded-xl text-left space-y-2.5 shadow-xs">
           {isRequester ? (
-            <div className="flex items-center gap-2 text-xs font-black text-[#0F172A]">
-              <Clock className="w-4 h-4 text-[#FF7A30] animate-spin" />
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+              <Clock className="w-4 h-4 text-[#FF6B30] animate-spin" />
               <span>Permintaan Jeda Terkirim... Menunggu persetujuan {partnerName}</span>
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs font-black text-[#0F172A]">
+              <p className="text-xs font-bold text-slate-900">
                 ⏸️ {proposalRequesterName || partnerName} meminta untuk menghentikan sementara Focus Session. Apakah kamu setuju?
               </p>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={handleAcceptPause}
-                  className="flex-1 neo-button bg-[#FF7A30] text-white py-2 text-xs flex items-center justify-center gap-1"
+                  className="flex-1 soft-button bg-[#FF6B30] text-white py-2 text-xs flex items-center justify-center gap-1"
                 >
                   <Check className="w-4 h-4 stroke-[3]" />
                   <span>Setujui Jeda 🤝</span>
@@ -268,7 +268,7 @@ export function FocusTimerCard({
                 <button
                   type="button"
                   onClick={handleRejectPause}
-                  className="px-3 py-2 rounded-xl bg-gray-100 border-2 border-[#0F172A] text-xs font-black hover:bg-gray-200 transition"
+                  className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold hover:bg-slate-200 transition text-slate-700"
                 >
                   <span>Lanjutkan Fokus</span>
                 </button>

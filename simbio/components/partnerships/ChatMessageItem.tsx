@@ -50,7 +50,7 @@ export function ChatMessageItem({
 
   if (isProposal) {
     return (
-      <div className="flex justify-center w-full my-2">
+      <div className="flex justify-center w-full my-3">
         <RoadmapProposalCard
           partnershipId={partnershipId}
           myUserId={myUserId}
@@ -64,29 +64,29 @@ export function ChatMessageItem({
     );
   }
 
-  // 1. Simbi AI Companion Special Message Bubble
+  // 1. Simbi AI Companion Message Bubble
   if (isSimbiAi) {
     return (
-      <div className="flex gap-2.5 items-start w-full my-2">
+      <div className="flex gap-3 items-start w-full my-2.5">
         {/* Capybara Simbi AI Badge Icon */}
-        <div className="w-9 h-9 rounded-2xl bg-[#06B6D4] border-2 border-[#0F172A] text-white font-black flex items-center justify-center flex-shrink-0 shadow-[2px_2px_0px_0px_#0F172A]">
+        <div className="w-9 h-9 rounded-2xl bg-sky-600 text-white font-bold flex items-center justify-center flex-shrink-0 shadow-xs mt-0.5">
           <Sparkles className="w-5 h-5 text-white animate-spin" style={{ animationDuration: '6s' }} />
         </div>
 
-        <div className="flex flex-col min-w-0 max-w-[260px] sm:max-w-[320px] md:max-w-[360px] items-start space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-black text-[#06B6D4] tracking-tight">Simbi AI</span>
-            <span className="neo-badge bg-[#06B6D4] text-white text-[9px] px-2 py-0.5 font-black">
+        <div className="flex flex-col min-w-0 max-w-[85%] sm:max-w-[78%] md:max-w-[72%] items-start space-y-1">
+          <div className="flex items-center gap-2 px-1">
+            <span className="text-xs font-bold text-sky-700">Simbi AI</span>
+            <span className="soft-badge bg-sky-100 text-sky-800 border-sky-200 text-[10px]">
               AI Companion
             </span>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-[#ECFEFF] text-[#0F172A] border-2 border-[#0F172A] text-xs font-bold leading-relaxed shadow-[3px_3px_0px_0px_#06B6D4] break-all [overflow-wrap:anywhere] relative group">
-            {/* Quoted Message Preview inside Simbi AI Bubble if replying */}
+          <div className="p-4 rounded-2xl bg-sky-50/90 text-slate-800 border border-sky-200/90 text-sm font-normal leading-relaxed shadow-2xs break-words relative group">
+            {/* Quoted Message Preview inside Simbi AI Bubble */}
             {m.replyTo && (
-              <div className="mb-2 p-2 rounded-xl bg-white/80 border-l-4 border-[#06B6D4] text-[11px] font-bold text-gray-700 shadow-sm">
-                <div className="text-[10px] font-black text-[#06B6D4] flex items-center gap-1">
-                  <CornerDownRight className="w-3 h-3" />
+              <div className="mb-2.5 p-2.5 rounded-xl bg-white/90 border-l-3 border-sky-500 text-xs font-medium text-slate-700 shadow-2xs">
+                <div className="text-[11px] font-bold text-sky-700 flex items-center gap-1">
+                  <CornerDownRight className="w-3.5 h-3.5" />
                   <span>
                     {m.replyTo.senderType === 'SIMBI_AI'
                       ? 'Simbi AI'
@@ -95,22 +95,22 @@ export function ChatMessageItem({
                       : partnerName}
                   </span>
                 </div>
-                <p className="line-clamp-2 italic text-gray-600 mt-0.5">{m.replyTo.content}</p>
+                <p className="line-clamp-2 italic text-slate-600 mt-0.5 leading-normal">{m.replyTo.content}</p>
               </div>
             )}
 
-            <p className="whitespace-pre-wrap break-all [overflow-wrap:anywhere] text-left text-gray-900">{m.content}</p>
+            <p className="whitespace-pre-wrap break-words text-left text-slate-800 text-sm leading-relaxed">{m.content}</p>
 
             <button
               onClick={() => onReply(m)}
-              className="mt-2 text-[10px] font-black text-[#06B6D4] hover:text-[#0F172A] flex items-center gap-1 transition"
+              className="mt-2 text-xs font-bold text-sky-700 hover:text-slate-900 flex items-center gap-1 transition"
             >
-              <Reply className="w-3 h-3" />
+              <Reply className="w-3.5 h-3.5" />
               <span>Reply</span>
             </button>
           </div>
 
-          <span className="text-[9px] text-gray-400 font-mono px-1">
+          <span className="text-[11px] text-slate-400 font-medium px-1">
             {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
@@ -127,44 +127,44 @@ export function ChatMessageItem({
   };
 
   return (
-    <div className={`flex gap-2.5 items-end ${isMine ? 'flex-row-reverse' : 'flex-row'} w-full overflow-hidden`}>
-      <div className="w-8 h-8 rounded-xl bg-[#FF7A30] border-2 border-[#0F172A] text-white font-black flex items-center justify-center text-xs flex-shrink-0 shadow-[1.5px_1.5px_0px_0px_#0F172A]">
+    <div className={`flex gap-3 items-end ${isMine ? 'flex-row-reverse' : 'flex-row'} w-full overflow-hidden my-2`}>
+      <div className="w-9 h-9 rounded-2xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-xs flex-shrink-0 shadow-2xs mb-1">
         {isMine ? 'ME' : partnerName.charAt(0)}
       </div>
 
-      <div className={`flex flex-col min-w-0 max-w-[200px] sm:max-w-[240px] md:max-w-[280px] ${isMine ? 'items-end' : 'items-start'}`}>
+      <div className={`flex flex-col min-w-0 max-w-[85%] sm:max-w-[78%] md:max-w-[70%] ${isMine ? 'items-end' : 'items-start'}`}>
         <div
-          className={`p-3 rounded-2xl border-2 border-[#0F172A] text-xs font-bold leading-relaxed shadow-[2.5px_2.5px_0px_0px_#0F172A] break-all [overflow-wrap:anywhere] relative group ${
-            isMine ? 'bg-[#FF7A30] text-white' : 'bg-white text-[#0F172A]'
+          className={`p-3.5 sm:p-4 rounded-2xl text-sm font-normal leading-relaxed shadow-2xs break-words relative group ${
+            isMine ? 'bg-[#FF6B30] text-white' : 'bg-white text-slate-800 border border-slate-200/80'
           }`}
         >
-          {/* Quoted Message Preview if replying to a message */}
+          {/* Quoted Message Preview */}
           {m.replyTo && (
-            <div className={`mb-2 p-2 rounded-xl text-[11px] font-bold border-l-4 ${
-              isMine ? 'bg-black/15 border-white text-white/90' : 'bg-[#FFFDF7] border-[#FF7A30] text-gray-700'
+            <div className={`mb-2.5 p-2.5 rounded-xl text-xs font-medium border-l-3 ${
+              isMine ? 'bg-black/15 border-white text-white/90' : 'bg-slate-50 border-[#FF6B30] text-slate-700'
             }`}>
-              <div className="text-[10px] font-black flex items-center gap-1 opacity-90">
-                <CornerDownRight className="w-3 h-3" />
+              <div className="text-[11px] font-bold flex items-center gap-1 opacity-90">
+                <CornerDownRight className="w-3.5 h-3.5" />
                 <span>{getQuotedSenderName()}</span>
               </div>
-              <p className="line-clamp-2 italic opacity-90 mt-0.5">{m.replyTo.content}</p>
+              <p className="line-clamp-2 italic opacity-90 mt-0.5 leading-normal">{m.replyTo.content}</p>
             </div>
           )}
 
-          <p className="whitespace-pre-wrap break-all [overflow-wrap:anywhere] text-left">{m.content}</p>
+          <p className="whitespace-pre-wrap break-words text-left text-sm leading-relaxed">{m.content}</p>
 
           <button
             onClick={() => onReply(m)}
-            className={`mt-1.5 text-[10px] font-black flex items-center gap-1 transition ${
-              isMine ? 'text-white/80 hover:text-white' : 'text-gray-500 hover:text-[#0F172A]'
+            className={`mt-2 text-xs font-bold flex items-center gap-1 transition ${
+              isMine ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-slate-900'
             }`}
           >
-            <Reply className="w-3 h-3" />
+            <Reply className="w-3.5 h-3.5" />
             <span>Reply</span>
           </button>
         </div>
 
-        <span className="text-[9px] text-gray-400 font-mono mt-1 px-1">
+        <span className="text-[11px] text-slate-400 font-medium mt-1 px-1">
           {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>

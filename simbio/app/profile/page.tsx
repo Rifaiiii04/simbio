@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api/client';
 import { Navbar } from '@/components/shared/Navbar';
 import { SimbiAvatar } from '@/components/shared/SimbiAvatar';
-import { GlowCard } from '@/components/ui/GlowCard';
-import { SearchableSkillSelect } from '@/components/ui/SearchableSkillSelect';
+import { AddSkillModal } from '@/components/profile/AddSkillModal';
 import {
   Camera,
   Globe,
@@ -19,6 +18,11 @@ import {
   Award,
   ShieldCheck,
   Upload,
+  Check,
+  Zap,
+  TrendingUp,
+  MapPin,
+  Circle,
 } from 'lucide-react';
 
 interface UserProfile {
@@ -125,7 +129,6 @@ export default function ProfilePage() {
     loadData();
   }, [router]);
 
-  // Handle local File Upload for profile picture
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -156,9 +159,9 @@ export default function ProfilePage() {
       });
 
       setProfile(updatedRes.user);
-      setMessage('Profile & Settings updated successfully!');
+      setMessage('Profil & Pengaturan berhasil diperbarui!');
     } catch (err: unknown) {
-      setMessage(err instanceof Error ? err.message : 'Failed to update profile');
+      setMessage(err instanceof Error ? err.message : 'Gagal memperbarui profil');
     } finally {
       setSaving(false);
     }
@@ -202,7 +205,7 @@ export default function ProfilePage() {
       setNewSkillId('');
       setCustomSkillName('');
     } catch (err: unknown) {
-      setMessage(err instanceof Error ? err.message : 'Failed to add skill');
+      setMessage(err instanceof Error ? err.message : 'Gagal menambahkan skill');
     } finally {
       setAddingSkill(false);
     }
@@ -221,12 +224,12 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#FFFDF7]">
+      <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
         <Navbar />
         <div className="flex-1 flex items-center justify-center p-4">
-          <div className="text-[#FF7A30] font-black text-sm animate-pulse flex items-center gap-2">
+          <div className="text-[#FF6B30] font-bold text-sm animate-pulse flex items-center gap-2">
             <Sparkles className="w-5 h-5 animate-spin" />
-            <span>Loading user profile & portfolio...</span>
+            <span>Memuat profil pengguna...</span>
           </div>
         </div>
       </div>
@@ -238,156 +241,163 @@ export default function ProfilePage() {
 
   // Calculate profile completion percentage
   let profilePercent = 40;
-  if (profile?.bio) profilePercent += 20;
-  if (profile?.country) profilePercent += 20;
-  if (profile?.avatarUrl) profilePercent += 20;
+  if (profile?.bio) profilePercent += 15;
+  if (profile?.country) profilePercent += 15;
+  if (profile?.avatarUrl) profilePercent += 15;
+  if (teachSkills.length > 0) profilePercent += 15;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FFFDF7] text-[#0F172A] selection:bg-[#FACC15]">
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-orange-100 selection:text-[#FF6B30]">
       <Navbar />
 
-      <main className="flex-1 max-w-6xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-8">
-        {/* Profile Header Hero Card */}
-        <div className="neo-box bg-[#FFFDF7] p-6 sm:p-8 space-y-6 shadow-[8px_8px_0px_0px_#0F172A]">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-            {/* Avatar Photo Container */}
-            <div className="relative group">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-[#FF7A30] border-3 border-[#0F172A] overflow-hidden flex items-center justify-center shadow-[4px_4px_0px_0px_#0F172A] flex-shrink-0">
-                {avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-4xl font-black text-white">{name.charAt(0)}</span>
-                )}
+      <main className="flex-1 w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Top Banner Hero Header Card */}
+        <div className="soft-card p-6 sm:p-8 bg-gradient-to-r from-orange-50/70 via-white to-sky-50/70 border border-slate-200/80 shadow-xs relative overflow-hidden">
+          <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 z-10 relative">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+              {/* Photo Avatar */}
+              <div className="relative group">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-[#FF6B30] text-white font-black flex items-center justify-center overflow-hidden shadow-md flex-shrink-0">
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-4xl font-bold text-white">{name.charAt(0)}</span>
+                  )}
+                </div>
+                <label className="absolute bottom-0 right-0 w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center cursor-pointer shadow-xs hover:bg-slate-100 transition">
+                  <Camera className="w-4 h-4 text-slate-700" />
+                  <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                </label>
               </div>
-              <label className="absolute bottom-0 right-0 w-8 h-8 rounded-xl bg-[#FACC15] border-2 border-[#0F172A] flex items-center justify-center cursor-pointer shadow-[2px_2px_0px_0px_#0F172A] hover:bg-[#FF7A30] transition">
-                <Camera className="w-4 h-4 text-[#0F172A]" />
-                <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-              </label>
+
+              {/* Profile Details */}
+              <div className="space-y-2 text-center sm:text-left">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+                  <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">{name}</h1>
+                  <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-xs px-3 py-1 flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Verified Learner</span>
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 text-xs font-semibold text-slate-500">
+                  {username && <span className="text-[#FF6B30] font-bold">@{username}</span>}
+                  <span className="soft-badge bg-sky-50 text-sky-700 border-sky-200 px-2.5 py-0.5 flex items-center gap-1">
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>{country}</span>
+                  </span>
+                  <span className="text-slate-400 font-medium">{profile?.email}</span>
+                </div>
+
+                {bio && <p className="text-xs text-slate-600 font-medium max-w-xl italic pt-1">&quot;{bio}&quot;</p>}
+              </div>
             </div>
 
-            {/* Profile Info Details */}
-            <div className="flex-1 text-center sm:text-left space-y-2">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A]">{name}</h1>
-                <span className="neo-badge bg-[#84CC16] text-[#0F172A] text-[10px] px-2.5 py-0.5 flex items-center gap-1 w-fit mx-auto sm:mx-0">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Verified Learner</span>
-                </span>
+            {/* Top Quick Stats Pill */}
+            <div className="flex items-center gap-4 bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs">
+              <div className="text-center px-3">
+                <p className="text-xl font-black text-slate-900">{teachSkills.length}</p>
+                <p className="text-[10px] font-bold text-emerald-700 uppercase">Teach Skills</p>
               </div>
-
-              <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 text-xs font-bold text-gray-700">
-                {username && <span className="text-[#FF7A30] font-black">@{username}</span>}
-                <span className="neo-badge bg-[#06B6D4] text-white px-2.5 py-0.5 flex items-center gap-1">
-                  <Globe className="w-3.5 h-3.5" />
-                  <span>{country}</span>
-                </span>
-                <span className="text-gray-500 font-bold">{profile?.email}</span>
-              </div>
-
-              {/* Profile Completion Bar */}
-              <div className="space-y-1.5 pt-2 max-w-md">
-                <div className="flex justify-between text-[11px] font-black text-[#0F172A]">
-                  <span>Profile Completion</span>
-                  <span className="text-[#FF7A30]">{profilePercent}%</span>
-                </div>
-                <div className="w-full h-3 bg-white rounded-xl border-2 border-[#0F172A] overflow-hidden p-0.5 shadow-[2px_2px_0px_0px_#0F172A]">
-                  <div
-                    className="h-full bg-[#FF7A30] rounded-lg transition-all duration-500 border border-[#0F172A]"
-                    style={{ width: `${profilePercent}%` }}
-                  />
-                </div>
+              <div className="h-8 w-px bg-slate-200" />
+              <div className="text-center px-3">
+                <p className="text-xl font-black text-slate-900">{learnSkills.length}</p>
+                <p className="text-[10px] font-bold text-[#FF6B30] uppercase">Learn Skills</p>
               </div>
             </div>
           </div>
-
-          <SimbiAvatar
-            state="happy"
-            message="Keep your profile, country, and skills updated to rank #1 in global AI exchange matching algorithms!"
-          />
         </div>
 
         {message && (
-          <div className="p-3.5 text-xs text-[#0F172A] bg-[#84CC16] rounded-xl border-2 border-[#0F172A] flex items-center gap-2 font-black shadow-[3px_3px_0px_0px_#0F172A]">
-            <CheckCircle2 className="w-4 h-4" />
+          <div className="p-3.5 text-xs text-emerald-800 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center gap-2 font-bold shadow-2xs">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>{message}</span>
           </div>
         )}
 
-        {/* Main Grid: Form (2 cols) vs Skills Portfolio (1 col) */}
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Left Column (2 Cols): Identity & Profile Settings Form */}
-          <div className="md:col-span-2 neo-box p-6 sm:p-8 space-y-6 shadow-[6px_6px_0px_0px_#0F172A]">
-            <div className="flex items-center gap-2 border-b-2 border-[#0F172A] pb-3">
-              <UserIcon className="w-5 h-5 text-[#FF7A30]" />
-              <h2 className="text-lg font-black text-[#0F172A]">Personal Identity & Location</h2>
-            </div>
+        {/* Asymmetrical 2-Column Workspace Grid (8 Cols Main Workspace | 4 Cols Sidebar) */}
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+          {/* LEFT MAIN WORKSPACE (8 Cols): Personal Identity & Skills Portfolio Grid */}
+          <div className="lg:col-span-8 space-y-8">
+            {/* CARD 1: Personal Identity & Account Settings */}
+            <div className="soft-card p-6 sm:p-8 bg-white space-y-6 shadow-xs border border-slate-200/80">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <UserIcon className="w-5 h-5 text-[#FF6B30]" />
+                  <h2 className="text-base font-bold text-slate-900">Identitas & Informasi Akun</h2>
+                </div>
+                <span className="soft-badge bg-slate-100 text-slate-600 text-[10px]">
+                  ID: {profile?.id.slice(0, 8)}...
+                </span>
+              </div>
 
-            <form onSubmit={handleSaveProfile} className="space-y-5">
-              {/* Photo Avatar Preset & Upload Section */}
-              <div className="space-y-2 bg-[#FFF5EF] p-4 rounded-xl border-2 border-[#0F172A]">
-                <label className="block text-xs font-black text-[#0F172A]">Profile Picture / Avatar</label>
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex gap-2">
-                    {presetAvatars.map((url, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setAvatarUrl(url)}
-                        className={`w-10 h-10 rounded-xl overflow-hidden border-2 border-[#0F172A] transition ${
-                          avatarUrl === url ? 'ring-3 ring-[#FF7A30] scale-105' : 'opacity-70 hover:opacity-100'
-                        }`}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={url} alt="Preset avatar" className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
+              <form onSubmit={handleSaveProfile} className="space-y-6">
+                {/* Photo Avatar Preset Selector */}
+                <div className="space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                  <label className="block text-xs font-bold text-slate-800">Pilih Preset Avatar Profil</label>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex gap-2">
+                      {presetAvatars.map((url, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setAvatarUrl(url)}
+                          className={`w-10 h-10 rounded-xl overflow-hidden border transition ${
+                            avatarUrl === url ? 'ring-2 ring-[#FF6B30] scale-105 border-[#FF6B30]' : 'border-slate-200 opacity-70 hover:opacity-100'
+                          }`}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={url} alt="Preset avatar" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
 
-                  <div className="flex-1 min-w-[200px]">
-                    <div className="relative">
-                      <Upload className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
-                      <input
-                        type="text"
-                        value={avatarUrl}
-                        onChange={(e) => setAvatarUrl(e.target.value)}
-                        placeholder="Paste image URL or pick preset above..."
-                        className="w-full pl-9 pr-3 py-2 text-xs bg-white rounded-lg border-2 border-[#0F172A] font-bold focus:outline-hidden"
-                      />
+                    <div className="flex-1 min-w-[200px]">
+                      <div className="relative">
+                        <Upload className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                        <input
+                          type="text"
+                          value={avatarUrl}
+                          onChange={(e) => setAvatarUrl(e.target.value)}
+                          placeholder="Atau tempel URL gambar avatar..."
+                          className="w-full pl-9 pr-3 py-2 text-xs bg-white rounded-xl border border-slate-200 font-medium focus:outline-hidden focus:border-[#FF6B30]"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-black text-[#0F172A] mb-1">Full Name</label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden focus:border-[#FF7A30]"
-                />
-              </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">Nama Lengkap</label>
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 font-medium focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
+                    />
+                  </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-black text-[#0F172A] mb-1">Username</label>
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="alex_morgan"
-                    className="w-full px-4 py-3 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden focus:border-[#FF7A30]"
-                  />
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">Username</label>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="alex_morgan"
+                      className="w-full px-4 py-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 font-medium focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black text-[#0F172A] mb-1">Country / Region</label>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">Negara / Wilayah Domisili</label>
                   <select
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="w-full px-4 py-3 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden focus:border-[#FF7A30]"
+                    className="w-full px-4 py-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 font-medium text-slate-900 focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
                   >
                     {countries.map((c) => (
                       <option key={c} value={c}>
@@ -396,128 +406,222 @@ export default function ProfilePage() {
                     ))}
                   </select>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-black text-[#0F172A] mb-1">Exchange Bio & Goals</label>
-                <textarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  rows={3}
-                  placeholder="Share your learning passion, experience, and what you wish to exchange..."
-                  className="w-full px-4 py-3 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden focus:border-[#FF7A30]"
-                />
-              </div>
-
-              {/* Distance Discovery Toggle */}
-              <div className="p-4 rounded-xl bg-white border-2 border-[#0F172A] space-y-2 shadow-[3px_3px_0px_0px_#0F172A]">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xs font-black text-[#0F172A]">Enable Proximity Matching</h3>
-                    <p className="text-[10px] text-gray-600 font-bold">Allow nearest learner matching via distance calculation.</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={locationEnabled}
-                    onChange={(e) => setLocationEnabled(e.target.checked)}
-                    className="w-5 h-5 accent-[#FF7A30] rounded-lg cursor-pointer"
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">Exchange Bio & Goals</label>
+                  <textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    rows={3}
+                    placeholder="Ceritakan minat belajar, latar belakang skill, dan harapan pertukaran ilmu kamu..."
+                    className="w-full px-4 py-2.5 text-xs bg-slate-50 rounded-xl border border-slate-200 font-medium focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
                   />
                 </div>
-              </div>
 
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full neo-button py-3.5 text-xs flex items-center justify-center gap-2"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>{saving ? 'Saving Changes...' : 'Save Profile & Settings'}</span>
-              </button>
-            </form>
-          </div>
-
-          {/* Right Column (1 Col): Skills Portfolio Management */}
-          <div className="space-y-6">
-            {/* Skills You Teach */}
-            <div className="neo-box p-6 space-y-4 shadow-[6px_6px_0px_0px_#0F172A]">
-              <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-2">
-                <div className="flex items-center gap-1.5 text-xs font-black text-emerald-600 uppercase tracking-wider">
-                  <BookOpen className="w-4 h-4 text-emerald-600" />
-                  <span>Skills You Teach ({teachSkills.length})</span>
-                </div>
-                <button
-                  onClick={() => setShowAddSkillModal('TEACH')}
-                  className="px-2.5 py-1 rounded-lg bg-[#84CC16] text-[#0F172A] border-2 border-[#0F172A] text-[10px] font-black flex items-center gap-1 shadow-[1.5px_1.5px_0px_0px_#0F172A] hover:bg-[#FACC15]"
-                >
-                  <Plus className="w-3 h-3" />
-                  <span>Add Skill</span>
-                </button>
-              </div>
-
-              {teachSkills.length === 0 ? (
-                <p className="text-xs text-gray-500 font-bold italic">No teach skills added yet.</p>
-              ) : (
-                <div className="space-y-2">
-                  {teachSkills.map((s) => (
-                    <div
-                      key={s.id}
-                      className="p-3 rounded-xl bg-white border-2 border-[#0F172A] flex items-center justify-between shadow-[2px_2px_0px_0px_#0F172A]"
-                    >
-                      <div>
-                        <span className="text-xs font-black text-[#0F172A] block">{s.skill.name}</span>
-                        <span className="text-[9px] font-black text-emerald-600 uppercase">{s.level}</span>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteUserSkill(s.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-600 transition"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                {/* Proximity Matching Toggle */}
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xs font-bold text-slate-800">Aktifkan Proximity Matching (Pencarian Jarak Terdekat)</h3>
+                      <p className="text-[10px] text-slate-500 font-medium">Izinkan pembelajar lain menemukan kamu berdasarkan estimasi lokasi terdekat.</p>
                     </div>
-                  ))}
+                    <input
+                      type="checkbox"
+                      checked={locationEnabled}
+                      onChange={(e) => setLocationEnabled(e.target.checked)}
+                      className="w-4 h-4 accent-[#FF6B30] rounded-md cursor-pointer"
+                    />
+                  </div>
                 </div>
-              )}
+
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="soft-button text-xs px-7 py-3 flex items-center justify-center gap-2 shadow-xs"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>{saving ? 'Menyimpan Pengaturan...' : 'Simpan Profil & Pengaturan'}</span>
+                </button>
+              </form>
             </div>
 
-            {/* Skills You Want to Learn */}
-            <div className="neo-box p-6 space-y-4 shadow-[6px_6px_0px_0px_#0F172A]">
-              <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-2">
-                <div className="flex items-center gap-1.5 text-xs font-black text-[#FF7A30] uppercase tracking-wider">
-                  <Award className="w-4 h-4 text-[#FF7A30]" />
-                  <span>Skills You Learn ({learnSkills.length})</span>
+            {/* CARD 2: Interactive Skills Portfolio Matrix (Spacious & Responsive) */}
+            <div className="soft-card p-6 sm:p-8 bg-white space-y-6 shadow-xs border border-slate-200/80">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-[#FF6B30]" />
+                  <h2 className="text-base font-bold text-slate-900">Matriks Portofolio Skill Exchange</h2>
                 </div>
-                <button
-                  onClick={() => setShowAddSkillModal('LEARN')}
-                  className="px-2.5 py-1 rounded-lg bg-[#FF7A30] text-white border-2 border-[#0F172A] text-[10px] font-black flex items-center gap-1 shadow-[1.5px_1.5px_0px_0px_#0F172A] hover:bg-[#FACC15] hover:text-[#0F172A]"
-                >
-                  <Plus className="w-3 h-3" />
-                  <span>Add Skill</span>
-                </button>
+                <span className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-[10px]">
+                  {userSkills.length} Total Skills Registered
+                </span>
               </div>
 
-              {learnSkills.length === 0 ? (
-                <p className="text-xs text-gray-500 font-bold italic">No learn skills added yet.</p>
-              ) : (
-                <div className="space-y-2">
-                  {learnSkills.map((s) => (
-                    <div
-                      key={s.id}
-                      className="p-3 rounded-xl bg-white border-2 border-[#0F172A] flex items-center justify-between shadow-[2px_2px_0px_0px_#0F172A]"
-                    >
-                      <div>
-                        <span className="text-xs font-black text-[#0F172A] block">{s.skill.name}</span>
-                        <span className="text-[9px] font-black text-[#FF7A30] uppercase">{s.level}</span>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteUserSkill(s.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-600 transition"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
+              {/* Sub-Section 1: Skills You Teach */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 uppercase tracking-wider">
+                    <BookOpen className="w-4 h-4 text-emerald-600" />
+                    <span>Skill yang Kamu Kuasai & Ajarkan ({teachSkills.length})</span>
+                  </div>
+                  <button
+                    onClick={() => setShowAddSkillModal('TEACH')}
+                    className="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition flex items-center gap-1 shadow-2xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ Tambah Skill Diajarkan</span>
+                  </button>
                 </div>
-              )}
+
+                {teachSkills.length === 0 ? (
+                  <div className="p-6 text-center space-y-2 rounded-xl border border-dashed border-slate-200 bg-slate-50/50">
+                    <p className="text-xs text-slate-500 font-medium italic">Belum ada skill yang diajarkan ditambahkan.</p>
+                  </div>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {teachSkills.map((s) => (
+                      <div
+                        key={s.id}
+                        className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between shadow-2xs hover:bg-white transition"
+                      >
+                        <div>
+                          <span className="text-xs font-bold text-slate-900 block">{s.skill.name}</span>
+                          <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px] mt-0.5">
+                            {s.level}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteUserSkill(s.id)}
+                          className="p-1.5 text-slate-400 hover:text-red-600 transition"
+                          title="Hapus skill"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sub-Section 2: Skills You Learn */}
+              <div className="space-y-3 pt-4 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#FF6B30] uppercase tracking-wider">
+                    <Award className="w-4 h-4 text-[#FF6B30]" />
+                    <span>Skill yang Ingin Kamu Pelajari ({learnSkills.length})</span>
+                  </div>
+                  <button
+                    onClick={() => setShowAddSkillModal('LEARN')}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#FF6B30] text-white text-xs font-bold hover:bg-[#E0531A] transition flex items-center gap-1 shadow-2xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ Tambah Skill Dipelajari</span>
+                  </button>
+                </div>
+
+                {learnSkills.length === 0 ? (
+                  <div className="p-6 text-center space-y-2 rounded-xl border border-dashed border-slate-200 bg-slate-50/50">
+                    <p className="text-xs text-slate-500 font-medium italic">Belum ada target skill yang dipelajari ditambahkan.</p>
+                  </div>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {learnSkills.map((s) => (
+                      <div
+                        key={s.id}
+                        className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between shadow-2xs hover:bg-white transition"
+                      >
+                        <div>
+                          <span className="text-xs font-bold text-slate-900 block">{s.skill.name}</span>
+                          <span className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-[9px] mt-0.5">
+                            {s.level}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteUserSkill(s.id)}
+                          className="p-1.5 text-slate-400 hover:text-red-600 transition"
+                          title="Hapus skill"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT SIDEBAR PANEL (4 Cols): Profile Strength Score & AI Rank Guidance */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* WIDGET 1: Skor Kekuatan Profil & AI Match Synergy Rank */}
+            <div className="soft-card p-6 bg-white space-y-5 shadow-xs border border-slate-200/80">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-[#FF6B30]" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">Skor Kekuatan Profil</h3>
+                </div>
+                <span className="text-xs font-black text-[#FF6B30]">{profilePercent}%</span>
+              </div>
+
+              {/* Progress Ring / Bar */}
+              <div className="space-y-2">
+                <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#FF6B30] to-amber-400 rounded-full transition-all duration-500"
+                    style={{ width: `${profilePercent}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-slate-500 font-medium">
+                  {profilePercent >= 80
+                    ? '🎉 Profil kamu sangat baik! Peringkat teratas pada algoritma AI Discovery.'
+                    : 'Lengkapi seluruh item di bawah untuk meningkatkan visibilitas matching AI!'}
+                </p>
+              </div>
+
+              {/* Interactive Completion Checklist */}
+              <div className="space-y-2 pt-2 border-t border-slate-100 text-xs font-medium">
+                <div className="flex items-center gap-2 text-emerald-700">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Nama & Email Terverifikasi</span>
+                </div>
+                <div className={`flex items-center gap-2 ${avatarUrl ? 'text-emerald-700' : 'text-slate-400'}`}>
+                  {avatarUrl ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Circle className="w-4 h-4" />}
+                  <span>Foto Profil / Avatar Diunggah</span>
+                </div>
+                <div className={`flex items-center gap-2 ${bio ? 'text-emerald-700' : 'text-slate-400'}`}>
+                  {bio ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Circle className="w-4 h-4" />}
+                  <span>Bio Exchange & Goal Ditambahkan</span>
+                </div>
+                <div className={`flex items-center gap-2 ${country ? 'text-emerald-700' : 'text-slate-400'}`}>
+                  {country ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Circle className="w-4 h-4" />}
+                  <span>Lokasi Negara Dipilih</span>
+                </div>
+                <div className={`flex items-center gap-2 ${teachSkills.length > 0 ? 'text-emerald-700' : 'text-slate-400'}`}>
+                  {teachSkills.length > 0 ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Circle className="w-4 h-4" />}
+                  <span>Minimal 1 Skill Diajarkan Registered</span>
+                </div>
+              </div>
+            </div>
+
+            {/* WIDGET 2: Simbi Capybara Mascot Guidance */}
+            <SimbiAvatar
+              state="happy"
+              message="Perbarui profil dan daftar skill kamu secara berkala untuk meningkatkan akurasi rekomendasi partner AI!"
+            />
+
+            {/* WIDGET 3: Account Verification Badge Info */}
+            <div className="soft-card p-6 bg-slate-900 text-white space-y-3 shadow-xs">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-sm font-bold text-white">Member Status Verified</h3>
+              </div>
+              <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                Akun kamu terdaftar aktif di jaringan reciprocal skill exchange global Simbioly.
+              </p>
+              <div className="pt-2 text-[10px] text-slate-400 font-mono flex justify-between border-t border-slate-800">
+                <span>100% Free monetary fees</span>
+                <span>Deterministic match</span>
+              </div>
             </div>
           </div>
         </div>
@@ -525,68 +629,21 @@ export default function ProfilePage() {
 
       {/* Add Skill Modal Panel */}
       {showAddSkillModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md neo-box p-6 space-y-4 shadow-[8px_8px_0px_0px_#0F172A] bg-white">
-            <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-2">
-              <h3 className="text-base font-black text-[#0F172A]">
-                Add Skill to {showAddSkillModal === 'TEACH' ? 'Teach' : 'Learn'}
-              </h3>
-              <button onClick={() => setShowAddSkillModal(false)} className="text-xs font-black">
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-black mb-1">Select Skill</label>
-                <SearchableSkillSelect
-                  skills={allSkills}
-                  selectedSkillId={newSkillId}
-                  customSkillName={customSkillName}
-                  onSelectSkill={(id, customName) => {
-                    setNewSkillId(id);
-                    if (customName !== undefined) setCustomSkillName(customName);
-                  }}
-                  placeholder="Type to search skill..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-black mb-1">Proficiency Level</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'].slice(0, 3).map((lvl) => (
-                    <button
-                      key={lvl}
-                      type="button"
-                      onClick={() => setNewSkillLevel(lvl)}
-                      className={`p-2.5 rounded-xl text-xs font-black border-2 border-[#0F172A] ${
-                        newSkillLevel === lvl ? 'bg-[#FF7A30] text-white' : 'bg-white text-[#0F172A]'
-                      }`}
-                    >
-                      {lvl}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={() => setShowAddSkillModal(false)}
-                className="w-1/3 py-2.5 rounded-xl bg-gray-100 border-2 border-[#0F172A] text-xs font-black"
-              >
-                Cancel
-              </button>
-              <button
-                disabled={addingSkill || !newSkillId}
-                onClick={handleAddSkill}
-                className="w-2/3 neo-button py-2.5 text-xs"
-              >
-                {addingSkill ? 'Adding...' : 'Save Skill'}
-              </button>
-            </div>
-          </div>
-        </div>
+        <AddSkillModal
+          type={showAddSkillModal}
+          allSkills={allSkills}
+          newSkillId={newSkillId}
+          customSkillName={customSkillName}
+          newSkillLevel={newSkillLevel}
+          addingSkill={addingSkill}
+          onSelectSkill={(id, customName) => {
+            setNewSkillId(id);
+            if (customName !== undefined) setCustomSkillName(customName);
+          }}
+          onSelectLevel={(lvl) => setNewSkillLevel(lvl)}
+          onClose={() => setShowAddSkillModal(false)}
+          onSave={handleAddSkill}
+        />
       )}
     </div>
   );

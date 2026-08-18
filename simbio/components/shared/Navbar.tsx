@@ -21,27 +21,27 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-[#FFFDF7] border-b-3 border-[#0F172A] px-4 py-3 shadow-xs">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 py-3 shadow-xs">
+      <div className="w-full max-w-[1700px] mx-auto flex items-center justify-between">
         {/* Brand Logo */}
-        <Link href={token ? '/dashboard' : '/'} className="flex items-center gap-2.5 font-black text-xl text-[#0F172A] group">
-          <div className="w-10 h-10 rounded-2xl bg-[#FF7A30] border-2.5 border-[#0F172A] shadow-[3px_3px_0px_0px_#0F172A] flex items-center justify-center text-white text-sm font-black group-hover:-translate-y-0.5 transition-transform">
+        <Link href={token ? '/dashboard' : '/'} className="flex items-center gap-2.5 font-bold text-xl text-slate-900 group">
+          <div className="w-10 h-10 rounded-2xl bg-[#FF6B30] shadow-sm flex items-center justify-center text-white text-sm font-black group-hover:scale-105 transition-transform">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="leading-none text-lg tracking-tight font-black text-[#0F172A]">Simbioly</span>
-            <span className="text-[10px] font-black text-[#FF7A30] uppercase tracking-wider">Skill Exchange</span>
+            <span className="leading-none text-lg tracking-tight font-black text-slate-900">Simbioly</span>
+            <span className="text-[10px] font-bold text-[#FF6B30] uppercase tracking-wider">Skill Exchange</span>
           </div>
         </Link>
 
         {/* Navigation Links */}
-        <nav className="hidden md:flex items-center gap-2 text-xs font-black text-[#0F172A]">
+        <nav className="hidden md:flex items-center gap-1.5 text-xs font-bold text-slate-600">
           {token ? (
             <>
               <Link
                 href="/dashboard"
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-[#0F172A] transition ${
-                  pathname === '/dashboard' ? 'bg-[#FF7A30] text-white shadow-[3px_3px_0px_0px_#0F172A]' : 'bg-white hover:bg-[#FACC15]'
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition ${
+                  pathname === '/dashboard' ? 'bg-[#FF6B30] text-white font-black shadow-xs' : 'hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 <LayoutDashboard className="w-4 h-4" />
@@ -49,8 +49,8 @@ export function Navbar() {
               </Link>
               <Link
                 href="/roadmaps"
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-[#0F172A] transition ${
-                  pathname.startsWith('/roadmaps') ? 'bg-[#FF7A30] text-white shadow-[3px_3px_0px_0px_#0F172A]' : 'bg-white hover:bg-[#FACC15]'
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition ${
+                  pathname.startsWith('/roadmaps') ? 'bg-[#FF6B30] text-white font-black shadow-xs' : 'hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 <Map className="w-4 h-4" />
@@ -58,8 +58,8 @@ export function Navbar() {
               </Link>
               <Link
                 href="/discovery"
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-[#0F172A] transition ${
-                  pathname === '/discovery' ? 'bg-[#FF7A30] text-white shadow-[3px_3px_0px_0px_#0F172A]' : 'bg-white hover:bg-[#FACC15]'
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition ${
+                  pathname === '/discovery' ? 'bg-[#FF6B30] text-white font-black shadow-xs' : 'hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 <Compass className="w-4 h-4" />
@@ -67,8 +67,8 @@ export function Navbar() {
               </Link>
               <Link
                 href="/partnerships"
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-[#0F172A] transition ${
-                  pathname.startsWith('/partnerships') ? 'bg-[#FF7A30] text-white shadow-[3px_3px_0px_0px_#0F172A]' : 'bg-white hover:bg-[#FACC15]'
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition ${
+                  pathname.startsWith('/partnerships') ? 'bg-[#FF6B30] text-white font-black shadow-xs' : 'hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 <Handshake className="w-4 h-4" />
@@ -76,8 +76,8 @@ export function Navbar() {
               </Link>
               <Link
                 href="/profile"
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-[#0F172A] transition ${
-                  pathname === '/profile' ? 'bg-[#FF7A30] text-white shadow-[3px_3px_0px_0px_#0F172A]' : 'bg-white hover:bg-[#FACC15]'
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition ${
+                  pathname === '/profile' ? 'bg-[#FF6B30] text-white font-black shadow-xs' : 'hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 <User className="w-4 h-4" />
@@ -86,10 +86,10 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/#how-it-works" className="px-4 py-2 rounded-xl bg-white border-2 border-[#0F172A] hover:bg-[#FACC15] transition">
+              <Link href="/#how-it-works" className="px-4 py-2 rounded-xl hover:bg-slate-100 hover:text-slate-900 transition">
                 How It Works
               </Link>
-              <Link href="/#skills" className="px-4 py-2 rounded-xl bg-white border-2 border-[#0F172A] hover:bg-[#FACC15] transition">
+              <Link href="/#skills" className="px-4 py-2 rounded-xl hover:bg-slate-100 hover:text-slate-900 transition">
                 Skill Catalog
               </Link>
             </>
@@ -101,7 +101,7 @@ export function Navbar() {
           {token ? (
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 text-xs font-black text-red-600 bg-white border-2 border-[#0F172A] px-3.5 py-2 rounded-xl hover:bg-red-100 transition"
+              className="flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-50 border border-red-100 px-3.5 py-2 rounded-xl hover:bg-red-100 transition"
             >
               <LogOut className="w-4 h-4" />
               <span>Log Out</span>
@@ -110,13 +110,13 @@ export function Navbar() {
             <>
               <Link
                 href="/login"
-                className="text-xs font-black text-[#0F172A] bg-white border-2.5 border-[#0F172A] px-4 py-2 rounded-xl hover:bg-gray-100 transition"
+                className="text-xs font-bold text-slate-700 hover:text-slate-900 px-4 py-2 rounded-xl hover:bg-slate-100 transition"
               >
                 Log In
               </Link>
               <Link
                 href="/register"
-                className="neo-button text-xs px-5 py-2.5 flex items-center gap-1.5"
+                className="soft-button text-xs px-5 py-2.5 flex items-center gap-1.5"
               >
                 <span>Start Exchange Free</span>
               </Link>
