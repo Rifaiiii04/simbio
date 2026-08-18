@@ -3,6 +3,7 @@ import { authenticate } from '../../middleware/authenticate.js';
 import {
   getMeHandler,
   updateMeHandler,
+  updateLocationHandler,
   getUserHandler,
   getAdminAnalyticsHandler,
   getAdminAiAnalyticsHandler,
@@ -17,6 +18,7 @@ router.get('/admin/list', getAdminUsersHandler);
 
 router.get('/me', authenticate, getMeHandler);
 router.patch('/me', authenticate, updateMeHandler);
+router.put('/me/location', authenticate, updateLocationHandler);
 router.get('/:id', authenticate, getUserHandler);
 
 export { router as usersRouter };

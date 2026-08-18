@@ -34,14 +34,21 @@ export async function findCandidates(
   // Load current user's skills and location
   const me = await prisma.user.findUnique({
     where: { id: currentUserId },
-    select: { latitude: true, longitude: true, locationEnabled: true, userSkills: { select: { skillId: true, type: true, level: true } } },
+    select: {
+      latitude: true,
+      longitude: true,
+      locationEnabled: true,
+      country: true,
+      userSkills: { select: { skillId: true, type: true, level: true } },
+    },
   });
   if (!me) return [];
 
   const myLearnSkillIds = me.userSkills.filter((s) => s.type === 'LEARN').map((s) => s.skillId);
   const myTeachSkillIds = me.userSkills.filter((s) => s.type === 'TEACH').map((s) => s.skillId);
+  const myCountry = me.country?.toLowerCase().trim() ?? null;
 
-  // Load candidates excluding current user and existing partners
+  // Exclude current user and existing partners
   const existingPartnerIds = (
     await prisma.partnership.findMany({
       where: { OR: [{ requesterId: currentUserId }, { recipientId: currentUserId }], status: { in: ['PENDING', 'ACCEPTED'] } },
@@ -66,13 +73,38 @@ export async function findCandidates(
     const candidateTeach = candidate.userSkills.filter((s) => s.type === 'TEACH');
     const candidateLearn = candidate.userSkills.filter((s) => s.type === 'LEARN');
 
-    // Deterministic compatibility score
+    /*
+     * Priority-weighted scoring:
+     *
+     * 1. teachMatch (PRIMARY): How many of the candidate's TEACH skills overlap
+     *    with what the current user wants to LEARN — this is the core value.
+     *    Weight: 10 pts per matching skill.
+     *
+     * 2. sameCountry (SECONDARY): Candidate lives in the same country as the
+     *    current user — local community-first discovery.
+     *    Weight: 5 pts flat bonus.
+     *
+     * 3. reciprocalBonus (TERTIARY): How many of the candidate's LEARN skills
+     *    overlap with what the current user can TEACH — true reciprocal exchange.
+     *    Weight: 3 pts per matching skill.
+     *
+     * Final sort order:
+     *   a. matchScore DESC (higher is better)
+     *   b. distanceKm ASC (closer is better, null last)
+     */
     const teachMatchCount = candidateTeach.filter((s) => myLearnSkillIds.includes(s.skillId)).length;
-    const learnMatchCount = candidateLearn.filter((s) => myTeachSkillIds.includes(s.skillId)).length;
-    const matchScore = teachMatchCount * 2 + learnMatchCount * 2;
+    const reciprocalBonus = candidateLearn.filter((s) => myTeachSkillIds.includes(s.skillId)).length;
+    const candidateCountry = candidate.country?.toLowerCase().trim() ?? null;
+    const sameCountryBonus = myCountry && candidateCountry && myCountry === candidateCountry ? 5 : 0;
+
+    const matchScore = teachMatchCount * 10 + sameCountryBonus + reciprocalBonus * 3;
 
     let distanceKm: number | null = null;
-    if (me.locationEnabled && me.latitude != null && me.longitude != null && candidate.latitude != null && candidate.longitude != null) {
+    if (
+      me.locationEnabled &&
+      me.latitude != null && me.longitude != null &&
+      candidate.latitude != null && candidate.longitude != null
+    ) {
       distanceKm = Math.round(haversine(me.latitude, me.longitude, candidate.latitude, candidate.longitude) * 10) / 10;
     }
 
@@ -85,37 +117,82 @@ export async function findCandidates(
     };
   });
 
-  // Filter by radius if location available
+  // Filter by radius if requested
   const filtered = filters.radius != null
     ? results.filter((r) => r.distanceKm == null || r.distanceKm <= (filters.radius ?? Infinity))
     : results;
 
-  // Sort by matchScore descending, then distanceKm ascending
+  // Sort: matchScore DESC → distanceKm ASC (null pushed to end)
   return filtered.sort((a, b) => {
     if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
     if (a.distanceKm != null && b.distanceKm != null) return a.distanceKm - b.distanceKm;
+    if (a.distanceKm != null) return -1; // a has distance, b doesn't → a first
+    if (b.distanceKm != null) return 1;
     return 0;
   });
 }
 
 export async function getMapData(currentUserId: string, radius?: number) {
   const me = await prisma.user.findUnique({
-    where: { id: currentUserId }, select: { latitude: true, longitude: true, locationEnabled: true },
+    where: { id: currentUserId },
+    select: { latitude: true, longitude: true, locationEnabled: true },
   });
 
-  const users = await prisma.user.findMany({
-    where: { id: { not: currentUserId }, latitude: { not: null }, longitude: { not: null } },
-    select: { id: true, name: true, username: true, avatarUrl: true, latitude: true, longitude: true, country: true,
-      userSkills: { select: { type: true, skill: { select: { id: true, name: true } } }, where: { type: 'TEACH' }, take: 3 } },
+  const [users, myPartnerships] = await Promise.all([
+    prisma.user.findMany({
+      where: { id: { not: currentUserId }, latitude: { not: null }, longitude: { not: null } },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        avatarUrl: true,
+        latitude: true,
+        longitude: true,
+        country: true,
+        bio: true,
+        userSkills: {
+          select: { type: true, skill: { select: { id: true, name: true } } },
+          where: { type: 'TEACH' },
+          take: 3,
+        },
+      },
+    }),
+    prisma.partnership.findMany({
+      where: {
+        OR: [{ requesterId: currentUserId }, { recipientId: currentUserId }],
+        status: { in: ['ACCEPTED', 'PENDING'] },
+      },
+      select: { id: true, requesterId: true, recipientId: true, status: true },
+    }),
+  ]);
+
+  const partnershipMap = new Map<string, { status: string; id: string }>();
+  myPartnerships.forEach((p) => {
+    const otherId = p.requesterId === currentUserId ? p.recipientId : p.requesterId;
+    partnershipMap.set(otherId, { status: p.status, id: p.id });
   });
 
   return users
-    .map((u) => ({
-      id: u.id, name: u.name, username: u.username, avatarUrl: u.avatarUrl, country: u.country,
-      latitude: u.latitude, longitude: u.longitude,
-      teachSkills: u.userSkills.map((s) => ({ id: s.skill.id, name: s.skill.name })),
-      distanceKm: (me?.locationEnabled && me.latitude != null && me.longitude != null && u.latitude != null && u.longitude != null)
-        ? Math.round(haversine(me.latitude, me.longitude, u.latitude, u.longitude) * 10) / 10 : null,
-    }))
+    .map((u) => {
+      const pInfo = partnershipMap.get(u.id);
+      return {
+        id: u.id,
+        name: u.name,
+        username: u.username,
+        avatarUrl: u.avatarUrl,
+        country: u.country,
+        bio: u.bio,
+        latitude: u.latitude,
+        longitude: u.longitude,
+        teachSkills: u.userSkills.map((s) => ({ id: s.skill.id, name: s.skill.name })),
+        distanceKm:
+          me?.locationEnabled && me.latitude != null && me.longitude != null && u.latitude != null && u.longitude != null
+            ? Math.round(haversine(me.latitude, me.longitude, u.latitude, u.longitude) * 10) / 10
+            : null,
+        isConnected: pInfo?.status === 'ACCEPTED',
+        isPending: pInfo?.status === 'PENDING',
+        partnershipId: pInfo?.id ?? null,
+      };
+    })
     .filter((u) => radius == null || u.distanceKm == null || u.distanceKm <= radius);
 }

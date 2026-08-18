@@ -35,6 +35,21 @@ export async function updateProfile(
   return prisma.user.update({ where: { id: userId }, data, select: OWN_SELECT });
 }
 
+export async function updateLocation(
+  userId: string,
+  payload: { latitude: number | null; longitude: number | null; locationEnabled: boolean },
+): Promise<{ locationEnabled: boolean }> {
+  return prisma.user.update({
+    where: { id: userId },
+    data: {
+      latitude: payload.latitude,
+      longitude: payload.longitude,
+      locationEnabled: payload.locationEnabled,
+    },
+    select: { locationEnabled: true },
+  });
+}
+
 export async function getAdminUsersList() {
   return prisma.user.findMany({
     select: { id: true, name: true, email: true, role: true, country: true, createdAt: true },

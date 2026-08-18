@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/shared/Navbar';
 import { ParallaxHero } from '@/components/ui/ParallaxHero';
 import { ParallaxScrollSection } from '@/components/ui/ParallaxScrollSection';
@@ -20,7 +21,32 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage() {
+  const router = useRouter();
   const [activeCategory, setActiveCategory] = useState('All');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('simbioly_token');
+    if (token) {
+      router.replace('/dashboard');
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [router]);
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="text-[#FF6B30] font-bold text-sm animate-pulse flex items-center gap-2">
+            <Sparkles className="w-5 h-5 animate-spin" />
+            <span>Memeriksa sesi pengguna...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const categories = ['All', 'Technology', 'Design', 'Languages', 'Music', 'Science'];
 

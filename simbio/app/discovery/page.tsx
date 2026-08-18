@@ -5,10 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api/client';
 import { Navbar } from '@/components/shared/Navbar';
-import { SimbiAvatar } from '@/components/shared/SimbiAvatar';
-import { GlowCard } from '@/components/ui/GlowCard';
 import { SearchableSkillSelect } from '@/components/ui/SearchableSkillSelect';
 import { ProposalModal } from '@/components/discovery/ProposalModal';
+import { MapView } from '@/components/discovery/MapView';
 import {
   Compass,
   Sparkles,
@@ -19,12 +18,12 @@ import {
   Search,
   SlidersHorizontal,
   Globe,
-  Bot,
-  Lightbulb,
   BookOpen,
   Award,
   Zap,
   ShieldCheck,
+  Map,
+  List,
 } from 'lucide-react';
 
 interface Candidate {
@@ -33,9 +32,6 @@ interface Candidate {
   learnSkills: Array<{ id: string; name: string; level: string }>;
   matchScore: number;
   distanceKm: number | null;
-  aiMatchScore?: number;
-  aiReasoning?: string;
-  suggestedProjectIdea?: string;
 }
 
 interface Skill {
@@ -52,14 +48,14 @@ export default function DiscoveryPage() {
   const [selectedCountry, setSelectedCountry] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
-  const [mode, setMode] = useState<'standard' | 'ai'>('standard');
+  const [view, setView] = useState<'list' | 'map'>('list');
   const [loading, setLoading] = useState(true);
   const [proposalCandidate, setProposalCandidate] = useState<Candidate | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const countries = ['All Countries', 'Indonesia', 'United States', 'Japan', 'Germany', 'United Kingdom', 'Singapore', 'Australia', 'Canada'];
 
-  // 300ms Debounce for text search
+  // 300ms debounce for text search
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedKeyword(searchKeyword), 300);
     return () => clearTimeout(handler);
@@ -67,17 +63,15 @@ export default function DiscoveryPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('simbioly_token');
-    if (!token) {
-      router.push('/login');
-      return;
-    }
+    if (!token) { router.push('/login'); return; }
 
     async function loadData() {
       try {
-        const skillsRes = await apiFetch<{ skills: Skill[] }>('/skills');
+        const [skillsRes, candidatesRes] = await Promise.all([
+          apiFetch<{ skills: Skill[] }>('/skills'),
+          apiFetch<{ candidates: Candidate[] }>('/discovery/people'),
+        ]);
         setSkills(skillsRes.skills);
-
-        const candidatesRes = await apiFetch<{ candidates: Candidate[] }>('/discovery/people');
         setCandidates(candidatesRes.candidates);
       } catch (err: unknown) {
         if (err instanceof Error && (err.message.includes('401') || err.message.includes('Authentication required'))) {
@@ -90,37 +84,10 @@ export default function DiscoveryPage() {
     loadData();
   }, [router]);
 
-  const handleFetchAiRecommendations = async () => {
-    const token = localStorage.getItem('simbioly_token');
-    if (!token) {
-      router.push('/login');
-      return;
-    }
-    setMode('ai');
-    setLoading(true);
-    setMessage(null);
-    try {
-      const res = await apiFetch<{ recommendations: Candidate[] }>('/ai/discovery/recommendations');
-      setCandidates(res.recommendations);
-    } catch (err: unknown) {
-      if (err instanceof Error && (err.message.includes('401') || err.message.includes('Authentication required'))) {
-        router.push('/login');
-      } else {
-        setMessage('Simbi AI matchmaker berhasil memuat rekomendasi sinergi skill!');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleFilter = async (skillId?: string, country?: string) => {
     const token = localStorage.getItem('simbioly_token');
-    if (!token) {
-      router.push('/login');
-      return;
-    }
+    if (!token) { router.push('/login'); return; }
 
-    setMode('standard');
     const targetSkill = skillId !== undefined ? (skillId === 'OTHER' ? '' : skillId) : selectedSkillId;
     const targetCountry = country !== undefined ? (country === 'All Countries' ? '' : country) : selectedCountry;
 
@@ -147,71 +114,65 @@ export default function DiscoveryPage() {
     }
   };
 
-  // Filter candidates by debounced text query
   const filteredCandidates = candidates.filter((c) => {
     if (!debouncedKeyword.trim()) return true;
     const q = debouncedKeyword.toLowerCase();
-    const nameMatch = c.user.name.toLowerCase().includes(q);
-    const countryMatch = c.user.country?.toLowerCase().includes(q);
-    const teachMatch = c.teachSkills.some((s) => s.name.toLowerCase().includes(q));
-    const learnMatch = c.learnSkills.some((s) => s.name.toLowerCase().includes(q));
-    return nameMatch || countryMatch || teachMatch || learnMatch;
+    return (
+      c.user.name.toLowerCase().includes(q) ||
+      c.user.country?.toLowerCase().includes(q) ||
+      c.teachSkills.some((s) => s.name.toLowerCase().includes(q)) ||
+      c.learnSkills.some((s) => s.name.toLowerCase().includes(q))
+    );
   });
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-orange-100 selection:text-[#FF6B30]">
       <Navbar />
 
-      <main className="flex-1 w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Top Header Command Banner */}
-        <div className="soft-card p-6 sm:p-7 bg-white border border-slate-200/80 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-xs font-bold">
-                Global Skill Exchange Network
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+      <main className="flex-1 w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-3 space-y-3">
+        {/* Header */}
+        <div className="soft-card p-3.5 sm:p-4 bg-white border border-slate-200/80 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div className="space-y-0.5">
+            <span className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-[10px] font-bold">
+              Global Skill Exchange Network
+            </span>
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
               Skill Discovery & Partner Matching
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl">
-              Cari partner reciprocal ideal kamu menggunakan pencocokan DB deterministik atau rekomendasi sinergi AI Smart Synergy.
+            <p className="text-xs text-slate-500 font-medium max-w-2xl">
+              Cari partner reciprocal ideal kamu melalui pencocokan deterministik berbasis skill atau temukan mereka langsung di peta sekitarmu.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Mode Selector Pills */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* View Tab Switcher */}
             <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
               <button
-                onClick={() => handleFilter(selectedSkillId, selectedCountry)}
-                className={`py-2 px-4 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                  mode === 'standard'
-                    ? 'bg-[#FF6B30] text-white shadow-2xs'
-                    : 'text-slate-700 hover:text-slate-900'
+                onClick={() => setView('list')}
+                className={`py-1.5 px-3.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  view === 'list' ? 'bg-[#FF6B30] text-white shadow-2xs' : 'text-slate-700 hover:text-slate-900'
                 }`}
               >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-                <span>DB Matcher</span>
+                <List className="w-3.5 h-3.5" />
+                <span>Daftar</span>
               </button>
               <button
-                onClick={handleFetchAiRecommendations}
-                className={`py-2 px-4 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                  mode === 'ai'
-                    ? 'bg-sky-600 text-white shadow-2xs'
-                    : 'text-slate-700 hover:text-slate-900'
+                onClick={() => setView('map')}
+                className={`py-1.5 px-3.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  view === 'map' ? 'bg-[#FF6B30] text-white shadow-2xs' : 'text-slate-700 hover:text-slate-900'
                 }`}
               >
-                <Bot className="w-3.5 h-3.5" />
-                <span>AI Smart Synergy ✨</span>
+                <Map className="w-3.5 h-3.5" />
+                <span>Peta Terdekat</span>
               </button>
             </div>
 
             <Link
               href="/partnerships"
-              className="soft-button text-xs sm:text-sm px-5 py-2.5 flex items-center gap-2 shadow-xs whitespace-nowrap"
+              className="soft-button text-xs px-4 py-2 flex items-center gap-1.5 shadow-xs whitespace-nowrap"
             >
               <span>Kemitraan Saya</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
@@ -223,23 +184,26 @@ export default function DiscoveryPage() {
           </div>
         )}
 
-        {/* Asymmetrical 2-Column Split Canvas (8 Cols Main Stream | 4 Cols AI Matchmaker Panel) */}
-        <div className="grid lg:grid-cols-12 gap-6 items-start">
-          {/* LEFT MAIN DISCOVERY CANVAS (8 Columns) */}
-          <div className="lg:col-span-8 space-y-6">
-            {/* Filter Toolbar Card */}
-            <div className="soft-card p-4 sm:p-5 bg-white space-y-3 shadow-xs border border-slate-200/80">
+        {/* MAP VIEW */}
+        {view === 'map' && (
+          <div className="w-full">
+            <MapView />
+          </div>
+        )}
+
+        {/* LIST VIEW */}
+        {view === 'list' && (
+          <>
+            {/* Filter Toolbar */}
+            <div className="soft-card p-4 sm:p-5 bg-white/95 backdrop-blur-md space-y-3 shadow-sm border border-slate-200/80 sticky top-[73px] z-40 transition-all">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  {mode === 'ai' ? <Bot className="w-4 h-4 text-sky-600" /> : <SlidersHorizontal className="w-4 h-4 text-[#FF6B30]" />}
-                  <span>{mode === 'ai' ? 'Hasil Rekomendasi AI Synergy Engine' : 'Sistem Filter DB Deterministik'}</span>
+                  <SlidersHorizontal className="w-4 h-4 text-[#FF6B30]" />
+                  <span>Sistem Filter DB Deterministik</span>
                 </div>
                 {(selectedSkillId || selectedCountry || searchKeyword) && (
                   <button
-                    onClick={() => {
-                      setSearchKeyword('');
-                      handleFilter('', 'All Countries');
-                    }}
+                    onClick={() => { setSearchKeyword(''); handleFilter('', 'All Countries'); }}
                     className="text-xs font-bold text-[#FF6B30] hover:underline"
                   >
                     Reset Filter
@@ -248,7 +212,7 @@ export default function DiscoveryPage() {
               </div>
 
               <div className="grid sm:grid-cols-3 gap-3">
-                {/* Search Bar */}
+                {/* Search */}
                 <div className="relative">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   <input
@@ -260,7 +224,7 @@ export default function DiscoveryPage() {
                   />
                 </div>
 
-                {/* Country Filter */}
+                {/* Country */}
                 <div className="relative">
                   <select
                     value={selectedCountry || 'All Countries'}
@@ -269,9 +233,7 @@ export default function DiscoveryPage() {
                   >
                     <option value="All Countries">Semua Negara (Global)</option>
                     {countries.slice(1).map((c) => (
-                      <option key={c} value={c}>
-                        Negara: {c}
-                      </option>
+                      <option key={c} value={c}>Negara: {c}</option>
                     ))}
                   </select>
                 </div>
@@ -288,55 +250,50 @@ export default function DiscoveryPage() {
               </div>
             </div>
 
-            {/* Overhauled Candidate Cards Grid (2 Columns inside 8-col canvas) */}
+            {/* Candidate Grid */}
             {loading ? (
               <div className="text-center py-16 text-xs text-slate-500 font-bold animate-pulse flex flex-col items-center gap-3">
                 <Sparkles className="w-8 h-8 text-[#FF6B30] animate-spin" />
-                <span>{mode === 'ai' ? 'Simbi AI sedang menganalisis sinergi reciprocal skill...' : 'Mencari kandidat partner...'}</span>
+                <span>Mencari kandidat partner...</span>
               </div>
             ) : filteredCandidates.length === 0 ? (
               <div className="soft-card p-10 text-center space-y-4 bg-white border border-slate-200/80">
                 <Compass className="w-12 h-12 text-[#FF6B30] mx-auto animate-spin" style={{ animationDuration: '10s' }} />
                 <div className="space-y-1">
-                  <p className="text-base font-bold text-slate-900">Tidak ada pembelajar yang cocok untuk filter ini.</p>
+                  <p className="text-base font-bold text-slate-900">Tidak ada kandidat yang cocok untuk filter ini.</p>
                   <p className="text-xs text-slate-500 font-medium max-w-md mx-auto">
-                    Coba cari nama negara lain atau reset filter untuk melihat seluruh kandidat aktif.
+                    Coba cari negara lain atau reset filter untuk melihat seluruh kandidat aktif.
                   </p>
                 </div>
                 <button
-                  onClick={() => {
-                    setSearchKeyword('');
-                    handleFilter('', 'All Countries');
-                  }}
+                  onClick={() => { setSearchKeyword(''); handleFilter('', 'All Countries'); }}
                   className="soft-button text-xs px-6 py-2.5 inline-flex items-center gap-1.5 shadow-2xs"
                 >
                   <span>Reset Semua Filter</span>
                 </button>
               </div>
             ) : (
-              <div className="grid sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredCandidates.map((c) => (
                   <div
                     key={c.user.id}
-                    className="soft-card p-6 bg-white border border-slate-200/80 space-y-5 shadow-xs hover:border-[#FF6B30]/50 transition group flex flex-col justify-between"
+                    className="soft-card p-6 bg-white border border-slate-200/80 space-y-5 shadow-xs hover:border-[#FF6B30]/50 hover:shadow-md transition group flex flex-col justify-between"
                   >
                     <div className="space-y-4">
-                      {/* Header Partner Info & Match Score Badge */}
+                      {/* Header */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3.5">
-                          <div className="w-13 h-13 rounded-2xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-lg shadow-2xs flex-shrink-0">
+                          <div className="w-13 h-13 rounded-2xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-lg shadow-2xs flex-shrink-0 overflow-hidden">
                             {c.user.avatarUrl ? (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img src={c.user.avatarUrl} alt={c.user.name} className="w-full h-full object-cover rounded-2xl" />
+                              <img src={c.user.avatarUrl} alt={c.user.name} className="w-full h-full object-cover" />
                             ) : (
                               c.user.name.charAt(0)
                             )}
                           </div>
                           <div>
                             <div className="flex items-center gap-1.5">
-                              <h3 className="font-black text-slate-900 text-lg group-hover:text-[#FF6B30] transition">
-                                {c.user.name}
-                              </h3>
+                              <h3 className="font-black text-slate-900 text-lg group-hover:text-[#FF6B30] transition">{c.user.name}</h3>
                               <ShieldCheck className="w-4 h-4 text-emerald-600" />
                             </div>
                             <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
@@ -350,10 +307,9 @@ export default function DiscoveryPage() {
                             </div>
                           </div>
                         </div>
-
                         <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-xs px-2.5 py-1 font-bold flex items-center gap-1 shrink-0">
                           <Zap className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{c.aiMatchScore ? `${c.aiMatchScore}% Match` : `${c.matchScore} pts`}</span>
+                          <span>{c.matchScore} pts</span>
                         </span>
                       </div>
 
@@ -363,31 +319,14 @@ export default function DiscoveryPage() {
                         </p>
                       )}
 
-                      {/* AI Reasoning & Project Idea Box (When in AI Mode) */}
-                      {mode === 'ai' && (c.aiReasoning || c.suggestedProjectIdea) && (
-                        <div className="p-3.5 rounded-2xl bg-sky-50/80 border border-sky-200/80 space-y-2 text-xs font-medium shadow-2xs">
-                          {c.aiReasoning && (
-                            <div>
-                              <span className="text-[10px] font-bold uppercase text-sky-800 flex items-center gap-1">
-                                <Bot className="w-3.5 h-3.5 text-sky-600" />
-                                <span>Alasan Pencocokan AI:</span>
-                              </span>
-                              <p className="text-slate-700 text-[11px] mt-0.5">{c.aiReasoning}</p>
-                            </div>
-                          )}
-                          {c.suggestedProjectIdea && (
-                            <div className="pt-1.5 border-t border-sky-200/60">
-                              <span className="text-[10px] font-bold uppercase text-indigo-700 flex items-center gap-1">
-                                <Lightbulb className="w-3.5 h-3.5 text-indigo-600" />
-                                <span>Ide Proyek Kolaborasi:</span>
-                              </span>
-                              <p className="text-indigo-950 text-[11px] mt-0.5">{c.suggestedProjectIdea}</p>
-                            </div>
-                          )}
+                      {c.distanceKm != null && (
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                          <MapPin className="w-3.5 h-3.5 text-[#FF6B30]" />
+                          <span>{c.distanceKm} km dari lokasimu</span>
                         </div>
                       )}
 
-                      {/* Reciprocal Skills Visual Matrix */}
+                      {/* Skill Matrix */}
                       <div className="space-y-2.5 bg-slate-50 p-4 rounded-2xl border border-slate-200/60 text-xs">
                         <div>
                           <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-emerald-700 mb-1.5">
@@ -406,7 +345,6 @@ export default function DiscoveryPage() {
                             )}
                           </div>
                         </div>
-
                         <div className="pt-2 border-t border-slate-200/60">
                           <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-[#FF6B30] mb-1.5">
                             <Award className="w-3.5 h-3.5 text-[#FF6B30]" />
@@ -427,7 +365,7 @@ export default function DiscoveryPage() {
                       </div>
                     </div>
 
-                    {/* Footer Connect Button */}
+                    {/* Footer */}
                     <div className="pt-3 border-t border-slate-100">
                       <button
                         onClick={() => setProposalCandidate(c)}
@@ -441,51 +379,10 @@ export default function DiscoveryPage() {
                 ))}
               </div>
             )}
-          </div>
-
-          {/* RIGHT SIDEBAR PANEL (4 Columns - AI Matchmaker & Insight Panel) */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Simbi Companion Mascot Advice */}
-            <SimbiAvatar
-              state={mode === 'ai' ? 'thinking' : 'happy'}
-              message={
-                mode === 'ai'
-                  ? 'Simbi AI sedang menganalisis sinergi skill, goal belajar, dan potensi ide proyek bersama!'
-                  : 'Gunakan mode AI Smart Synergy untuk mendapatkan rekomendasi pasangan pertukaran skill berakurasi tinggi!'
-              }
-            />
-
-            {/* Match Formula Info Card */}
-            <div className="soft-card p-6 bg-white space-y-4 shadow-xs border border-slate-200/80">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-                <Sparkles className="w-5 h-5 text-[#FF6B30]" />
-                <h3 className="text-sm font-bold text-slate-900">Algoritma Matching Simbioly</h3>
-              </div>
-              <div className="space-y-3 text-xs text-slate-600 font-medium leading-relaxed">
-                <p>
-                  Sistem Simbioly menggunakan kalkulasi deterministik 2-arah (reciprocal exchange). Skor dihitung bila skill yang kamu ajarkan dicari oleh partner, dan sebaliknya.
-                </p>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 text-[11px] font-mono text-slate-700">
-                  ⚡ Match Score = Teach(A) ∩ Learn(B) + Teach(B) ∩ Learn(A)
-                </div>
-              </div>
-            </div>
-
-            {/* Proximity Location Info Card */}
-            <div className="soft-card p-6 bg-slate-900 text-white space-y-3 shadow-xs">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-[#FF6B30]" />
-                <h3 className="text-sm font-bold text-white">Proximity Distance Matcher</h3>
-              </div>
-              <p className="text-xs text-slate-300 font-medium leading-relaxed">
-                Aktifkan fitur lokasi di halaman Profil kamu untuk menemukan partner belajar yang berjarak dekat dengan lokasi domisili kamu!
-              </p>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
       </main>
 
-      {/* Connection Proposal Modal */}
       {proposalCandidate && (
         <ProposalModal
           candidate={proposalCandidate}

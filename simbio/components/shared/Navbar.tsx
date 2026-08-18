@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Sparkles, Compass, Map, Handshake, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { Sparkles, Compass, Handshake, User, LogOut, LayoutDashboard } from 'lucide-react';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -47,15 +47,7 @@ export function Navbar() {
                 <LayoutDashboard className="w-4 h-4" />
                 <span>Dashboard</span>
               </Link>
-              <Link
-                href="/roadmaps"
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition ${
-                  pathname.startsWith('/roadmaps') ? 'bg-[#FF6B30] text-white font-black shadow-xs' : 'hover:bg-slate-100 hover:text-slate-900'
-                }`}
-              >
-                <Map className="w-4 h-4" />
-                <span>Roadmaps</span>
-              </Link>
+
               <Link
                 href="/discovery"
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl transition ${

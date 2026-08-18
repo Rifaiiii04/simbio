@@ -35,6 +35,36 @@ export async function updateMeHandler(
   }
 }
 
+export async function updateLocationHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    if (!req.user) throw new AppError(ErrorCode.UNAUTHORIZED, 'Authentication required', 401);
+    const { latitude, longitude, locationEnabled } = req.body as {
+      latitude?: number | null;
+      longitude?: number | null;
+      locationEnabled: boolean;
+    };
+    if (typeof locationEnabled !== 'boolean') {
+      throw new AppError(ErrorCode.VALIDATION_ERROR, 'locationEnabled must be boolean', 400);
+    }
+    // When enabling, coordinates are required
+    if (locationEnabled && (latitude == null || longitude == null)) {
+      throw new AppError(ErrorCode.VALIDATION_ERROR, 'latitude and longitude are required when enabling location', 400);
+    }
+    const result = await usersRepo.updateLocation(req.user.id, {
+      latitude: locationEnabled ? (latitude ?? null) : null,
+      longitude: locationEnabled ? (longitude ?? null) : null,
+      locationEnabled,
+    });
+    sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function getUserHandler(
   req: Request,
   res: Response,

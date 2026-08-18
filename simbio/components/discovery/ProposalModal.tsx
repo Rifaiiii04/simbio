@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { apiFetch } from '@/lib/api/client';
 import { Sparkles, UserCheck, X, BookOpen, GraduationCap, MessageSquare } from 'lucide-react';
 
@@ -139,8 +140,15 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="w-full max-w-lg neo-box p-6 sm:p-8 space-y-6 bg-white shadow-[10px_10px_0px_0px_#0F172A] relative max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-4">
@@ -266,6 +274,7 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
