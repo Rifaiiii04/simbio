@@ -21,6 +21,7 @@ import {
   TrendingUp,
   ChevronRight,
   ShieldCheck,
+  Users,
 } from 'lucide-react';
 
 interface UserSummary {
@@ -28,6 +29,7 @@ interface UserSummary {
   name: string;
   username: string | null;
   avatarUrl: string | null;
+  country?: string | null;
 }
 
 interface Partnership {
@@ -110,15 +112,15 @@ export default function PartnershipsPage() {
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-orange-100 selection:text-[#FF6B30]">
       <Navbar />
 
-      <main className="flex-1 w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Top Full-Width Hero Command Banner */}
-        <div className="soft-card p-6 sm:p-8 bg-white border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <main className="flex-1 w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Top Combined Command Header Card (Integrates Hero Title, Stat Counters & Quick Action Button) */}
+        <div className="soft-card p-6 sm:p-7 bg-white border border-slate-200/80 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-xs">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-xs font-bold">
                 Reciprocal Exchange Hub
               </span>
-              <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
+              <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-xs font-bold">
                 Real-Time WebSocket Rooms
               </span>
             </div>
@@ -130,13 +132,28 @@ export default function PartnershipsPage() {
             </p>
           </div>
 
-          <Link
-            href="/discovery"
-            className="soft-button text-xs sm:text-sm px-6 py-3 flex items-center gap-2 shadow-xs whitespace-nowrap"
-          >
-            <Compass className="w-4 h-4" />
-            <span>+ Cari Partner Baru</span>
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Integrated Statistik Kolaborasi Badges */}
+            <div className="flex items-center gap-3 bg-slate-50 p-2.5 rounded-2xl border border-slate-200/70">
+              <div className="px-3 text-center">
+                <p className="text-lg font-black text-slate-900">{activePartnerships.length}</p>
+                <p className="text-[10px] font-bold text-emerald-700 uppercase">Kemitraan Aktif</p>
+              </div>
+              <div className="h-7 w-px bg-slate-200" />
+              <div className="px-3 text-center">
+                <p className="text-lg font-black text-[#FF6B30]">{pendingRequests.length}</p>
+                <p className="text-[10px] font-bold text-amber-700 uppercase">Menunggu</p>
+              </div>
+            </div>
+
+            <Link
+              href="/discovery"
+              className="soft-button text-xs sm:text-sm px-6 py-3 flex items-center gap-2 shadow-xs whitespace-nowrap"
+            >
+              <Compass className="w-4 h-4" />
+              <span>+ Cari Partner Baru</span>
+            </Link>
+          </div>
         </div>
 
         {statusMessage && (
@@ -146,35 +163,47 @@ export default function PartnershipsPage() {
           </div>
         )}
 
-        {/* Asymmetrical 2-Column Workspace Grid (8 Cols Main | 4 Cols Sidebar) */}
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
-          {/* LEFT MAIN WORKSPACE (8 Cols): Pending Invites & Active Partnerships */}
-          <div className="lg:col-span-8 space-y-8">
-            {/* Section 1: Pending Requests Section */}
-            {pendingRequests.length > 0 && (
-              <div className="soft-card bg-gradient-to-br from-amber-50/90 via-white to-orange-50/70 border border-amber-200/80 p-6 space-y-4 shadow-xs">
-                <div className="flex items-center justify-between border-b border-amber-200/60 pb-3">
-                  <div className="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider">
-                    <Clock className="w-4 h-4 text-[#FF6B30]" />
-                    <span>Undangan Kemitraan Menunggu Konfirmasi ({pendingRequests.length})</span>
-                  </div>
-                  <span className="soft-badge bg-white text-amber-800 border-amber-200 text-[10px]">
-                    Action Required
-                  </span>
+        {/* Asymmetrical 2-Column Layout (Left 8 Cols: Active Partnerships | Right 4 Cols: Pending Invitations & Guidance) */}
+        <div className="grid lg:grid-cols-12 gap-6 items-start">
+          {/* LEFT MAIN CANVAS (8 Columns): Active Exchange Partnerships Moved Way Upwards! */}
+          <div className="lg:col-span-8 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="flex items-center gap-2">
+                <Handshake className="w-5 h-5 text-[#FF6B30]" />
+                <h2 className="text-xl font-bold text-slate-900">Kemitraan Aktif ({activePartnerships.length})</h2>
+              </div>
+              <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
+                Ready for Learning Rooms
+              </span>
+            </div>
+
+            {activePartnerships.length === 0 ? (
+              <div className="soft-card p-10 text-center space-y-4 bg-white border border-slate-200/80">
+                <Handshake className="w-12 h-12 text-slate-300 mx-auto" />
+                <div className="space-y-1">
+                  <p className="text-base font-bold text-slate-900">Belum Ada Kemitraan Aktif Terhubung</p>
+                  <p className="text-xs text-slate-500 font-medium max-w-md mx-auto">
+                    Jelajahi pembelajar global di halaman Discovery dan ajukan undangan pertukaran skill reciprocal!
+                  </p>
                 </div>
+                <Link href="/discovery" className="soft-button text-xs px-6 py-3 inline-flex items-center gap-2 shadow-xs">
+                  <Compass className="w-4 h-4" />
+                  <span>Jelajahi Skill Discovery</span>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-5">
+                {activePartnerships.map((p) => {
+                  const partner = p.requesterId === myUserId ? p.recipient : p.requester;
 
-                <div className="grid gap-3">
-                  {pendingRequests.map((p) => {
-                    const partner = p.requesterId === myUserId ? p.recipient : p.requester;
-                    const isIncoming = p.recipientId === myUserId;
-
-                    return (
-                      <div
-                        key={p.id}
-                        className="p-4 rounded-xl bg-white border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs hover:border-slate-300 transition"
-                      >
+                  return (
+                    <div
+                      key={p.id}
+                      className="soft-card p-5 bg-white border border-slate-200/80 space-y-4 shadow-xs hover:border-[#FF6B30]/40 transition group"
+                    >
+                      <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3.5">
-                          <div className="w-11 h-11 rounded-2xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-sm shadow-2xs flex-shrink-0">
+                          <div className="w-12 h-12 rounded-2xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-base shadow-2xs flex-shrink-0">
                             {partner.avatarUrl ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img src={partner.avatarUrl} alt={partner.name} className="w-full h-full object-cover rounded-2xl" />
@@ -183,32 +212,107 @@ export default function PartnershipsPage() {
                             )}
                           </div>
                           <div>
-                            <h3 className="font-bold text-slate-900 text-sm">{partner.name}</h3>
-                            <p className="text-[11px] text-slate-500 font-medium">
-                              {isIncoming ? 'Mengirimkan undangan pertukaran skill 1-on-1' : 'Menunggu respon dari partner'}
+                            <div className="flex items-center gap-1.5">
+                              <h3 className="font-bold text-slate-900 text-base group-hover:text-[#FF6B30] transition">
+                                {partner.name}
+                              </h3>
+                              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                            </div>
+                            <p className="text-xs text-slate-500 font-medium">
+                              {partner.username ? `@${partner.username}` : `Terhubung sejak ${new Date(p.createdAt).toLocaleDateString()}`}
+                            </p>
+                          </div>
+                        </div>
+
+                        <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] px-2.5 py-0.5 shrink-0">
+                          Active Exchange
+                        </span>
+                      </div>
+
+                      {/* Action Controls: Enter Dedicated Room Page + End Exchange */}
+                      <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
+                        <Link
+                          href={`/partnerships/${p.id}`}
+                          className="soft-button text-xs py-2.5 flex items-center justify-center gap-1.5 shadow-2xs"
+                        >
+                          <MessageSquare className="w-4 h-4 text-white" />
+                          <span>Room Belajar →</span>
+                        </Link>
+                        <button
+                          onClick={() => handleAction(p.id, 'leave')}
+                          className="py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold hover:bg-red-50 hover:text-red-600 transition shadow-2xs"
+                        >
+                          Akhiri Exchange
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT SIDEBAR (4 Columns): Pending Invitation Requests Moved Side-by-Side! */}
+          <div className="lg:col-span-4 space-y-5">
+            {/* Pending Connection Requests (Side-by-Side with Active Partnerships) */}
+            {pendingRequests.length > 0 && (
+              <div className="soft-card bg-gradient-to-br from-amber-50/90 via-white to-orange-50/70 border border-amber-200/80 p-5 space-y-4 shadow-xs">
+                <div className="flex items-center justify-between border-b border-amber-200/60 pb-2.5">
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider">
+                    <Clock className="w-4 h-4 text-[#FF6B30]" />
+                    <span>Undangan Kemitraan ({pendingRequests.length})</span>
+                  </div>
+                  <span className="soft-badge bg-white text-amber-800 border-amber-200 text-[10px] font-bold">
+                    Action Required
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {pendingRequests.map((p) => {
+                    const partner = p.requesterId === myUserId ? p.recipient : p.requester;
+                    const isIncoming = p.recipientId === myUserId;
+
+                    return (
+                      <div
+                        key={p.id}
+                        className="p-3.5 rounded-xl bg-white border border-slate-200/80 space-y-3 shadow-2xs"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-xs shadow-2xs flex-shrink-0">
+                            {partner.avatarUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={partner.avatarUrl} alt={partner.name} className="w-full h-full object-cover rounded-xl" />
+                            ) : (
+                              partner.name.charAt(0)
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-slate-900 text-xs">{partner.name}</h3>
+                            <p className="text-[10px] text-slate-500 font-medium">
+                              {isIncoming ? 'Mengirimkan undangan pertukaran skill 1-on-1' : 'Menunggu respon partner'}
                             </p>
                           </div>
                         </div>
 
                         {isIncoming ? (
-                          <div className="flex gap-2">
+                          <div className="grid grid-cols-2 gap-2 pt-1">
                             <button
                               onClick={() => handleAction(p.id, 'accept')}
-                              className="px-4 py-2 rounded-xl bg-[#10B981] text-white text-xs font-bold hover:bg-emerald-600 transition shadow-2xs flex items-center gap-1.5"
+                              className="py-2 rounded-xl bg-[#10B981] text-white text-[11px] font-bold hover:bg-emerald-600 transition shadow-2xs flex items-center justify-center gap-1"
                             >
                               <UserCheck className="w-3.5 h-3.5" />
-                              <span>Terima Undangan</span>
+                              <span>Terima</span>
                             </button>
                             <button
                               onClick={() => handleAction(p.id, 'reject')}
-                              className="px-3.5 py-2 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold hover:bg-red-50 hover:text-red-600 transition shadow-2xs flex items-center gap-1.5"
+                              className="py-2 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold hover:bg-red-50 hover:text-red-600 transition shadow-2xs flex items-center justify-center gap-1"
                             >
-                              <UserX className="w-3.5 h-3.5 text-slate-500 hover:text-red-600" />
+                              <UserX className="w-3.5 h-3.5 text-slate-500" />
                               <span>Tolak</span>
                             </button>
                           </div>
                         ) : (
-                          <span className="soft-badge bg-sky-50 text-sky-700 border-sky-200 text-[10px] px-3 py-1">
+                          <span className="soft-badge bg-sky-50 text-sky-700 border-sky-200 text-[10px] px-2.5 py-0.5 w-full text-center block">
                             Menunggu Persetujuan Partner
                           </span>
                         )}
@@ -219,118 +323,16 @@ export default function PartnershipsPage() {
               </div>
             )}
 
-            {/* Section 2: Active Exchange Partnerships */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <Handshake className="w-5 h-5 text-[#FF6B30]" />
-                  <h2 className="text-xl font-bold text-slate-900">Kemitraan Aktif ({activePartnerships.length})</h2>
-                </div>
-                <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
-                  Ready for Learning Rooms
-                </span>
-              </div>
-
-              {activePartnerships.length === 0 ? (
-                <div className="soft-card p-10 text-center space-y-4 bg-white border border-slate-200/80">
-                  <Handshake className="w-12 h-12 text-slate-300 mx-auto" />
-                  <div className="space-y-1">
-                    <p className="text-base font-bold text-slate-900">Belum Ada Kemitraan Aktif Terhubung</p>
-                    <p className="text-xs text-slate-500 font-medium max-w-md mx-auto">
-                      Jelajahi pembelajar global di halaman Discovery dan ajukan undangan pertukaran skill reciprocal!
-                    </p>
-                  </div>
-                  <Link href="/discovery" className="soft-button text-xs px-6 py-3 inline-flex items-center gap-2 shadow-xs">
-                    <Compass className="w-4 h-4" />
-                    <span>Jelajahi Skill Discovery</span>
-                  </Link>
-                </div>
-              ) : (
-                <div className="grid sm:grid-cols-2 gap-6">
-                  {activePartnerships.map((p) => {
-                    const partner = p.requesterId === myUserId ? p.recipient : p.requester;
-
-                    return (
-                      <GlowCard key={p.id}>
-                        <div className="space-y-5">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3.5">
-                              <div className="w-12 h-12 rounded-2xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-base shadow-2xs flex-shrink-0">
-                                {partner.avatarUrl ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img src={partner.avatarUrl} alt={partner.name} className="w-full h-full object-cover rounded-2xl" />
-                                ) : (
-                                  partner.name.charAt(0)
-                                )}
-                              </div>
-                              <div>
-                                <h3 className="font-bold text-slate-900 text-base">{partner.name}</h3>
-                                <p className="text-[10px] text-slate-400 font-medium">
-                                  Terhubung sejak {new Date(p.createdAt).toLocaleDateString()}
-                                </p>
-                              </div>
-                            </div>
-
-                            <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] px-2.5 py-0.5">
-                              Active Exchange
-                            </span>
-                          </div>
-
-                          {/* Action Controls: Enter Dedicated Room Page + End Exchange */}
-                          <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
-                            <Link
-                              href={`/partnerships/${p.id}`}
-                              className="soft-button text-xs py-2.5 flex items-center justify-center gap-1.5 shadow-2xs"
-                            >
-                              <MessageSquare className="w-4 h-4 text-white" />
-                              <span>Room Belajar →</span>
-                            </Link>
-                            <button
-                              onClick={() => handleAction(p.id, 'leave')}
-                              className="py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold hover:bg-red-50 hover:text-red-600 transition shadow-2xs"
-                            >
-                              Akhiri Exchange
-                            </button>
-                          </div>
-                        </div>
-                      </GlowCard>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* RIGHT SIDEBAR PANEL (4 Cols): Simbi Mascot Guidance, Stats & Discovery Link */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Widget 1: Simbi Capybara Guidance */}
+            {/* Simbi Companion Mascot Advice */}
             <SimbiAvatar
               state="happy"
               message="Masuk ke Room Belajar Bareng untuk berdiskusi real-time via WebSocket, menyusun roadmap AI bersama, dan sesi fokus Pomodoro!"
             />
 
-            {/* Widget 2: Partnership Growth Statistics */}
-            <div className="soft-card p-6 bg-slate-900 text-white space-y-4 shadow-xs">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Statistik Kolaborasi</span>
-                <TrendingUp className="w-4 h-4 text-[#FF6B30]" />
-              </div>
-              <div className="grid grid-cols-2 gap-3 pt-1">
-                <div className="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
-                  <p className="text-2xl font-black text-white">{activePartnerships.length}</p>
-                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Kemitraan Aktif</p>
-                </div>
-                <div className="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
-                  <p className="text-2xl font-black text-[#FF6B30]">{pendingRequests.length}</p>
-                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Menunggu Konfirmasi</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Widget 3: Discovery Quick Banner */}
-            <div className="soft-card p-6 bg-white space-y-3 shadow-xs border border-slate-200/80">
+            {/* Quick Discovery Navigation Banner */}
+            <div className="soft-card p-5 bg-white space-y-3 shadow-xs border border-slate-200/80">
               <div className="flex items-center gap-2">
-                <Compass className="w-5 h-5 text-[#FF6B30]" />
+                <Compass className="w-4.5 h-4.5 text-[#FF6B30]" />
                 <h3 className="text-sm font-bold text-slate-900">Temukan Partner Belajar Baru</h3>
               </div>
               <p className="text-xs text-slate-500 font-medium leading-relaxed">
