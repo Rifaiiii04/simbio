@@ -144,6 +144,31 @@ export function initWebSocketServer(httpServer: HttpServer): SocketIOServer {
       socket.to(data.partnershipId).emit('partner_stop_typing', data);
     });
 
+    // Focus Session Mutual Confirmation Events
+    socket.on('focus_request_start', (data: { partnershipId: string; requesterId: string; requesterName: string }) => {
+      socket.to(data.partnershipId).emit('focus_start_proposed', data);
+    });
+
+    socket.on('focus_reject_start', (data: { partnershipId: string }) => {
+      io?.to(data.partnershipId).emit('focus_start_rejected');
+    });
+
+    socket.on('focus_accept_start', (data: { partnershipId: string }) => {
+      io?.to(data.partnershipId).emit('focus_session_started');
+    });
+
+    socket.on('focus_request_pause', (data: { partnershipId: string; requesterId: string; requesterName: string }) => {
+      socket.to(data.partnershipId).emit('focus_pause_proposed', data);
+    });
+
+    socket.on('focus_reject_pause', (data: { partnershipId: string }) => {
+      io?.to(data.partnershipId).emit('focus_pause_rejected');
+    });
+
+    socket.on('focus_accept_pause', (data: { partnershipId: string }) => {
+      io?.to(data.partnershipId).emit('focus_session_paused');
+    });
+
     socket.on('disconnect', () => {
       logger.info({ socketId: socket.id }, 'WebSocket client disconnected');
     });

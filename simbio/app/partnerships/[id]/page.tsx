@@ -70,10 +70,22 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
   const [isSimbiAiTyping, setIsSimbiAiTyping] = useState(false);
+  const [isFocusModeActive, setIsFocusModeActive] = useState(false);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const chatBottomRef = useRef<HTMLDivElement | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isFocusModeActive) {
+        e.preventDefault();
+        e.returnValue = 'Mode Fokus sedang aktif! Apakah Anda yakin ingin keluar?';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isFocusModeActive]);
 
   // Audio Call Modal State
   const [showAudioCallModal, setShowAudioCallModal] = useState(false);
@@ -278,6 +290,12 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
             <div className="flex items-center gap-3">
               <Link
                 href="/partnerships"
+                onClick={(e) => {
+                  if (isFocusModeActive) {
+                    e.preventDefault();
+                    alert('🔒 Mode Fokus Sedang Berjalan! Anda tidak dapat keluar dari room chat ini hingga sesi fokus selesai atau jeda disetujui kedua belah pihak.');
+                  }
+                }}
                 className="w-10 h-10 rounded-xl bg-white border-2 border-[#0F172A] flex items-center justify-center text-[#0F172A] hover:bg-[#FACC15] transition shadow-[2.5px_2.5px_0px_0px_#0F172A]"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -467,7 +485,7 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
             {/* Input Form Bar */}
             <form onSubmit={handleSendMessage} className="flex gap-2 pt-2 relative">
               <div className="flex-1 relative">
-                {showMentionDropdown && (
+                {showMentionDropdown && !isFocusModeActive && (
                   <MentionDropdown
                     partnerName={partner.name}
                     partnerUsername={partner.username}
@@ -477,13 +495,22 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
                 <input
                   type="text"
                   required
+                  disabled={isFocusModeActive}
                   value={newMessageText}
                   onChange={(e) => handleInputChange(e.target.value)}
-                  placeholder="Tulis pesan atau ketik @ untuk mention @SimbiAI..."
-                  className="w-full px-4 py-3.5 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden focus:border-[#FF7A30]"
+                  placeholder={
+                    isFocusModeActive
+                      ? '🔒 Mode Fokus Aktif (Distraction-Free Mode). Chat dikunci hingga fokus selesai...'
+                      : 'Tulis pesan atau ketik @ untuk mention @SimbiAI...'
+                  }
+                  className="w-full px-4 py-3.5 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold focus:outline-hidden focus:border-[#FF7A30] disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                 />
               </div>
-              <button type="submit" disabled={!newMessageText.trim()} className="neo-button px-7 text-xs flex items-center gap-1.5 h-[48px]">
+              <button
+                type="submit"
+                disabled={isFocusModeActive || !newMessageText.trim()}
+                className="neo-button px-7 text-xs flex items-center gap-1.5 h-[48px] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <Send className="w-4 h-4 text-white" />
                 <span className="font-black">Send</span>
               </button>
@@ -501,7 +528,13 @@ export default function DedicatedPartnershipRoomPage({ params }: { params: Promi
             />
 
             {/* Widget: Shared Pomodoro Focus Session */}
-            <FocusTimerCard />
+            <FocusTimerCard
+              partnershipId={partnershipId}
+              myUserId={myUserId}
+              partnerName={partner?.name || 'Partner'}
+              socket={socketRef.current}
+              onFocusStateChange={(isActive) => setIsFocusModeActive(isActive)}
+            />
 
             <SimbiAvatar state="happy" message="Start an Audio Call session or AI Topic Exchange to elevate your reciprocal skill growth!" />
           </div>
