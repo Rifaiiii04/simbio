@@ -81,6 +81,8 @@ export default function ProfilePage() {
       return;
     }
 
+    let permObj: PermissionStatus | null = null;
+
     async function loadData() {
       try {
         setLoading(true);
@@ -92,13 +94,43 @@ export default function ProfilePage() {
         ]);
 
         const u = userData.user;
+        let isLocEnabled = !!u.locationEnabled;
+
+        // Auto turn off if browser permission is denied
+        if (typeof window !== 'undefined' && 'permissions' in navigator) {
+          try {
+            const perm = await navigator.permissions.query({ name: 'geolocation' });
+            permObj = perm;
+            if (perm.state === 'denied' && isLocEnabled) {
+              isLocEnabled = false;
+              apiFetch('/users/me/location', {
+                method: 'PUT',
+                body: JSON.stringify({ locationEnabled: false }),
+              }).catch(() => {});
+            }
+
+            // Real-time listener if user changes permission in browser settings
+            perm.onchange = () => {
+              if (perm.state === 'denied') {
+                setLocationEnabled(false);
+                apiFetch('/users/me/location', {
+                  method: 'PUT',
+                  body: JSON.stringify({ locationEnabled: false }),
+                }).catch(() => {});
+              }
+            };
+          } catch {
+            // Permissions API query not supported in some older browsers
+          }
+        }
+
         setProfile(u);
         setName(u.name || '');
         setUsername(u.username || '');
         setBio(u.bio || '');
         setCountry(u.country || 'Indonesia');
         setAvatarUrl(u.avatarUrl);
-        setLocationEnabled(!!u.locationEnabled);
+        setLocationEnabled(isLocEnabled);
 
         setUserSkills(userSkillsData.skills || []);
         setAllSkills(skillsData.skills || []);
@@ -112,6 +144,12 @@ export default function ProfilePage() {
     }
 
     loadData();
+
+    return () => {
+      if (permObj) {
+        permObj.onchange = null;
+      }
+    };
   }, [router]);
 
   // Handle Save Identity Form
@@ -249,9 +287,19 @@ export default function ProfilePage() {
             setLoadingLocation(false);
           }
         },
-        (err) => {
-          setErrorMsg(`Gagal membaca GPS: ${err.message}. Pastikan izin lokasi diberikan.`);
+        async (err) => {
           setLoadingLocation(false);
+          setLocationEnabled(false);
+          apiFetch('/users/me/location', {
+            method: 'PUT',
+            body: JSON.stringify({ locationEnabled: false }),
+          }).catch(() => {});
+
+          setErrorMsg(
+            err.code === 1
+              ? 'Izin akses lokasi belum diizinkan/ditolak. Fitur Live Location otomatis dinonaktifkan.'
+              : `Gagal membaca GPS: ${err.message}. Fitur Live Location otomatis dinonaktifkan.`,
+          );
         },
         { enableHighAccuracy: true, timeout: 10000 },
       );

@@ -16,7 +16,6 @@ import {
   ShieldCheck,
   Crosshair,
   Users,
-  Power,
   Handshake,
   MessageCircle,
   ExternalLink,
@@ -176,18 +175,55 @@ export function MapView() {
     setMounted(true);
   }, []);
 
-  // Load initial location and users
+  // Load initial location and users with automatic GPS permission verification
   useEffect(() => {
+    let permObj: PermissionStatus | null = null;
+
     async function init() {
       try {
         const [meRes, mapRes] = await Promise.all([
           apiFetch<{ user: { locationEnabled: boolean; latitude: number | null; longitude: number | null } }>('/users/me'),
           apiFetch<{ users: MapUser[] }>('/discovery/map'),
         ]);
+
+        let isEnabled = meRes.user.locationEnabled;
+
+        // Auto turn off if browser permission is denied
+        if (typeof window !== 'undefined' && 'permissions' in navigator) {
+          try {
+            const perm = await navigator.permissions.query({ name: 'geolocation' });
+            permObj = perm;
+            if (perm.state === 'denied' && isEnabled) {
+              isEnabled = false;
+              apiFetch('/users/me/location', {
+                method: 'PUT',
+                body: JSON.stringify({ locationEnabled: false }),
+              }).catch(() => {});
+            }
+
+            // Real-time listener if user changes permission in browser settings
+            perm.onchange = () => {
+              if (perm.state === 'denied') {
+                setLocationStatus((prev) => (prev ? { ...prev, locationEnabled: false, latitude: null, longitude: null } : null));
+                if (selfMarkerRef.current) {
+                  selfMarkerRef.current.remove();
+                  selfMarkerRef.current = null;
+                }
+                apiFetch('/users/me/location', {
+                  method: 'PUT',
+                  body: JSON.stringify({ locationEnabled: false }),
+                }).catch(() => {});
+              }
+            };
+          } catch {
+            // Permissions API query not supported in some older browsers
+          }
+        }
+
         const loc = {
-          locationEnabled: meRes.user.locationEnabled,
-          latitude: meRes.user.latitude ?? null,
-          longitude: meRes.user.longitude ?? null,
+          locationEnabled: isEnabled,
+          latitude: isEnabled ? (meRes.user.latitude ?? null) : null,
+          longitude: isEnabled ? (meRes.user.longitude ?? null) : null,
         };
         setLocationStatus(loc);
         locationStatusRef.current = loc;
@@ -199,6 +235,12 @@ export function MapView() {
       }
     }
     init();
+
+    return () => {
+      if (permObj) {
+        permObj.onchange = null;
+      }
+    };
   }, []);
 
   // Initialize Leaflet
@@ -343,12 +385,22 @@ export function MapView() {
           setLoadingLocation(false);
         }
       },
-      (err) => {
+      async (err) => {
         setLoadingLocation(false);
+        setLocationStatus((prev) => (prev ? { ...prev, locationEnabled: false, latitude: null, longitude: null } : null));
+        if (selfMarkerRef.current) {
+          selfMarkerRef.current.remove();
+          selfMarkerRef.current = null;
+        }
+        apiFetch('/users/me/location', {
+          method: 'PUT',
+          body: JSON.stringify({ locationEnabled: false }),
+        }).catch(() => {});
+
         setGeoError(
           err.code === 1
-            ? 'Akses lokasi ditolak. Aktifkan izin lokasi di browser lalu coba lagi.'
-            : 'Gagal mendapatkan lokasi GPS.',
+            ? 'Izin akses lokasi belum diizinkan/ditolak. Fitur Live Location otomatis dinonaktifkan.'
+            : 'Gagal mendapatkan koordinat GPS. Fitur Live Location otomatis dinonaktifkan.',
         );
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
@@ -415,13 +467,13 @@ export function MapView() {
         </div>
 
         {/* Action Toggle Buttons */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
           {geoError && <span className="text-xs font-bold text-red-600">{geoError}</span>}
 
           {locationStatus?.locationEnabled && locationStatus.latitude != null && (
             <button
               onClick={handleCenterOnMe}
-              className="px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 text-xs font-black transition flex items-center gap-1.5 shadow-2xs active:scale-95"
+              className="px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 text-xs font-black transition flex items-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
               title="Arahkan peta langsung ke posisimu"
             >
               <Crosshair className="w-3.5 h-3.5 text-blue-600" />
@@ -429,28 +481,50 @@ export function MapView() {
             </button>
           )}
 
-          {locationStatus?.locationEnabled ? (
+          {/* Modern Toggle Switch */}
+          <div className="flex items-center gap-2.5">
+            <span className="text-xs font-bold text-slate-600 hidden sm:inline select-none">
+              {loadingLocation
+                ? 'Memproses...'
+                : locationStatus?.locationEnabled
+                ? 'Aktif'
+                : 'Nonaktif'}
+            </span>
             <button
-              onClick={handleDisableLocation}
-              className="px-3.5 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:text-red-600 hover:border-red-200 hover:bg-red-50 text-xs font-bold transition flex items-center gap-1.5"
-            >
-              <Power className="w-3.5 h-3.5 text-slate-400" />
-              <span>Nonaktifkan Lokasi</span>
-            </button>
-          ) : (
-            <button
-              onClick={handleEnableLocation}
+              type="button"
+              role="switch"
+              aria-checked={!!locationStatus?.locationEnabled}
+              aria-label="Toggle Live Location"
+              onClick={
+                locationStatus?.locationEnabled
+                  ? handleDisableLocation
+                  : handleEnableLocation
+              }
               disabled={loadingLocation}
-              className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-[#FF6B30] to-orange-500 hover:from-[#E0531A] hover:to-orange-600 text-white text-xs font-black transition flex items-center gap-1.5 shadow-sm disabled:opacity-60"
+              className={`relative inline-flex h-7 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#FF6B30] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
+                locationStatus?.locationEnabled
+                  ? 'bg-emerald-500 shadow-sm shadow-emerald-500/20'
+                  : 'bg-slate-300'
+              }`}
             >
-              {loadingLocation ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
-              ) : (
-                <MapPin className="w-3.5 h-3.5 text-white" />
-              )}
-              <span>Aktifkan Lokasimu Sekarang</span>
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none flex items-center justify-center h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-300 ease-in-out ${
+                  locationStatus?.locationEnabled ? 'translate-x-7' : 'translate-x-0'
+                }`}
+              >
+                {loadingLocation ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#FF6B30]" />
+                ) : (
+                  <span
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      locationStatus?.locationEnabled ? 'bg-emerald-500' : 'bg-slate-400'
+                    }`}
+                  />
+                )}
+              </span>
             </button>
-          )}
+          </div>
         </div>
       </div>
 
