@@ -137,7 +137,7 @@ export default function ProfilePage() {
         setReputation(reputationData.reputation);
         setReputationLoading(false);
       } catch (err: unknown) {
-        setErrorMsg(err instanceof Error ? err.message : 'Gagal memuat data profil');
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to load profile data');
       } finally {
         setLoading(false);
       }
@@ -172,10 +172,10 @@ export default function ProfilePage() {
       });
 
       setProfile(res.user);
-      setSuccessMsg('Profil berhasil diperbarui!');
+      setSuccessMsg('Profile updated successfully!');
       setTimeout(() => setSuccessMsg(null), 4000);
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Gagal menyimpan profil');
+      setErrorMsg(err instanceof Error ? err.message : 'Failed to save profile');
     } finally {
       setSaving(false);
     }
@@ -185,7 +185,7 @@ export default function ProfilePage() {
   const handleAvatarUpdated = (newUrl: string) => {
     setAvatarUrl(newUrl);
     setProfile((prev) => (prev ? { ...prev, avatarUrl: newUrl } : null));
-    setSuccessMsg('Foto profil berhasil diunggah dan disimpan!');
+    setSuccessMsg('Profile photo updated successfully!');
     setTimeout(() => setSuccessMsg(null), 4000);
   };
 
@@ -213,10 +213,10 @@ export default function ProfilePage() {
       setNewSkillId('');
       setCustomSkillName('');
       setNewSkillLevel('INTERMEDIATE');
-      setSuccessMsg('Skill berhasil ditambahkan!');
+      setSuccessMsg('Skill added successfully!');
       setTimeout(() => setSuccessMsg(null), 4000);
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Gagal menambahkan skill');
+      setErrorMsg(err instanceof Error ? err.message : 'Failed to add skill');
     } finally {
       setAddingSkill(false);
     }
@@ -230,10 +230,10 @@ export default function ProfilePage() {
         method: 'DELETE',
       });
       setUserSkills((prev) => prev.filter((s) => s.id !== userSkillId));
-      setSuccessMsg('Skill berhasil dihapus');
+      setSuccessMsg('Skill removed successfully');
       setTimeout(() => setSuccessMsg(null), 3000);
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Gagal menghapus skill');
+      setErrorMsg(err instanceof Error ? err.message : 'Failed to remove skill');
     } finally {
       setDeletingSkillId(null);
     }
@@ -252,17 +252,17 @@ export default function ProfilePage() {
           body: JSON.stringify({ locationEnabled: false }),
         });
         setLocationEnabled(false);
-        setSuccessMsg('Live location berhasil dinonaktifkan.');
+        setSuccessMsg('Live location disabled.');
         setTimeout(() => setSuccessMsg(null), 4000);
       } catch (err: unknown) {
-        setErrorMsg(err instanceof Error ? err.message : 'Gagal mengubah status lokasi');
+        setErrorMsg(err instanceof Error ? err.message : 'Failed to update location status');
       } finally {
         setLoadingLocation(false);
       }
     } else {
       // Enable via GPS
       if (!('geolocation' in navigator)) {
-        setErrorMsg('Browser Anda tidak mendukung Geolocation GPS');
+        setErrorMsg('Your browser does not support GPS geolocation');
         setLoadingLocation(false);
         return;
       }
@@ -279,10 +279,10 @@ export default function ProfilePage() {
               }),
             });
             setLocationEnabled(true);
-            setSuccessMsg('Live location berhasil diaktifkan!');
+            setSuccessMsg('Live location enabled successfully!');
             setTimeout(() => setSuccessMsg(null), 4000);
           } catch (err: unknown) {
-            setErrorMsg(err instanceof Error ? err.message : 'Gagal menyimpan koordinat lokasi');
+            setErrorMsg(err instanceof Error ? err.message : 'Failed to save location coordinates');
           } finally {
             setLoadingLocation(false);
           }
@@ -297,8 +297,8 @@ export default function ProfilePage() {
 
           setErrorMsg(
             err.code === 1
-              ? 'Izin akses lokasi belum diizinkan/ditolak. Fitur Live Location otomatis dinonaktifkan.'
-              : `Gagal membaca GPS: ${err.message}. Fitur Live Location otomatis dinonaktifkan.`,
+              ? 'Location permission denied by browser. Live Location disabled.'
+              : `Failed to read GPS: ${err.message}. Live Location disabled.`,
           );
         },
         { enableHighAccuracy: true, timeout: 10000 },
@@ -313,7 +313,7 @@ export default function ProfilePage() {
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3 text-slate-500">
             <Loader2 className="w-8 h-8 animate-spin text-[#FF6B30]" />
-            <span className="text-xs font-bold">Memuat profil Simbioly Anda...</span>
+            <span className="text-xs font-bold">Loading your Simbioly profile...</span>
           </div>
         </div>
       </div>
@@ -327,13 +327,13 @@ export default function ProfilePage() {
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center max-w-md space-y-4">
             <AlertCircle className="w-10 h-10 mx-auto text-red-500" />
-            <h3 className="text-lg font-black text-slate-900">Gagal Memuat Profil</h3>
-            <p className="text-xs text-slate-500">{errorMsg || 'Terjadi kesalahan saat memuat data akun Anda.'}</p>
+            <h3 className="text-lg font-black text-slate-900">Failed to Load Profile</h3>
+            <p className="text-xs text-slate-500">{errorMsg || 'An error occurred while loading your account data.'}</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-2.5 rounded-xl bg-[#FF6B30] text-white text-xs font-black hover:bg-[#E0531A] transition"
+              className="px-6 py-2.5 rounded-xl bg-[#FF6B30] text-white text-xs font-black hover:bg-[#E0531A] transition cursor-pointer"
             >
-              Coba Lagi
+              Try Again
             </button>
           </div>
         </div>
@@ -383,7 +383,7 @@ export default function ProfilePage() {
         {/* 2. REPUTATION STATISTICS */}
         <ProfileReputationStats reputation={reputation} loading={reputationLoading} />
 
-        {/* 2. IDENTITY & PERSONAL INFO FORM */}
+        {/* 3. IDENTITY & PERSONAL INFO FORM */}
         <form onSubmit={handleSaveProfile} className="space-y-6">
           <ProfileIdentityForm
             name={name}
@@ -396,7 +396,7 @@ export default function ProfilePage() {
             onChangeCountry={setCountry}
           />
 
-          {/* 3. SKILLS MATRIX SECTION */}
+          {/* 4. SKILLS MATRIX SECTION */}
           <ProfileSkillsSection
             userSkills={userSkills}
             onOpenAddSkill={(type) => setShowAddSkillModal(type)}
@@ -404,7 +404,7 @@ export default function ProfilePage() {
             deletingSkillId={deletingSkillId}
           />
 
-          {/* 4. LOCATION PREFERENCES */}
+          {/* 5. LOCATION PREFERENCES */}
           <ProfileLocationSettings
             locationEnabled={locationEnabled}
             onToggleLocation={handleToggleLocation}
@@ -419,7 +419,7 @@ export default function ProfilePage() {
               className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#FF6B30] to-orange-500 hover:from-[#E0531A] hover:to-orange-600 text-white text-xs font-black transition flex items-center gap-2 shadow-md hover:shadow-orange-200 active:scale-95 disabled:opacity-60 cursor-pointer"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Save className="w-4 h-4 text-white" />}
-              <span>Simpan Semua Perubahan</span>
+              <span>Save All Changes</span>
             </button>
           </div>
         </form>

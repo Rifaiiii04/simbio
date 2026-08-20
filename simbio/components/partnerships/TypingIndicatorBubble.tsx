@@ -24,7 +24,7 @@ export function TypingIndicatorBubble({
             <Sparkles className="w-4 h-4 text-white animate-spin" />
           </div>
           <div className="p-3 rounded-2xl bg-sky-50 text-sky-800 border border-sky-200 text-xs font-bold flex items-center gap-2 shadow-xs">
-            <span>Simbi AI sedang berpikir dan mengetik balasan...</span>
+            <span>Simbi AI is thinking and composing a reply...</span>
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-sky-600 animate-bounce" style={{ animationDelay: '0ms' }} />
               <span className="w-1.5 h-1.5 rounded-full bg-sky-600 animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -42,7 +42,7 @@ export function TypingIndicatorBubble({
           </div>
           <div className="p-3 rounded-2xl bg-white text-slate-800 border border-slate-200 text-xs font-bold flex items-center gap-2 shadow-xs">
             <MessageSquare className="w-3.5 h-3.5 text-[#FF6B30]" />
-            <span>{partnerName} sedang mengetik...</span>
+            <span>{partnerName} is typing...</span>
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FF6B30] animate-bounce" style={{ animationDelay: '0ms' }} />
               <span className="w-1.5 h-1.5 rounded-full bg-[#FF6B30] animate-bounce" style={{ animationDelay: '150ms' }} />

@@ -17,7 +17,7 @@ export function MentionDropdown({
     {
       id: 'simbi_ai',
       label: '@SimbiAI',
-      description: 'Tanyakan sesuatu ke AI Companion Simbi',
+      description: 'Ask a question or request roadmap from Simbi AI',
       icon: Sparkles,
       color: 'bg-sky-600 text-white',
     },
@@ -33,7 +33,7 @@ export function MentionDropdown({
   return (
     <div className="absolute bottom-full mb-2 left-0 w-72 bg-white border border-slate-200 rounded-2xl p-2 shadow-lg z-50 animate-fadeIn">
       <div className="text-[10px] font-bold uppercase text-slate-400 px-2 py-1 tracking-wider border-b border-slate-100">
-        Pilih Mention:
+        Select Mention:
       </div>
       <div className="space-y-1 pt-1">
         {options.map((opt) => {
@@ -43,7 +43,7 @@ export function MentionDropdown({
               key={opt.id}
               type="button"
               onClick={() => onSelectMention(opt.label)}
-              className="w-full p-2 rounded-xl text-left hover:bg-slate-50 border border-transparent hover:border-slate-200 transition flex items-center gap-2.5 group"
+              className="w-full p-2 rounded-xl text-left hover:bg-slate-50 border border-transparent hover:border-slate-200 transition flex items-center gap-2.5 group cursor-pointer"
             >
               <div className={`w-8 h-8 rounded-xl ${opt.color} flex items-center justify-center font-bold flex-shrink-0 shadow-2xs`}>
                 <Icon className="w-4 h-4" />

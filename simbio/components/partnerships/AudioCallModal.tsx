@@ -25,7 +25,7 @@ interface PartnerSummary {
   avatarUrl: string | null;
 }
 
-interface AudioSessionData {
+export interface AudioSessionData {
   id: string;
   partnershipId: string;
   mode: 'NORMAL' | 'AI_TOPIC_EXCHANGE';

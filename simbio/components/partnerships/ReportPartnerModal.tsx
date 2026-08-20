@@ -56,14 +56,14 @@ export function ReportPartnerModal({
               <ShieldAlert className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-[#0F172A]">Laporkan Partner</h2>
-              <p className="text-xs text-gray-600 font-bold">Report partner: {partnerName}</p>
+              <h2 className="text-xl font-black text-[#0F172A]">Report Partner</h2>
+              <p className="text-xs text-gray-600 font-bold">Reporting partner: {partnerName}</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-xl bg-white border-2 border-[#0F172A] font-black text-sm flex items-center justify-center text-[#0F172A] hover:bg-red-500 hover:text-white transition shadow-[2px_2px_0px_0px_#0F172A]"
+            className="w-9 h-9 rounded-xl bg-white border-2 border-[#0F172A] font-black text-sm flex items-center justify-center text-[#0F172A] hover:bg-red-500 hover:text-white transition shadow-[2px_2px_0px_0px_#0F172A] cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -73,7 +73,7 @@ export function ReportPartnerModal({
         <div className="p-3.5 rounded-xl border-2 border-[#0F172A] bg-[#FFF5EF] text-[#FF7A30] text-xs font-bold flex items-start gap-2.5 shadow-[2px_2px_0px_0px_#0F172A]">
           <AlertTriangle className="w-4 h-4 text-[#FF7A30] flex-shrink-0 mt-0.5" />
           <span>
-            Laporan ini bersifat rahasia dan akan ditinjau oleh tim moderator Simbioly. Penyalahgunaan fitur laporan palsu dapat berakibat sanksi akun.
+            This report is confidential and will be reviewed by the Simbioly moderation team. False reporting may result in account restrictions.
           </span>
         </div>
 
@@ -81,29 +81,29 @@ export function ReportPartnerModal({
         <div className="space-y-4">
           {/* Reason Select */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-black text-[#0F172A] uppercase">Kategori Alasan Laporan:</label>
+            <label className="text-[11px] font-black text-[#0F172A] uppercase">Reason Category:</label>
             <select
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               className="w-full px-3 py-2.5 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold text-[#0F172A] focus:outline-hidden focus:border-red-500 shadow-[2px_2px_0px_0px_#0F172A]"
             >
-              <option value="INAPPROPRIATE_BEHAVIOR">Perilaku Tidak Layak / Toksik</option>
-              <option value="SPAM">Spam / Iklan Tidak Diinginkan</option>
-              <option value="HARASSMENT">Pelecehan / Perundungan</option>
-              <option value="SCAM">Penipuan / Indikasi Fraud</option>
-              <option value="OTHER">Lainnya</option>
+              <option value="INAPPROPRIATE_BEHAVIOR">Inappropriate / Toxic Behavior</option>
+              <option value="SPAM">Spam / Unsolicited Advertising</option>
+              <option value="HARASSMENT">Harassment / Bullying</option>
+              <option value="SCAM">Fraud / Scam Suspicion</option>
+              <option value="OTHER">Other</option>
             </select>
           </div>
 
           {/* Description Textarea */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-black text-[#0F172A] uppercase">Detail / Catatan Laporan (Opsional):</label>
+            <label className="text-[11px] font-black text-[#0F172A] uppercase">Report Details & Notes (Optional):</label>
             <textarea
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full p-3 text-xs bg-[#FFFDF7] rounded-xl border-2 border-[#0F172A] font-bold text-[#0F172A] focus:outline-hidden focus:border-red-500 shadow-[3px_3px_0px_0px_#0F172A]"
-              placeholder="Jelaskan detail kejadian atau pelanggaran yang dilakukan partner..."
+              placeholder="Provide context or details about the incident..."
             />
           </div>
         </div>
@@ -113,18 +113,18 @@ export function ReportPartnerModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl bg-gray-100 border-2 border-[#0F172A] text-xs font-black hover:bg-gray-200 transition shadow-[2px_2px_0px_0px_#0F172A]"
+            className="px-5 py-2.5 rounded-xl bg-gray-100 border-2 border-[#0F172A] text-xs font-black hover:bg-gray-200 transition shadow-[2px_2px_0px_0px_#0F172A] cursor-pointer"
           >
-            Batal
+            Cancel
           </button>
           <button
             type="button"
             disabled={loading}
             onClick={handleSubmitReport}
-            className="px-6 py-2.5 rounded-xl bg-red-600 text-white border-2 border-[#0F172A] text-xs font-black hover:bg-red-700 transition flex items-center gap-2 shadow-[3px_3px_0px_0px_#0F172A]"
+            className="px-6 py-2.5 rounded-xl bg-red-600 text-white border-2 border-[#0F172A] text-xs font-black hover:bg-red-700 transition flex items-center gap-2 shadow-[3px_3px_0px_0px_#0F172A] cursor-pointer"
           >
             <Send className="w-4 h-4" />
-            <span>{loading ? 'Mengirim...' : 'Kirim Laporan'}</span>
+            <span>{loading ? 'Submitting...' : 'Submit Report'}</span>
           </button>
         </div>
       </div>

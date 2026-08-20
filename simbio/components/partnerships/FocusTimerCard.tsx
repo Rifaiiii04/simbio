@@ -156,7 +156,7 @@ export function FocusTimerCard({
       <div className="flex items-center justify-between border-b border-amber-200/60 pb-2">
         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider">
           <Clock className="w-4 h-4 text-[#FF6B30]" />
-          <span>Focus Belajar Bareng (Sync)</span>
+          <span>Focus Study Session (Sync)</span>
         </div>
         <span className="soft-badge bg-white text-slate-800 border-amber-200 text-[10px] font-mono">
           25 Min Pomodoro
@@ -176,16 +176,14 @@ export function FocusTimerCard({
       )}
 
       {/* State Machine UI Controls */}
-
-      {/* STATE 1: IDLE */}
       {focusState === 'IDLE' && (
         <button
           type="button"
           onClick={handleProposeStart}
-          className="w-full soft-button bg-slate-900 hover:bg-slate-800 text-white py-3 text-xs flex items-center justify-center gap-2 shadow-xs"
+          className="w-full soft-button bg-slate-900 hover:bg-slate-800 text-white py-3 text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer"
         >
           <Play className="w-4 h-4 fill-current" />
-          <span>Ajukan Start Focus Session 🚀</span>
+          <span>Propose Focus Session</span>
         </button>
       )}
 
@@ -195,26 +193,26 @@ export function FocusTimerCard({
           {isRequester ? (
             <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
               <Clock className="w-4 h-4 text-[#FF6B30] animate-spin" />
-              <span>Menunggu Ready dari {partnerName}... (1/2)</span>
+              <span>Waiting for {partnerName} to be ready... (1/2)</span>
             </div>
           ) : (
             <div className="space-y-2">
               <p className="text-xs font-bold text-slate-900">
-                🔥 {proposalRequesterName || partnerName} mengajak Start Focus Session (25 Min)! Apakah kamu Siap (Ready)?
+                {proposalRequesterName || partnerName} proposes to start a Focus Session (25 Min). Are you ready?
               </p>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={handleAcceptStart}
-                  className="flex-1 soft-button bg-[#10B981] hover:bg-emerald-600 text-white py-2 text-xs flex items-center justify-center gap-1"
+                  className="flex-1 soft-button bg-[#10B981] hover:bg-emerald-600 text-white py-2 text-xs flex items-center justify-center gap-1 cursor-pointer"
                 >
                   <Check className="w-4 h-4 stroke-[3]" />
-                  <span>Ready & Start! 🚀</span>
+                  <span>Ready & Start</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleRejectStart}
-                  className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold hover:bg-red-50 hover:text-red-600 transition"
+                  className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold hover:bg-red-50 hover:text-red-600 transition cursor-pointer"
                 >
                   <X className="w-4 h-4 text-slate-600 hover:text-red-600" />
                 </button>
@@ -229,13 +227,13 @@ export function FocusTimerCard({
         <div className="space-y-2.5">
           <div className="p-2.5 bg-sky-50 border border-sky-200 rounded-xl text-xs font-bold text-sky-800 flex items-center justify-center gap-1.5 shadow-2xs">
             <Lock className="w-4 h-4 text-sky-600" />
-            <span>Mode Fokus Aktif (Chat & Navigasi Dikunci)</span>
+            <span>Focus Mode Active (Chat & Navigation Locked)</span>
           </div>
 
           <button
             type="button"
             onClick={handleProposePause}
-            className="w-full soft-button bg-[#FF6B30] text-white py-2.5 text-xs flex items-center justify-center gap-2"
+            className="w-full soft-button bg-[#FF6B30] text-white py-2.5 text-xs flex items-center justify-center gap-2 cursor-pointer"
           >
             <Pause className="w-4 h-4" />
             <span>Request Pause / End Focus</span>
@@ -249,28 +247,28 @@ export function FocusTimerCard({
           {isRequester ? (
             <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
               <Clock className="w-4 h-4 text-[#FF6B30] animate-spin" />
-              <span>Permintaan Jeda Terkirim... Menunggu persetujuan {partnerName}</span>
+              <span>Pause Request Sent... Waiting for {partnerName}&apos;s agreement</span>
             </div>
           ) : (
             <div className="space-y-2">
               <p className="text-xs font-bold text-slate-900">
-                ⏸️ {proposalRequesterName || partnerName} meminta untuk menghentikan sementara Focus Session. Apakah kamu setuju?
+                {proposalRequesterName || partnerName} requested to pause the Focus Session. Do you agree?
               </p>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={handleAcceptPause}
-                  className="flex-1 soft-button bg-[#FF6B30] text-white py-2 text-xs flex items-center justify-center gap-1"
+                  className="flex-1 soft-button bg-[#FF6B30] text-white py-2 text-xs flex items-center justify-center gap-1 cursor-pointer"
                 >
                   <Check className="w-4 h-4 stroke-[3]" />
-                  <span>Setujui Jeda 🤝</span>
+                  <span>Agree to Pause</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleRejectPause}
-                  className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold hover:bg-slate-200 transition text-slate-700"
+                  className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold hover:bg-slate-200 transition cursor-pointer"
                 >
-                  <span>Lanjutkan Fokus</span>
+                  <X className="w-4 h-4 text-slate-600" />
                 </button>
               </div>
             </div>

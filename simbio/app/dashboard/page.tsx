@@ -46,7 +46,7 @@ export default function UserDashboard() {
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="text-[#FF6B30] font-bold text-sm animate-pulse flex items-center gap-2">
             <Sparkles className="w-5 h-5 animate-spin" />
-            <span>Memuat Dashboard...</span>
+            <span>Loading Dashboard...</span>
           </div>
         </div>
       </div>
@@ -85,7 +85,7 @@ export default function UserDashboard() {
                 <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-slate-400" />
                 </div>
-                <p className="text-xs font-bold text-slate-500">Pilih kandidat untuk melihat statistik</p>
+                <p className="text-xs font-bold text-slate-500">Select a candidate to view statistics</p>
               </div>
             )}
           </div>

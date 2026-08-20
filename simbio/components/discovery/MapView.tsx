@@ -85,7 +85,7 @@ function createSelfMarker(L: any, lat: number, lng: number): any {
         background:#1E293B;color:#FFFFFF;font-size:10px;font-weight:900;
         padding:2px 8px;border-radius:99px;white-space:nowrap;
         box-shadow:0 2px 6px rgba(0,0,0,0.3);letter-spacing:0.3px;
-      ">Kamu 📍</div>
+      ">You</div>
     </div>
   `;
   const icon = L.divIcon({
@@ -112,9 +112,9 @@ function createPartnerMarker(L: any, u: MapUser): any {
     : 'rgba(255,107,48,0.45)';
 
   const badgeText = isConnected
-    ? '🤝 Terhubung'
+    ? 'Connected'
     : isPending
-    ? '⏳ Menunggu'
+    ? 'Pending'
     : u.teachSkills[0]?.name
     ? u.teachSkills[0].name.slice(0, 13)
     : 'Partner';
@@ -352,7 +352,7 @@ export function MapView() {
 
   const handleEnableLocation = () => {
     if (!navigator.geolocation) {
-      setGeoError('Browser Anda tidak mendukung geolocation.');
+      setGeoError('Your browser does not support geolocation.');
       return;
     }
     setLoadingLocation(true);
@@ -380,7 +380,7 @@ export function MapView() {
           }
         } catch (err) {
           console.error(err);
-          setGeoError('Gagal menyimpan lokasi. Coba lagi.');
+          setGeoError('Failed to save location. Please try again.');
         } finally {
           setLoadingLocation(false);
         }
@@ -399,8 +399,8 @@ export function MapView() {
 
         setGeoError(
           err.code === 1
-            ? 'Izin akses lokasi belum diizinkan/ditolak. Fitur Live Location otomatis dinonaktifkan.'
-            : 'Gagal mendapatkan koordinat GPS. Fitur Live Location otomatis dinonaktifkan.',
+            ? 'Location access denied by browser. Live Location disabled.'
+            : 'Failed to retrieve GPS location coordinates. Live Location disabled.',
         );
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
@@ -454,14 +454,14 @@ export function MapView() {
               />
               <h3 className="text-xs sm:text-sm font-black text-slate-900">
                 {locationStatus?.locationEnabled
-                  ? 'Status Lokasi: Aktif (Terlihat di Peta)'
-                  : 'Status Lokasi: Nonaktif'}
+                  ? 'Location Status: Active (Visible on Map)'
+                  : 'Location Status: Disabled'}
               </h3>
             </div>
             <p className="text-[11px] text-slate-500 font-medium">
               {locationStatus?.locationEnabled
-                ? 'Posisimu aktif. Partner terdekat dapat menemukanmu di peta.'
-                : 'Aktifkan lokasi agar profilmu muncul di peta reciprocal partner.'}
+                ? 'Your location is active. Nearby partners can discover you on the map.'
+                : 'Enable location so your profile appears on the reciprocal partner map.'}
             </p>
           </div>
         </div>
@@ -474,10 +474,10 @@ export function MapView() {
             <button
               onClick={handleCenterOnMe}
               className="px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 text-xs font-black transition flex items-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
-              title="Arahkan peta langsung ke posisimu"
+              title="Center map on your location"
             >
               <Crosshair className="w-3.5 h-3.5 text-blue-600" />
-              <span>Ke Lokasiku</span>
+              <span>My Location</span>
             </button>
           )}
 
@@ -485,10 +485,10 @@ export function MapView() {
           <div className="flex items-center gap-2.5">
             <span className="text-xs font-bold text-slate-600 hidden sm:inline select-none">
               {loadingLocation
-                ? 'Memproses...'
+                ? 'Processing...'
                 : locationStatus?.locationEnabled
-                ? 'Aktif'
-                : 'Nonaktif'}
+                ? 'On'
+                : 'Off'}
             </span>
             <button
               type="button"
@@ -537,27 +537,27 @@ export function MapView() {
 
           <div className="max-w-md space-y-1.5">
             <span className="soft-badge bg-slate-100 text-slate-700 border-slate-200 text-xs font-black">
-              🔒 Akses Peta Dinonaktifkan
+              Location Access Disabled
             </span>
             <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Live Location Belum Aktif
+              Live Location is Off
             </h3>
             <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
-              Untuk melihat peta interaktif dan menemukan partner reciprocal di sekitar Anda, pastikan Anda telah menghidupkan fitur live location Anda.
+              To view the interactive map and discover reciprocal learning partners near you, please turn on your live location.
             </p>
           </div>
 
           <button
             onClick={handleEnableLocation}
             disabled={loadingLocation}
-            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#FF6B30] to-orange-500 hover:from-[#E0531A] hover:to-orange-600 text-white text-xs font-black transition flex items-center gap-2 shadow-lg hover:shadow-orange-200 active:scale-95 disabled:opacity-60"
+            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#FF6B30] to-orange-500 hover:from-[#E0531A] hover:to-orange-600 text-white text-xs font-black transition flex items-center gap-2 shadow-lg hover:shadow-orange-200 active:scale-95 disabled:opacity-60 cursor-pointer"
           >
             {loadingLocation ? (
               <Loader2 className="w-4 h-4 animate-spin text-white" />
             ) : (
               <MapPin className="w-4 h-4 text-white" />
             )}
-            <span>Hidupkan Live Location Sekarang 📍</span>
+            <span>Enable Live Location</span>
           </button>
 
           {geoError && (
@@ -575,7 +575,7 @@ export function MapView() {
               <div className="absolute inset-0 z-30 flex items-center justify-center bg-white/80 backdrop-blur-sm">
                 <div className="flex flex-col items-center gap-2">
                   <Loader2 className="w-8 h-8 animate-spin text-[#FF6B30]" />
-                  <span className="text-xs font-black text-slate-700">Menyiapkan peta interaktif...</span>
+                  <span className="text-xs font-black text-slate-700">Loading interactive map...</span>
                 </div>
               </div>
             )}
@@ -586,26 +586,26 @@ export function MapView() {
             <div className="absolute top-3.5 left-14 z-[400] bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-2xl shadow-md border border-slate-200/80 flex items-center gap-3 text-[10px] font-black text-slate-700">
               <div className="flex items-center gap-1">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-600 border border-white" />
-                <span>Kamu</span>
+                <span>You</span>
               </div>
               <div className="flex items-center gap-1">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
-                <span>Terhubung ({connectedPartners.length})</span>
+                <span>Connected ({connectedPartners.length})</span>
               </div>
               <div className="flex items-center gap-1">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#FF6B30] border border-white" />
-                <span>Belum Terhubung</span>
+                <span>Available</span>
               </div>
             </div>
 
             {/* Floating Center On Me Button */}
             <button
               onClick={handleCenterOnMe}
-              className="absolute bottom-4 right-4 z-[400] bg-white/95 backdrop-blur-md text-slate-800 text-xs font-black px-3.5 py-2.5 rounded-2xl shadow-xl border border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 transition active:scale-95 group hover:border-blue-400"
-              title="Arahkan peta langsung ke posisi saya"
+              className="absolute bottom-4 right-4 z-[400] bg-white/95 backdrop-blur-md text-slate-800 text-xs font-black px-3.5 py-2.5 rounded-2xl shadow-xl border border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 transition active:scale-95 group hover:border-blue-400 cursor-pointer"
+              title="Center map on my location"
             >
               <Crosshair className="w-4 h-4 text-blue-600 group-hover:rotate-90 transition-transform duration-300" />
-              <span>Lokasi Saya 📍</span>
+              <span>My Location</span>
             </button>
           </div>
 
@@ -616,10 +616,10 @@ export function MapView() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <Handshake className="w-4 h-4 text-emerald-600" />
-                  <h4 className="text-xs font-black text-slate-900">Partner Terhubung</h4>
+                  <h4 className="text-xs font-black text-slate-900">Connected Partners</h4>
                 </div>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                  {connectedPartners.length} Terhubung
+                  {connectedPartners.length} Connected
                 </span>
               </div>
 
@@ -630,7 +630,7 @@ export function MapView() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari nama atau skill..."
+                  placeholder="Search name or skill..."
                   className="w-full pl-8 pr-3 py-1.5 text-xs bg-white rounded-xl border border-slate-200 font-medium focus:outline-hidden focus:border-emerald-500"
                 />
               </div>
@@ -641,9 +641,9 @@ export function MapView() {
               {displayedSidebarUsers.length === 0 ? (
                 <div className="text-center py-12 px-4 space-y-2 text-slate-400">
                   <Handshake className="w-8 h-8 mx-auto text-slate-300" />
-                  <p className="text-xs font-bold text-slate-700">Belum Ada Partner Terhubung</p>
+                  <p className="text-xs font-bold text-slate-700">No Connected Partners Yet</p>
                   <p className="text-[11px] text-slate-500 leading-relaxed">
-                    Klik pin oranye pada peta untuk menghubungkan skill exchange dengan partner baru di sekitarmu!
+                    Click an available partner pin on the map to propose a skill exchange with nearby peers!
                   </p>
                 </div>
               ) : (
@@ -673,14 +673,14 @@ export function MapView() {
                             </div>
                             <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium">
                               <MapPin className="w-3 h-3 text-[#FF6B30]" />
-                              <span>{u.distanceKm != null ? `${u.distanceKm} km` : u.country || 'Indonesia'}</span>
+                              <span>{u.distanceKm != null ? `${u.distanceKm} km` : u.country || 'Global'}</span>
                             </div>
                           </div>
                         </div>
 
                         {/* Status Tag */}
                         <span className="text-[9px] font-black px-2 py-0.5 rounded-md shrink-0 bg-emerald-100 text-emerald-800 border border-emerald-300">
-                          Terhubung
+                          Connected
                         </span>
                       </div>
 
@@ -706,7 +706,7 @@ export function MapView() {
                           className="w-full py-1.5 px-3 rounded-xl bg-emerald-600 text-white text-[11px] font-black hover:bg-emerald-700 flex items-center justify-center gap-1.5 shadow-2xs transition"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
-                          <span>Chat Kemitraan</span>
+                          <span>Open Chat</span>
                         </Link>
                       </div>
                     </div>
@@ -729,13 +729,13 @@ export function MapView() {
               {/* Close Button Top Right */}
               <button
                 onClick={() => setSelectedUser(null)}
-                className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-slate-900/60 sm:bg-slate-100 sm:text-slate-600 backdrop-blur-md text-white flex items-center justify-center hover:bg-slate-900/80 sm:hover:bg-slate-200 transition"
+                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-md transition cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
 
-              {/* LEFT COLUMN: Large Portrait Photo (5 cols) */}
-              <div className="sm:col-span-5 relative bg-slate-950 min-h-[240px] sm:min-h-[380px]">
+              {/* LEFT COLUMN: Large Avatar Cover (5 cols) */}
+              <div className="sm:col-span-5 relative h-48 sm:h-auto min-h-[220px] bg-slate-900 overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={getAvatarUrl(selectedUser.avatarUrl, selectedUser.id)}
@@ -753,7 +753,7 @@ export function MapView() {
                         : 'bg-[#FF6B30]/90 text-white'
                     }`}
                   >
-                    {selectedUser.isConnected ? '🤝 Partner Terhubung' : '✨ Partner Baru'}
+                    {selectedUser.isConnected ? 'Connected Partner' : 'New Partner'}
                   </span>
                 </div>
               </div>
@@ -778,8 +778,8 @@ export function MapView() {
                       <MapPin className="w-3.5 h-3.5 shrink-0" />
                       <span>
                         {selectedUser.distanceKm != null
-                          ? `${selectedUser.distanceKm} km dari posisimu`
-                          : selectedUser.country || 'Indonesia'}
+                          ? `${selectedUser.distanceKm} km away`
+                          : selectedUser.country || 'Global'}
                       </span>
                     </div>
                   </div>
@@ -795,11 +795,11 @@ export function MapView() {
                 <div className="bg-slate-50 rounded-2xl p-4 space-y-2.5 border border-slate-100">
                   <span className="text-[11px] font-black uppercase text-emerald-700 flex items-center gap-1.5">
                     <BookOpen className="w-4 h-4 text-emerald-600" />
-                    <span>Skill Yang Bisa Diajarkan:</span>
+                    <span>Skills Offered to Teach:</span>
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedUser.teachSkills.length === 0 ? (
-                      <span className="text-xs text-slate-400 italic">Belum mencantumkan skill</span>
+                      <span className="text-xs text-slate-400 italic">No skills listed yet</span>
                     ) : (
                       selectedUser.teachSkills.map((s) => (
                         <span
@@ -817,9 +817,9 @@ export function MapView() {
                 <div className="flex gap-2.5 pt-2">
                   <button
                     onClick={() => setSelectedUser(null)}
-                    className="w-1/3 h-12 rounded-2xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-100 transition flex items-center justify-center"
+                    className="w-1/3 h-12 rounded-2xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-100 transition flex items-center justify-center cursor-pointer"
                   >
-                    Tutup
+                    Close
                   </button>
 
                   {selectedUser.isConnected ? (
@@ -828,7 +828,7 @@ export function MapView() {
                       className="w-2/3 h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition flex items-center justify-center gap-2 shadow-md"
                     >
                       <MessageCircle className="w-4 h-4" />
-                      <span>Buka Chat Kemitraan</span>
+                      <span>Open Chat Room</span>
                     </Link>
                   ) : (
                     <button
@@ -836,10 +836,10 @@ export function MapView() {
                         setProposalCandidate(toCandidate(selectedUser));
                         setSelectedUser(null);
                       }}
-                      className="w-2/3 h-12 rounded-2xl bg-gradient-to-r from-[#FF6B30] to-orange-500 text-white text-xs font-black hover:from-[#E0531A] hover:to-orange-600 transition flex items-center justify-center gap-2 shadow-md"
+                      className="w-2/3 h-12 rounded-2xl bg-gradient-to-r from-[#FF6B30] to-orange-500 text-white text-xs font-black hover:from-[#E0531A] hover:to-orange-600 transition flex items-center justify-center gap-2 shadow-md cursor-pointer"
                     >
                       <UserCheck className="w-4 h-4" />
-                      <span>Hubungkan Exchange</span>
+                      <span>Connect Exchange</span>
                     </button>
                   )}
                 </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { User as UserIcon, Globe, FileText, AtSign } from 'lucide-react';
+import { User as UserIcon, Globe, AtSign } from 'lucide-react';
 
 interface ProfileIdentityFormProps {
   name: string;
@@ -44,23 +44,23 @@ export function ProfileIdentityForm({
           <UserIcon className="w-4 h-4" />
         </div>
         <div>
-          <h3 className="text-sm sm:text-base font-black text-slate-900">Informasi Pribadi & Akun</h3>
+          <h3 className="text-sm sm:text-base font-black text-slate-900">Personal & Account Information</h3>
           <p className="text-xs text-slate-500 font-medium">
-            Kelola data identitas profil Anda yang akan ditampilkan ke partner reciprocal.
+            Manage your profile identity details visible to reciprocal learning partners.
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Nama Lengkap */}
+        {/* Full Name */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-bold text-slate-700">Nama Lengkap</label>
+          <label className="block text-xs font-bold text-slate-700">Full Name</label>
           <div className="relative">
             <input
               type="text"
               value={name}
               onChange={(e) => onChangeName(e.target.value)}
-              placeholder="Contoh: Muhammad Rifai"
+              placeholder="e.g. Alex Johnson"
               className="w-full px-3.5 py-2.5 text-xs font-bold text-slate-900 bg-slate-50/70 rounded-2xl border border-slate-200 focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
               required
             />
@@ -78,15 +78,15 @@ export function ProfileIdentityForm({
               type="text"
               value={username}
               onChange={(e) => onChangeUsername(e.target.value)}
-              placeholder="username_kamu"
+              placeholder="your_username"
               className="w-full pl-8 pr-3.5 py-2.5 text-xs font-bold text-slate-900 bg-slate-50/70 rounded-2xl border border-slate-200 focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
             />
           </div>
         </div>
 
-        {/* Negara / Wilayah */}
+        {/* Country / Region */}
         <div className="space-y-1.5 sm:col-span-2">
-          <label className="block text-xs font-bold text-slate-700">Negara / Wilayah Domisili</label>
+          <label className="block text-xs font-bold text-slate-700">Country / Region</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
               <Globe className="w-3.5 h-3.5 text-[#FF6B30]" />
@@ -105,18 +105,18 @@ export function ProfileIdentityForm({
           </div>
         </div>
 
-        {/* Bio / Ringkasan Kolaborasi */}
+        {/* Bio */}
         <div className="space-y-1.5 sm:col-span-2">
           <div className="flex items-center justify-between">
-            <label className="block text-xs font-bold text-slate-700">Bio & Minat Kolaborasi</label>
-            <span className="text-[10px] text-slate-400 font-medium">{bio.length}/500 karakter</span>
+            <label className="block text-xs font-bold text-slate-700">Bio & Collaboration Interests</label>
+            <span className="text-[10px] text-slate-400 font-medium">{bio.length}/500 characters</span>
           </div>
           <div className="relative">
             <textarea
               rows={3}
               value={bio}
               onChange={(e) => onChangeBio(e.target.value.slice(0, 500))}
-              placeholder="Ceritakan latar belakang skill, keahlian yang ingin dibagikan, atau target skill yang ingin dipelajari bersama partner..."
+              placeholder="Tell others about your background, the skills you love teaching, or what you are excited to learn together..."
               className="w-full px-3.5 py-2.5 text-xs font-medium text-slate-900 bg-slate-50/70 rounded-2xl border border-slate-200 focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition leading-relaxed resize-none"
             />
           </div>

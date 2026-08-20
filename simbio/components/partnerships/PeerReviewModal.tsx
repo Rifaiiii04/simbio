@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { apiFetch } from '@/lib/api/client';
-import { Star } from 'lucide-react';
+import { Star, X } from 'lucide-react';
 
 interface PeerReviewModalProps {
   partnershipId: string;
@@ -41,9 +41,9 @@ export function PeerReviewModal({
 
       onSuccess('Peer review submitted successfully!');
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.message || 'Failed to submit review');
+      alert(err instanceof Error ? err.message : 'Failed to submit review');
     } finally {
       setSubmitting(false);
     }
@@ -54,15 +54,15 @@ export function PeerReviewModal({
       <div className="w-full max-w-lg neo-box p-6 space-y-4 shadow-[8px_8px_0px_0px_#0F172A] bg-white max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-2">
           <h3 className="text-base font-black text-[#0F172A]">Peer Review for {partnerName}</h3>
-          <button onClick={onClose} className="text-xs font-black">
-            ✕
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 transition cursor-pointer">
+            <X className="w-4 h-4 text-slate-700" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-3">
             <div className="p-3 bg-[#FFFDF7] rounded-xl border-2 border-[#0F172A]">
-              <label className="block text-xs font-black mb-1">Consistency (1-5 Star)</label>
+              <label className="block text-xs font-black mb-1">Consistency (1-5 Stars)</label>
               <input
                 type="number"
                 min={1}
@@ -74,7 +74,7 @@ export function PeerReviewModal({
             </div>
 
             <div className="p-3 bg-[#FFFDF7] rounded-xl border-2 border-[#0F172A]">
-              <label className="block text-xs font-black mb-1">Communication (1-5 Star)</label>
+              <label className="block text-xs font-black mb-1">Communication (1-5 Stars)</label>
               <input
                 type="number"
                 min={1}
@@ -86,7 +86,7 @@ export function PeerReviewModal({
             </div>
 
             <div className="p-3 bg-[#FFFDF7] rounded-xl border-2 border-[#0F172A]">
-              <label className="block text-xs font-black mb-1">Knowledge Sharing (1-5 Star)</label>
+              <label className="block text-xs font-black mb-1">Knowledge Sharing (1-5 Stars)</label>
               <input
                 type="number"
                 min={1}
@@ -98,7 +98,7 @@ export function PeerReviewModal({
             </div>
 
             <div className="p-3 bg-[#FFFDF7] rounded-xl border-2 border-[#0F172A]">
-              <label className="block text-xs font-black mb-1">Collaboration (1-5 Star)</label>
+              <label className="block text-xs font-black mb-1">Collaboration (1-5 Stars)</label>
               <input
                 type="number"
                 min={1}
@@ -125,14 +125,14 @@ export function PeerReviewModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-1/3 py-2.5 rounded-xl bg-gray-100 border-2 border-[#0F172A] text-xs font-black"
+              className="w-1/3 py-2.5 rounded-xl bg-gray-100 border-2 border-[#0F172A] text-xs font-black cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="w-2/3 neo-button py-2.5 text-xs flex items-center justify-center gap-1.5"
+              className="w-2/3 neo-button py-2.5 text-xs flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Star className="w-4 h-4 fill-white" />
               <span>{submitting ? 'Submitting...' : 'Submit Peer Review'}</span>

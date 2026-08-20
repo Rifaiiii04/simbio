@@ -140,7 +140,7 @@ export default function DiscoveryPage() {
               Skill Discovery & Partner Matching
             </h1>
             <p className="text-xs text-slate-500 font-medium max-w-2xl">
-              Cari partner reciprocal ideal kamu melalui pencocokan deterministik berbasis skill atau temukan mereka langsung di peta sekitarmu.
+              Find your ideal reciprocal partner through deterministic skill matching or discover them on the live proximity map.
             </p>
           </div>
 
@@ -149,21 +149,21 @@ export default function DiscoveryPage() {
             <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
               <button
                 onClick={() => setView('list')}
-                className={`py-1.5 px-3.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                className={`py-1.5 px-3.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                   view === 'list' ? 'bg-[#FF6B30] text-white shadow-2xs' : 'text-slate-700 hover:text-slate-900'
                 }`}
               >
                 <List className="w-3.5 h-3.5" />
-                <span>Daftar</span>
+                <span>List View</span>
               </button>
               <button
                 onClick={() => setView('map')}
-                className={`py-1.5 px-3.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                className={`py-1.5 px-3.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                   view === 'map' ? 'bg-[#FF6B30] text-white shadow-2xs' : 'text-slate-700 hover:text-slate-900'
                 }`}
               >
                 <Map className="w-3.5 h-3.5" />
-                <span>Peta Terdekat</span>
+                <span>Map View</span>
               </button>
             </div>
 
@@ -171,7 +171,7 @@ export default function DiscoveryPage() {
               href="/partnerships"
               className="soft-button text-xs px-4 py-2 flex items-center gap-1.5 shadow-xs whitespace-nowrap"
             >
-              <span>Kemitraan Saya</span>
+              <span>My Partnerships</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -199,7 +199,7 @@ export default function DiscoveryPage() {
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2 text-xs font-black text-slate-800 uppercase tracking-wider">
                   <SlidersHorizontal className="w-4 h-4 text-[#FF6B30]" />
-                  <span>Filter Pencarian</span>
+                  <span>Search Filters</span>
                 </div>
                 {(selectedSkillId || selectedCountry || searchKeyword) && (
                   <button
@@ -216,14 +216,14 @@ export default function DiscoveryPage() {
 
               {/* Search */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700">Pencarian Cepat</label>
+                <label className="block text-xs font-bold text-slate-700">Quick Search</label>
                 <div className="relative">
                   <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-3" />
                   <input
                     type="text"
                     value={searchKeyword}
                     onChange={(e) => setSearchKeyword(e.target.value)}
-                    placeholder="Nama / skill..."
+                    placeholder="Name / skill..."
                     className="w-full pl-9 pr-3.5 py-2 text-xs bg-slate-50 rounded-2xl border border-slate-200 font-medium focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
                   />
                 </div>
@@ -231,13 +231,13 @@ export default function DiscoveryPage() {
 
               {/* Country */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700">Negara Domisili</label>
+                <label className="block text-xs font-bold text-slate-700">Country</label>
                 <select
                   value={selectedCountry || 'All Countries'}
                   onChange={(e) => handleFilter(undefined, e.target.value)}
                   className="w-full px-3.5 py-2 text-xs bg-slate-50 rounded-2xl border border-slate-200 font-medium text-slate-900 focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
                 >
-                  <option value="All Countries">Semua Negara (Global)</option>
+                  <option value="All Countries">All Countries (Global)</option>
                   {countries.slice(1).map((c) => (
                     <option key={c} value={c}>
                       {c}
@@ -248,20 +248,20 @@ export default function DiscoveryPage() {
 
               {/* Skill Filter */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700">Spesifik Skill</label>
+                <label className="block text-xs font-bold text-slate-700">Specific Skill</label>
                 <SearchableSkillSelect
                   skills={skills}
                   selectedSkillId={selectedSkillId}
                   onSelectSkill={(id) => handleFilter(id, undefined)}
-                  placeholder="Pilih skill..."
+                  placeholder="Select a skill..."
                 />
               </div>
 
               {/* Result Counter */}
               <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-bold">
-                <span>Ditemukan:</span>
+                <span>Results Found:</span>
                 <span className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-xs px-2.5 py-0.5 font-black">
-                  {filteredCandidates.length} Kandidat
+                  {filteredCandidates.length} Candidates
                 </span>
               </div>
             </aside>
@@ -271,15 +271,15 @@ export default function DiscoveryPage() {
               {loading ? (
                 <div className="text-center py-16 text-xs text-slate-500 font-bold animate-pulse flex flex-col items-center gap-3">
                   <Sparkles className="w-8 h-8 text-[#FF6B30] animate-spin" />
-                  <span>Mencari kandidat partner...</span>
+                  <span>Searching for partner candidates...</span>
                 </div>
               ) : filteredCandidates.length === 0 ? (
                 <div className="soft-card p-10 text-center space-y-4 bg-white border border-slate-200/80">
                   <Compass className="w-12 h-12 text-[#FF6B30] mx-auto animate-spin" style={{ animationDuration: '10s' }} />
                   <div className="space-y-1">
-                    <p className="text-base font-bold text-slate-900">Tidak ada kandidat yang cocok untuk filter ini.</p>
+                    <p className="text-base font-bold text-slate-900">No candidates match this filter.</p>
                     <p className="text-xs text-slate-500 font-medium max-w-md mx-auto">
-                      Coba cari negara lain atau reset filter untuk melihat seluruh kandidat aktif.
+                      Try adjusting your search criteria or reset filters to view all active candidates.
                     </p>
                   </div>
                   <button
@@ -287,9 +287,9 @@ export default function DiscoveryPage() {
                       setSearchKeyword('');
                       handleFilter('', 'All Countries');
                     }}
-                    className="soft-button text-xs px-6 py-2.5 inline-flex items-center gap-1.5 shadow-2xs"
+                    className="soft-button text-xs px-6 py-2.5 inline-flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   >
-                    <span>Reset Semua Filter</span>
+                    <span>Reset All Filters</span>
                   </button>
                 </div>
               ) : (
@@ -344,7 +344,7 @@ export default function DiscoveryPage() {
                         {c.distanceKm != null && (
                           <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
                             <MapPin className="w-3 h-3 text-[#FF6B30]" />
-                            <span>{c.distanceKm} km dari lokasimu</span>
+                            <span>{c.distanceKm} km from your location</span>
                           </div>
                         )}
 
@@ -353,11 +353,11 @@ export default function DiscoveryPage() {
                           <div>
                             <div className="flex items-center gap-1 text-[10px] font-bold uppercase text-emerald-700 mb-1">
                               <BookOpen className="w-3 h-3 text-emerald-600" />
-                              <span>Bisa Mengajar:</span>
+                              <span>Can Teach:</span>
                             </div>
                             <div className="flex flex-wrap gap-1">
                               {c.teachSkills.length === 0 ? (
-                                <span className="text-slate-400 italic text-[10px]">Belum dicantumkan</span>
+                                <span className="text-slate-400 italic text-[10px]">None listed</span>
                               ) : (
                                 c.teachSkills.map((s) => (
                                   <span
@@ -373,11 +373,11 @@ export default function DiscoveryPage() {
                           <div className="pt-1.5 border-t border-slate-200/60">
                             <div className="flex items-center gap-1 text-[10px] font-bold uppercase text-[#FF6B30] mb-1">
                               <Award className="w-3 h-3 text-[#FF6B30]" />
-                              <span>Ingin Belajar:</span>
+                              <span>Wants to Learn:</span>
                             </div>
                             <div className="flex flex-wrap gap-1">
                               {c.learnSkills.length === 0 ? (
-                                <span className="text-slate-400 italic text-[10px]">Belum dicantumkan</span>
+                                <span className="text-slate-400 italic text-[10px]">None listed</span>
                               ) : (
                                 c.learnSkills.map((s) => (
                                   <span
@@ -397,10 +397,10 @@ export default function DiscoveryPage() {
                       <div className="pt-2 border-t border-slate-100">
                         <button
                           onClick={() => setProposalCandidate(c)}
-                          className="w-full soft-button py-2.5 text-xs flex items-center justify-center gap-1.5 shadow-2xs font-bold"
+                          className="w-full soft-button py-2.5 text-xs flex items-center justify-center gap-1.5 shadow-2xs font-bold cursor-pointer"
                         >
                           <UserCheck className="w-3.5 h-3.5 text-white" />
-                          <span>⚡ Hubungkan Exchange</span>
+                          <span>Connect Exchange</span>
                         </button>
                       </div>
                     </div>

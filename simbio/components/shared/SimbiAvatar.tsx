@@ -93,8 +93,8 @@ export function SimbiAvatar({ state = 'happy', message, className = '' }: SimbiA
           {/* Close / Dismiss Button */}
           <button
             onClick={handleDismiss}
-            className="w-7 h-7 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-600 flex items-center justify-center transition shrink-0"
-            title="Tutup & jangan tampilkan lagi"
+            className="w-7 h-7 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-600 flex items-center justify-center transition shrink-0 cursor-pointer"
+            title="Dismiss and don't show again"
           >
             <X className="w-4 h-4" />
           </button>

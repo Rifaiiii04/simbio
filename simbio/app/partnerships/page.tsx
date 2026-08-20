@@ -6,22 +6,17 @@ import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api/client';
 import { Navbar } from '@/components/shared/Navbar';
 import { SimbiAvatar } from '@/components/shared/SimbiAvatar';
-import { GlowCard } from '@/components/ui/GlowCard';
 import {
   Handshake,
   MessageSquare,
   UserCheck,
   UserX,
   Compass,
-  ArrowRight,
   CheckCircle2,
   Clock,
   Sparkles,
-  Zap,
-  TrendingUp,
   ChevronRight,
   ShieldCheck,
-  Users,
 } from 'lucide-react';
 
 interface UserSummary {
@@ -81,10 +76,10 @@ export default function PartnershipsPage() {
       setPartnerships(res.partnerships);
       setStatusMessage(
         action === 'accept'
-          ? 'Kemitraan berhasil diterima! Selamat belajar bersama 🚀'
+          ? 'Partnership accepted successfully! Happy learning together.'
           : action === 'reject'
-          ? 'Undangan kemitraan ditolak.'
-          : 'Kemitraan telah diakhiri.'
+          ? 'Partnership invitation declined.'
+          : 'Partnership ended.'
       );
     } catch (err: unknown) {
       console.error(err);
@@ -98,7 +93,7 @@ export default function PartnershipsPage() {
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="text-[#FF6B30] font-bold text-sm animate-pulse flex items-center gap-2">
             <Sparkles className="w-5 h-5 animate-spin" />
-            <span>Memuat kemitraan belajar...</span>
+            <span>Loading study partnerships...</span>
           </div>
         </div>
       </div>
@@ -113,7 +108,7 @@ export default function PartnershipsPage() {
       <Navbar />
 
       <main className="flex-1 w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6 space-y-6">
-        {/* Top Combined Command Header Card (Integrates Hero Title, Stat Counters & Quick Action Button) */}
+        {/* Top Combined Command Header Card */}
         <div className="soft-card p-6 sm:p-7 bg-white border border-slate-200/80 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
@@ -121,28 +116,28 @@ export default function PartnershipsPage() {
                 Reciprocal Exchange Hub
               </span>
               <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-xs font-bold">
-                Real-Time WebSocket Rooms
+                Real-Time Collaboration Rooms
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Kemitraan Skill Exchange Saya
+              My Skill Exchange Partnerships
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl">
-              Terhubung dengan partner 1-on-1, masuk ke Room Belajar Bareng real-time, jalankan sesi fokus Pomodoro, dan selesaikan tantangan bersama!
+              Connect 1-on-1 with learning peers, enter collaborative study rooms, run structured focus sessions, and achieve your milestones together.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            {/* Integrated Statistik Kolaborasi Badges */}
+            {/* Integrated Stats */}
             <div className="flex items-center gap-3 bg-slate-50 p-2.5 rounded-2xl border border-slate-200/70">
               <div className="px-3 text-center">
                 <p className="text-lg font-black text-slate-900">{activePartnerships.length}</p>
-                <p className="text-[10px] font-bold text-emerald-700 uppercase">Kemitraan Aktif</p>
+                <p className="text-[10px] font-bold text-emerald-700 uppercase">Active</p>
               </div>
               <div className="h-7 w-px bg-slate-200" />
               <div className="px-3 text-center">
                 <p className="text-lg font-black text-[#FF6B30]">{pendingRequests.length}</p>
-                <p className="text-[10px] font-bold text-amber-700 uppercase">Menunggu</p>
+                <p className="text-[10px] font-bold text-amber-700 uppercase">Pending</p>
               </div>
             </div>
 
@@ -151,7 +146,7 @@ export default function PartnershipsPage() {
               className="soft-button text-xs sm:text-sm px-6 py-3 flex items-center gap-2 shadow-xs whitespace-nowrap"
             >
               <Compass className="w-4 h-4" />
-              <span>+ Cari Partner Baru</span>
+              <span>Find New Partner</span>
             </Link>
           </div>
         </div>
@@ -163,14 +158,14 @@ export default function PartnershipsPage() {
           </div>
         )}
 
-        {/* Asymmetrical 2-Column Layout (Left 8 Cols: Active Partnerships | Right 4 Cols: Pending Invitations & Guidance) */}
+        {/* 2-Column Layout */}
         <div className="grid lg:grid-cols-12 gap-6 items-start">
-          {/* LEFT MAIN CANVAS (8 Columns): Active Exchange Partnerships Moved Way Upwards! */}
+          {/* LEFT CANVAS (8 Columns): Active Partnerships */}
           <div className="lg:col-span-8 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
               <div className="flex items-center gap-2">
                 <Handshake className="w-5 h-5 text-[#FF6B30]" />
-                <h2 className="text-xl font-bold text-slate-900">Kemitraan Aktif ({activePartnerships.length})</h2>
+                <h2 className="text-xl font-bold text-slate-900">Active Partnerships ({activePartnerships.length})</h2>
               </div>
               <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
                 Ready for Learning Rooms
@@ -181,14 +176,14 @@ export default function PartnershipsPage() {
               <div className="soft-card p-10 text-center space-y-4 bg-white border border-slate-200/80">
                 <Handshake className="w-12 h-12 text-slate-300 mx-auto" />
                 <div className="space-y-1">
-                  <p className="text-base font-bold text-slate-900">Belum Ada Kemitraan Aktif Terhubung</p>
+                  <p className="text-base font-bold text-slate-900">No Active Partnerships Connected</p>
                   <p className="text-xs text-slate-500 font-medium max-w-md mx-auto">
-                    Jelajahi pembelajar global di halaman Discovery dan ajukan undangan pertukaran skill reciprocal!
+                    Explore global peers on the Discovery page and propose a reciprocal skill exchange!
                   </p>
                 </div>
                 <Link href="/discovery" className="soft-button text-xs px-6 py-3 inline-flex items-center gap-2 shadow-xs">
                   <Compass className="w-4 h-4" />
-                  <span>Jelajahi Skill Discovery</span>
+                  <span>Explore Skill Discovery</span>
                 </Link>
               </div>
             ) : (
@@ -219,7 +214,7 @@ export default function PartnershipsPage() {
                               <ShieldCheck className="w-4 h-4 text-emerald-600" />
                             </div>
                             <p className="text-xs text-slate-500 font-medium">
-                              {partner.username ? `@${partner.username}` : `Terhubung sejak ${new Date(p.createdAt).toLocaleDateString()}`}
+                              {partner.username ? `@${partner.username}` : `Connected since ${new Date(p.createdAt).toLocaleDateString()}`}
                             </p>
                           </div>
                         </div>
@@ -229,20 +224,20 @@ export default function PartnershipsPage() {
                         </span>
                       </div>
 
-                      {/* Action Controls: Enter Dedicated Room Page + End Exchange */}
+                      {/* Action Controls */}
                       <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
                         <Link
                           href={`/partnerships/${p.id}`}
                           className="soft-button text-xs py-2.5 flex items-center justify-center gap-1.5 shadow-2xs"
                         >
                           <MessageSquare className="w-4 h-4 text-white" />
-                          <span>Room Belajar →</span>
+                          <span>Study Room</span>
                         </Link>
                         <button
                           onClick={() => handleAction(p.id, 'leave')}
-                          className="py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold hover:bg-red-50 hover:text-red-600 transition shadow-2xs"
+                          className="py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold hover:bg-red-50 hover:text-red-600 transition shadow-2xs cursor-pointer"
                         >
-                          Akhiri Exchange
+                          End Exchange
                         </button>
                       </div>
                     </div>
@@ -252,15 +247,14 @@ export default function PartnershipsPage() {
             )}
           </div>
 
-          {/* RIGHT SIDEBAR (4 Columns): Pending Invitation Requests Moved Side-by-Side! */}
+          {/* RIGHT SIDEBAR (4 Columns): Pending Invitations */}
           <div className="lg:col-span-4 space-y-5">
-            {/* Pending Connection Requests (Side-by-Side with Active Partnerships) */}
             {pendingRequests.length > 0 && (
               <div className="soft-card bg-gradient-to-br from-amber-50/90 via-white to-orange-50/70 border border-amber-200/80 p-5 space-y-4 shadow-xs">
                 <div className="flex items-center justify-between border-b border-amber-200/60 pb-2.5">
                   <div className="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider">
                     <Clock className="w-4 h-4 text-[#FF6B30]" />
-                    <span>Undangan Kemitraan ({pendingRequests.length})</span>
+                    <span>Partnership Requests ({pendingRequests.length})</span>
                   </div>
                   <span className="soft-badge bg-white text-amber-800 border-amber-200 text-[10px] font-bold">
                     Action Required
@@ -289,7 +283,7 @@ export default function PartnershipsPage() {
                           <div>
                             <h3 className="font-bold text-slate-900 text-xs">{partner.name}</h3>
                             <p className="text-[10px] text-slate-500 font-medium">
-                              {isIncoming ? 'Mengirimkan undangan pertukaran skill 1-on-1' : 'Menunggu respon partner'}
+                              {isIncoming ? 'Sent you a 1-on-1 skill swap proposal' : 'Waiting for partner response'}
                             </p>
                           </div>
                         </div>
@@ -298,22 +292,22 @@ export default function PartnershipsPage() {
                           <div className="grid grid-cols-2 gap-2 pt-1">
                             <button
                               onClick={() => handleAction(p.id, 'accept')}
-                              className="py-2 rounded-xl bg-[#10B981] text-white text-[11px] font-bold hover:bg-emerald-600 transition shadow-2xs flex items-center justify-center gap-1"
+                              className="py-2 rounded-xl bg-[#10B981] text-white text-[11px] font-bold hover:bg-emerald-600 transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
                             >
                               <UserCheck className="w-3.5 h-3.5" />
-                              <span>Terima</span>
+                              <span>Accept</span>
                             </button>
                             <button
                               onClick={() => handleAction(p.id, 'reject')}
-                              className="py-2 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold hover:bg-red-50 hover:text-red-600 transition shadow-2xs flex items-center justify-center gap-1"
+                              className="py-2 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold hover:bg-red-50 hover:text-red-600 transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
                             >
                               <UserX className="w-3.5 h-3.5 text-slate-500" />
-                              <span>Tolak</span>
+                              <span>Decline</span>
                             </button>
                           </div>
                         ) : (
                           <span className="soft-badge bg-sky-50 text-sky-700 border-sky-200 text-[10px] px-2.5 py-0.5 w-full text-center block">
-                            Menunggu Persetujuan Partner
+                            Waiting for Partner Approval
                           </span>
                         )}
                       </div>
@@ -326,23 +320,23 @@ export default function PartnershipsPage() {
             {/* Simbi Companion Mascot Advice */}
             <SimbiAvatar
               state="happy"
-              message="Masuk ke Room Belajar Bareng untuk berdiskusi real-time via WebSocket, menyusun roadmap AI bersama, dan sesi fokus Pomodoro!"
+              message="Enter your study room to collaborate in real-time, build AI learning roadmaps together, and track milestones!"
             />
 
-            {/* Quick Discovery Navigation Banner */}
+            {/* Quick Discovery Banner */}
             <div className="soft-card p-5 bg-white space-y-3 shadow-xs border border-slate-200/80">
               <div className="flex items-center gap-2">
                 <Compass className="w-4.5 h-4.5 text-[#FF6B30]" />
-                <h3 className="text-sm font-bold text-slate-900">Temukan Partner Belajar Baru</h3>
+                <h3 className="text-sm font-bold text-slate-900">Find New Learning Partners</h3>
               </div>
               <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                Gunakan algoritma matching deterministik atau AI Smart Synergy Matcher untuk menemukan partner reciprocal ideal.
+                Use deterministic matching or browse nearby members on the interactive map.
               </p>
               <Link
                 href="/discovery"
                 className="w-full py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold hover:bg-slate-200 transition flex items-center justify-center gap-2 shadow-2xs"
               >
-                <span>Pergi ke Discovery</span>
+                <span>Go to Discovery</span>
                 <ChevronRight className="w-4 h-4 text-slate-500" />
               </Link>
             </div>

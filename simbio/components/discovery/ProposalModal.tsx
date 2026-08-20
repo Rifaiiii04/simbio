@@ -80,7 +80,7 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
 
         // Initial proposal template
         setMessageText(
-          `Halo ${candidate.user.name}, saya tertarik dengan skill ${defaultPartnerSkill} yang Anda miliki. Jika Anda tidak keberatan, maukah Anda belajar bersama saya? Saya memiliki skill ${defaultMySkill} yang siap saya bagikan dengan Anda!`
+          `Hi ${candidate.user.name}, I am interested in your skill in ${defaultPartnerSkill}. Would you like to exchange knowledge with me? I have experience in ${defaultMySkill} that I would love to share with you!`
         );
       } catch (err) {
         console.error('Failed to load user skills:', err);
@@ -88,7 +88,7 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
         setSelectedPartnerSkill(defaultPartnerSkill);
         setSelectedMySkill('Skill Exchange');
         setMessageText(
-          `Halo ${candidate.user.name}, saya tertarik dengan skill ${defaultPartnerSkill} yang Anda miliki. Jika Anda tidak keberatan, maukah Anda belajar bersama saya?`
+          `Hi ${candidate.user.name}, I am interested in your skill in ${defaultPartnerSkill}. Would you like to connect and study together?`
         );
       } finally {
         setLoading(false);
@@ -103,7 +103,7 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
     setSelectedPartnerSkill(skillName);
     if (!isCustomEdited) {
       setMessageText(
-        `Halo ${candidate.user.name}, saya tertarik dengan skill ${skillName} yang Anda miliki. Jika Anda tidak keberatan, maukah Anda belajar bersama saya? Saya memiliki skill ${selectedMySkill || 'Skill Exchange'} yang siap saya bagikan dengan Anda!`
+        `Hi ${candidate.user.name}, I am interested in your skill in ${skillName}. Would you like to exchange knowledge with me? I have experience in ${selectedMySkill || 'Skill Exchange'} that I would love to share with you!`
       );
     }
   };
@@ -112,7 +112,7 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
     setSelectedMySkill(skillName);
     if (!isCustomEdited) {
       setMessageText(
-        `Halo ${candidate.user.name}, saya tertarik dengan skill ${selectedPartnerSkill || 'Skill Exchange'} yang Anda miliki. Jika Anda tidak keberatan, maukah Anda belajar bersama saya? Saya memiliki skill ${skillName} yang siap saya bagikan dengan Anda!`
+        `Hi ${candidate.user.name}, I am interested in your skill in ${selectedPartnerSkill || 'Skill Exchange'}. Would you like to exchange knowledge with me? I have experience in ${skillName} that I would love to share with you!`
       );
     }
   };
@@ -162,14 +162,14 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
               )}
             </div>
             <div>
-              <h2 className="text-xl font-black text-[#0F172A]">Proposal Pertemanan Belajar</h2>
+              <h2 className="text-xl font-black text-[#0F172A]">Study Partnership Proposal</h2>
               <p className="text-xs text-gray-600 font-bold">Connect with {candidate.user.name}</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-xl bg-white border-2 border-[#0F172A] font-black text-sm flex items-center justify-center text-[#0F172A] hover:bg-red-500 hover:text-white transition shadow-[2px_2px_0px_0px_#0F172A]"
+            className="w-9 h-9 rounded-xl bg-white border-2 border-[#0F172A] font-black text-sm flex items-center justify-center text-[#0F172A] hover:bg-red-500 hover:text-white transition shadow-[2px_2px_0px_0px_#0F172A] cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -178,17 +178,17 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
         {loading ? (
           <div className="py-12 text-center space-y-3">
             <Sparkles className="w-8 h-8 text-[#FF7A30] mx-auto animate-spin" />
-            <p className="text-xs font-black text-[#0F172A]">Memuat skill user & menyiapkan proposal...</p>
+            <p className="text-xs font-black text-[#0F172A]">Loading user skills & preparing proposal...</p>
           </div>
         ) : (
           <div className="space-y-5">
             {/* Skill Selector Controls */}
             <div className="grid sm:grid-cols-2 gap-4">
-              {/* Dropdown 1: Skill Partner yang ingin dipelajari */}
+              {/* Dropdown 1: Partner Skill to learn */}
               <div className="space-y-1.5">
                 <label className="text-[11px] font-black text-[#0F172A] uppercase flex items-center gap-1">
                   <GraduationCap className="w-3.5 h-3.5 text-[#FF7A30]" />
-                  <span>Skill {candidate.user.name}:</span>
+                  <span>{candidate.user.name}&apos;s Skill:</span>
                 </label>
                 <select
                   value={selectedPartnerSkill}
@@ -207,11 +207,11 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
                 </select>
               </div>
 
-              {/* Dropdown 2: Skill Saya yang ingin ditawarkan */}
+              {/* Dropdown 2: My Offered Skill */}
               <div className="space-y-1.5">
                 <label className="text-[11px] font-black text-[#0F172A] uppercase flex items-center gap-1">
                   <BookOpen className="w-3.5 h-3.5 text-[#84CC16]" />
-                  <span>Skill Tawar Saya:</span>
+                  <span>My Offered Skill:</span>
                 </label>
                 <select
                   value={selectedMySkill}
@@ -235,7 +235,7 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
             <div className="space-y-1.5">
               <label className="text-[11px] font-black text-[#0F172A] uppercase flex items-center gap-1">
                 <MessageSquare className="w-3.5 h-3.5 text-[#06B6D4]" />
-                <span>Pesan Proposal Pertemanan:</span>
+                <span>Partnership Message:</span>
               </label>
               <textarea
                 rows={4}
@@ -245,10 +245,10 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
                   setIsCustomEdited(true);
                 }}
                 className="w-full p-3 text-xs bg-[#FFFDF7] rounded-xl border-2 border-[#0F172A] font-bold text-[#0F172A] focus:outline-hidden focus:border-[#06B6D4] shadow-[3px_3px_0px_0px_#0F172A]"
-                placeholder="Tulis pesan tawaran belajar bersama..."
+                placeholder="Write a greeting or learning proposal..."
               />
               <p className="text-[10px] text-gray-500 font-bold">
-                *Pesan ini akan otomatis dikirim sebagai salam perkenalan pertama di ruang chat Anda.
+                *This message will be sent as your introductory greeting in the collaboration room.
               </p>
             </div>
 
@@ -257,18 +257,18 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl bg-gray-100 border-2 border-[#0F172A] text-xs font-black hover:bg-gray-200 transition shadow-[2px_2px_0px_0px_#0F172A]"
+                className="px-5 py-2.5 rounded-xl bg-gray-100 border-2 border-[#0F172A] text-xs font-black hover:bg-gray-200 transition shadow-[2px_2px_0px_0px_#0F172A] cursor-pointer"
               >
-                Batal
+                Cancel
               </button>
               <button
                 type="button"
                 disabled={submitting}
                 onClick={handleSubmitProposal}
-                className="px-6 py-2.5 rounded-xl bg-[#84CC16] text-[#0F172A] border-2 border-[#0F172A] text-xs font-black hover:bg-emerald-400 transition flex items-center gap-2 shadow-[3px_3px_0px_0px_#0F172A]"
+                className="px-6 py-2.5 rounded-xl bg-[#84CC16] text-[#0F172A] border-2 border-[#0F172A] text-xs font-black hover:bg-emerald-400 transition flex items-center gap-2 shadow-[3px_3px_0px_0px_#0F172A] cursor-pointer"
               >
                 <UserCheck className="w-4 h-4" />
-                <span>{submitting ? 'Mengirim...' : 'Kirim Proposal & Connect'}</span>
+                <span>{submitting ? 'Sending...' : 'Send Proposal & Connect'}</span>
               </button>
             </div>
           </div>

@@ -20,9 +20,9 @@ export function ProfileLocationSettings({
           <Navigation className="w-4 h-4" />
         </div>
         <div>
-          <h3 className="text-sm sm:text-base font-black text-slate-900">Preferensi Lokasi & Discovery</h3>
+          <h3 className="text-sm sm:text-base font-black text-slate-900">Location & Discovery Preferences</h3>
           <p className="text-xs text-slate-500 font-medium">
-            Atur visibilitas profil Anda pada peta pencarian partner terdekat.
+            Manage your profile visibility on the nearby discovery map.
           </p>
         </div>
       </div>
@@ -40,7 +40,7 @@ export function ProfileLocationSettings({
           </div>
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
-              <h4 className="text-xs font-black text-slate-900">Fitur Live Location (Peta Terdekat)</h4>
+              <h4 className="text-xs font-black text-slate-900">Live Location (Nearby Map)</h4>
               <span
                 className={`text-[9px] font-black px-2 py-0.5 rounded-md transition-colors ${
                   locationEnabled
@@ -48,13 +48,13 @@ export function ProfileLocationSettings({
                     : 'bg-slate-200 text-slate-600'
                 }`}
               >
-                {locationEnabled ? 'Aktif' : 'Nonaktif'}
+                {locationEnabled ? 'On' : 'Off'}
               </span>
             </div>
             <p className="text-[11px] text-slate-500 font-medium leading-relaxed max-w-xl">
               {locationEnabled
-                ? 'Profil Anda terlihat pada Peta Terdekat untuk reciprocal partner di sekitar wilayah Anda.'
-                : 'Profil Anda tidak akan ditampilkan pada Peta Terdekat, dan Anda perlu mengaktifkan lokasi untuk melihat peta.'}
+                ? 'Your profile is visible on the Nearby Map to reciprocal partners in your region.'
+                : 'Your profile is hidden from the Nearby Map. Turn on location to view peers on the map.'}
             </p>
           </div>
         </div>
@@ -62,7 +62,7 @@ export function ProfileLocationSettings({
         {/* Modern Animated Toggle Switch */}
         <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
           <span className="text-xs font-bold text-slate-600 hidden sm:inline select-none">
-            {loadingLocation ? 'Memproses...' : locationEnabled ? 'Aktif' : 'Nonaktif'}
+            {loadingLocation ? 'Processing...' : locationEnabled ? 'On' : 'Off'}
           </span>
           <button
             type="button"

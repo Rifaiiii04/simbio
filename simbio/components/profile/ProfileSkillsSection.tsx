@@ -1,6 +1,6 @@
 'use client';
 
-import { Award, BookOpen, Plus, Trash2, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Award, BookOpen, Plus, Trash2 } from 'lucide-react';
 
 interface UserSkill {
   id: string;
@@ -43,14 +43,14 @@ export function ProfileSkillsSection({
                 <Award className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-sm font-black text-slate-900">Skill yang Bisa Diajarkan</h3>
+                <h3 className="text-sm font-black text-slate-900">Skills Offered to Teach</h3>
                 <p className="text-[11px] text-slate-500 font-medium">
-                  Keahlian yang Anda tawarkan untuk pertukaran ilmu.
+                  Expertise and knowledge you share with reciprocal partners.
                 </p>
               </div>
             </div>
             <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-              {teachSkills.length} Skill
+              {teachSkills.length} Skills
             </span>
           </div>
 
@@ -58,9 +58,9 @@ export function ProfileSkillsSection({
           {teachSkills.length === 0 ? (
             <div className="text-center py-8 px-4 bg-slate-50/60 rounded-2xl border border-dashed border-slate-200 space-y-2">
               <Award className="w-8 h-8 mx-auto text-slate-300" />
-              <p className="text-xs font-bold text-slate-700">Belum Ada Skill Mengajar</p>
+              <p className="text-xs font-bold text-slate-700">No Teaching Skills Added</p>
               <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
-                Tambahkan minimal 1 skill yang Anda kuasai agar profil Anda dapat dicocokkan dengan reciprocal partner.
+                Add at least 1 skill you have mastered so our matching engine can connect you with study peers.
               </p>
             </div>
           ) : (
@@ -93,8 +93,8 @@ export function ProfileSkillsSection({
                       <button
                         onClick={() => onRemoveSkill(item.id)}
                         disabled={isDeleting}
-                        className="w-7 h-7 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 flex items-center justify-center transition disabled:opacity-50"
-                        title="Hapus skill ini"
+                        className="w-7 h-7 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 flex items-center justify-center transition disabled:opacity-50 cursor-pointer"
+                        title="Delete skill"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -108,10 +108,10 @@ export function ProfileSkillsSection({
 
         <button
           onClick={() => onOpenAddSkill('TEACH')}
-          className="w-full py-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-black transition flex items-center justify-center gap-1.5 active:scale-98"
+          className="w-full py-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-black transition flex items-center justify-center gap-1.5 active:scale-98 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>Tambah Skill Mengajar</span>
+          <span>Add Teaching Skill</span>
         </button>
       </div>
 
@@ -124,14 +124,14 @@ export function ProfileSkillsSection({
                 <BookOpen className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-sm font-black text-slate-900">Skill yang Ingin Dipelajari</h3>
+                <h3 className="text-sm font-black text-slate-900">Skills Desired to Learn</h3>
                 <p className="text-[11px] text-slate-500 font-medium">
-                  Keahlian yang ingin Anda pelajari dari partner reciprocal.
+                  Skills and topics you want to acquire from reciprocal peers.
                 </p>
               </div>
             </div>
             <span className="text-xs font-black text-[#FF6B30] bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200">
-              {learnSkills.length} Skill
+              {learnSkills.length} Skills
             </span>
           </div>
 
@@ -139,9 +139,9 @@ export function ProfileSkillsSection({
           {learnSkills.length === 0 ? (
             <div className="text-center py-8 px-4 bg-slate-50/60 rounded-2xl border border-dashed border-slate-200 space-y-2">
               <BookOpen className="w-8 h-8 mx-auto text-slate-300" />
-              <p className="text-xs font-bold text-slate-700">Belum Ada Skill Belajar</p>
+              <p className="text-xs font-bold text-slate-700">No Learning Targets Added</p>
               <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
-                Tambahkan target skill yang ingin Anda kuasai untuk memudahkan sistem menemukan partner yang tepat.
+                Add the skills you want to learn so our reciprocal algorithms can recommend the best candidates.
               </p>
             </div>
           ) : (
@@ -174,8 +174,8 @@ export function ProfileSkillsSection({
                       <button
                         onClick={() => onRemoveSkill(item.id)}
                         disabled={isDeleting}
-                        className="w-7 h-7 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 flex items-center justify-center transition disabled:opacity-50"
-                        title="Hapus skill ini"
+                        className="w-7 h-7 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 flex items-center justify-center transition disabled:opacity-50 cursor-pointer"
+                        title="Delete skill"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -189,10 +189,10 @@ export function ProfileSkillsSection({
 
         <button
           onClick={() => onOpenAddSkill('LEARN')}
-          className="w-full py-2.5 rounded-2xl bg-orange-50 border border-orange-200 text-[#FF6B30] hover:bg-orange-100 text-xs font-black transition flex items-center justify-center gap-1.5 active:scale-98"
+          className="w-full py-2.5 rounded-2xl bg-orange-50 border border-orange-200 text-[#FF6B30] hover:bg-orange-100 text-xs font-black transition flex items-center justify-center gap-1.5 active:scale-98 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>Tambah Skill Belajar</span>
+          <span>Add Learning Target</span>
         </button>
       </div>
     </div>

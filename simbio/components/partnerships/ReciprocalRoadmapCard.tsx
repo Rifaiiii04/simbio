@@ -188,18 +188,18 @@ export function ReciprocalRoadmapCard({
             <ListChecks className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900">Roadmap & Checklist Topik Belajar</h3>
-            <p className="text-xs text-slate-500 font-medium">Topik diskusi reciprocal exchange yang bisa dicentang bersama</p>
+            <h3 className="text-base font-bold text-slate-900">Learning Roadmap & Topics Checklist</h3>
+            <p className="text-xs text-slate-500 font-medium">Mutual reciprocal learning milestones to track progress together</p>
           </div>
         </div>
 
         <button
           onClick={handleGenerateAiTopics}
           disabled={generating}
-          className="soft-button text-xs bg-sky-600 hover:bg-sky-700 flex items-center justify-center gap-2 shadow-xs disabled:opacity-50"
+          className="soft-button text-xs bg-sky-600 hover:bg-sky-700 flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
         >
           <Sparkles className={`w-4 h-4 ${generating ? 'animate-spin' : ''}`} />
-          <span>{generating ? 'Generating AI Roadmap...' : 'Generate AI Roadmap ✨'}</span>
+          <span>{generating ? 'Generating AI Roadmap...' : 'Generate AI Roadmap'}</span>
         </button>
       </div>
 
@@ -207,14 +207,14 @@ export function ReciprocalRoadmapCard({
       <div className="flex gap-2 p-1 bg-slate-100/80 rounded-xl border border-slate-200/60">
         <button
           onClick={() => setActiveTabUserId(myUserId)}
-          className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition ${
+          className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
             activeTabUserId === myUserId
               ? 'bg-[#FF6B30] text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
         >
           <GraduationCap className="w-4 h-4" />
-          <span>Saya Belajar ({myTopics[0]?.category || 'My Target Skill'})</span>
+          <span>My Learning ({myTopics[0]?.category || 'My Target Skill'})</span>
         </button>
 
         <button
@@ -222,14 +222,14 @@ export function ReciprocalRoadmapCard({
             const partnerId = topics.find((t) => t.targetUserId !== myUserId)?.targetUserId;
             if (partnerId) setActiveTabUserId(partnerId);
           }}
-          className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition ${
+          className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
             activeTabUserId !== myUserId
               ? 'bg-[#10B981] text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>{partnerName} Belajar ({partnerTopics[0]?.category || 'Partner Skill'})</span>
+          <span>{partnerName}&apos;s Learning ({partnerTopics[0]?.category || 'Partner Skill'})</span>
         </button>
       </div>
 
@@ -237,8 +237,8 @@ export function ReciprocalRoadmapCard({
       {totalCount > 0 && (
         <div className="space-y-1.5 p-3 rounded-xl bg-slate-50 border border-slate-200/60">
           <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-            <span>Progres Belajar ({activeCategoryName}):</span>
-            <span className="text-[#FF6B30]">{completedCount} / {totalCount} Topik ({progressPercent}%)</span>
+            <span>Learning Progress ({activeCategoryName}):</span>
+            <span className="text-[#FF6B30]">{completedCount} / {totalCount} Topics ({progressPercent}%)</span>
           </div>
           <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
             <div
@@ -253,7 +253,7 @@ export function ReciprocalRoadmapCard({
       {activeTabUserId !== myUserId && (
         <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] font-semibold text-amber-800 flex items-center gap-1.5 shadow-2xs">
           <Lock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-          <span>Ini adalah list belajar {partnerName}. Hanya {partnerName} yang dapat mencentang list miliknya.</span>
+          <span>This is {partnerName}&apos;s learning checklist. Only {partnerName} can complete their own milestones.</span>
         </div>
       )}
 
@@ -261,15 +261,15 @@ export function ReciprocalRoadmapCard({
       {loading ? (
         <div className="py-8 text-center text-xs text-slate-500 font-bold animate-pulse flex flex-col items-center gap-2">
           <Sparkles className="w-6 h-6 text-[#FF6B30] animate-spin" />
-          <span>Memuat roadmap topik belajar...</span>
+          <span>Loading roadmap topics...</span>
         </div>
       ) : activeTabTopics.length === 0 ? (
         <div className="p-8 text-center space-y-3 rounded-xl border border-dashed border-slate-300 bg-slate-50/50">
           <ListChecks className="w-10 h-10 text-slate-400 mx-auto" />
           <div className="space-y-1">
-            <p className="text-sm font-bold text-slate-900">Belum Ada Topik Belajar Tersedia</p>
+            <p className="text-sm font-bold text-slate-900">No Learning Topics Available</p>
             <p className="text-xs text-slate-500 font-medium max-w-sm mx-auto">
-              Tekan tombol &quot;Generate AI Roadmap&quot; untuk membuat list topik obrolan otomatis, atau tambah topik manual di bawah!
+              Click &quot;Generate AI Roadmap&quot; to auto-generate milestones or add custom topics manually below!
             </p>
           </div>
         </div>
@@ -290,7 +290,7 @@ export function ReciprocalRoadmapCard({
                   <button
                     disabled={!isMyTopic}
                     onClick={() => isMyTopic && handleToggleTopic(item.id)}
-                    title={isMyTopic ? 'Ceklis topik ini' : `Hanya ${partnerName} yang dapat mencentang list miliknya`}
+                    title={isMyTopic ? 'Toggle topic completion' : `Only ${partnerName} can complete their own milestones`}
                     className={`mt-0.5 transition flex-shrink-0 ${
                       isMyTopic ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed opacity-60'
                     }`}
@@ -329,8 +329,8 @@ export function ReciprocalRoadmapCard({
                 {isMyTopic && (
                   <button
                     onClick={() => handleDeleteTopic(item.id)}
-                    className="text-slate-300 hover:text-red-500 transition p-1"
-                    title="Hapus topik"
+                    className="text-slate-300 hover:text-red-500 transition p-1 cursor-pointer"
+                    title="Delete topic"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -341,24 +341,24 @@ export function ReciprocalRoadmapCard({
         </div>
       )}
 
-      {/* Form Tambah Topik Manual */}
+      {/* Form Add Manual Topic */}
       <form onSubmit={handleAddManualTopic} className="flex gap-2 pt-2 border-t border-slate-100">
         <input
           type="text"
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
-          placeholder={`Tambah topik obrolan baru untuk ${
-            activeTabUserId === myUserId ? 'diri sendiri' : partnerName
+          placeholder={`Add new milestone topic for ${
+            activeTabUserId === myUserId ? 'yourself' : partnerName
           }...`}
           className="flex-1 px-3.5 py-2 text-xs bg-slate-50 rounded-xl border border-slate-200 font-medium text-slate-900 focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
         />
         <button
           type="submit"
           disabled={adding || !newTitle.trim()}
-          className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition flex items-center gap-1 shadow-2xs disabled:opacity-50"
+          className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition flex items-center gap-1 shadow-2xs disabled:opacity-50 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>{adding ? 'Adding...' : 'Tambah Topik'}</span>
+          <span>{adding ? 'Adding...' : 'Add Topic'}</span>
         </button>
       </form>
     </div>

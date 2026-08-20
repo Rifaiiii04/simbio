@@ -30,12 +30,17 @@ const NAV_ITEMS: NavItem[] = [
   { name: 'Profile', href: '/profile', icon: User },
 ];
 
-export function Navbar() {
+interface NavbarProps {
+  hideBottomNav?: boolean;
+}
+
+export function Navbar({ hideBottomNav }: NavbarProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const isPartnershipRoom = Boolean(pathname && /^\/partnerships\/[^/]+$/.test(pathname));
 
   useEffect(() => {
     const storedToken = localStorage.getItem('simbioly_token');
@@ -130,13 +135,13 @@ export function Navbar() {
                   href="/#how-it-works"
                   className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white/80 transition"
                 >
-                  Cara Kerja
+                  How It Works
                 </Link>
                 <Link
                   href="/#skills"
                   className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white/80 transition"
                 >
-                  Katalog Skill
+                  Skill Catalog
                 </Link>
               </div>
             )}
@@ -150,7 +155,7 @@ export function Navbar() {
                 <Link
                   href="/profile"
                   className="hidden sm:flex items-center gap-2 p-1.5 pr-3 rounded-2xl bg-slate-50 hover:bg-orange-50/70 border border-slate-200/80 hover:border-orange-200 transition group"
-                  title="Buka profil saya"
+                  title="View my profile"
                 >
                   <div className="w-7 h-7 rounded-xl overflow-hidden bg-orange-100 border border-orange-200 shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -161,7 +166,7 @@ export function Navbar() {
                     />
                   </div>
                   <span className="text-xs font-black text-slate-800 group-hover:text-[#FF6B30] max-w-[100px] truncate">
-                    {userName || 'Profil'}
+                    {userName || 'Profile'}
                   </span>
                 </Link>
 
@@ -171,7 +176,7 @@ export function Navbar() {
                   whileTap={{ scale: 0.96 }}
                   onClick={handleLogout}
                   className="flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-50/90 border border-red-200/80 px-3.5 py-2 rounded-xl hover:bg-red-100/90 hover:border-red-300 transition shadow-2xs cursor-pointer"
-                  title="Keluar dari akun"
+                  title="Log out of account"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Log Out</span>
@@ -191,7 +196,7 @@ export function Navbar() {
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF6B30] to-orange-500 hover:from-[#E0531A] hover:to-orange-600 text-white text-xs font-black transition flex items-center gap-1.5 shadow-md shadow-orange-500/20 active:scale-95"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
-                  <span>Daftar Gratis</span>
+                  <span>Sign Up Free</span>
                 </Link>
               </div>
             )}
@@ -202,7 +207,7 @@ export function Navbar() {
       {/* ========================================================================= */}
       {/* 2. MOBILE BOTTOM NAVIGATION BAR (ONLY ON SCREENS < md)                     */}
       {/* ========================================================================= */}
-      {token && (
+      {token && !hideBottomNav && (
         <nav aria-label="Mobile Navigation" className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-2xl px-3 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-around">
             {NAV_ITEMS.map((item) => {

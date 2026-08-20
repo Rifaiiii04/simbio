@@ -2,8 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Sparkles, ArrowRight, Code, Globe, Compass, MessageSquare, CheckCircle2 } from 'lucide-react';
-import { SimbiCapybaraHero } from '@/components/shared/SimbiCapybaraHero';
+import { Sparkles, ArrowRight, Code, Compass, CheckCircle2 } from 'lucide-react';
 
 export function ParallaxHero() {
   return (
@@ -13,7 +12,7 @@ export function ParallaxHero() {
       <div className="absolute bottom-10 right-10 w-96 h-96 bg-sky-200/30 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center z-10 w-full">
-        {/* Left Column: Asymmetrical Typography & Content (7 Cols) */}
+        {/* Left Column */}
         <div className="lg:col-span-7 space-y-7 text-center lg:text-left">
           {/* Soft Badge */}
           <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-[#FF6B30] px-4 py-2 rounded-full text-xs font-bold shadow-xs">
@@ -21,32 +20,32 @@ export function ParallaxHero() {
             <span>Reciprocal Skill Exchange Engine</span>
           </div>
 
-          {/* Asymmetrical Headline */}
+          {/* Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.12]">
-            Pelajari skill yang kamu <span className="text-[#FF6B30] relative inline-block">idamkan<span className="absolute bottom-1 left-0 w-full h-3 bg-orange-100 -z-10 rounded-sm" /></span>.<br />
-            Bagikan skill yang kamu <span className="text-sky-600 relative inline-block">kuasai<span className="absolute bottom-1 left-0 w-full h-3 bg-sky-100 -z-10 rounded-sm" /></span>.
+            Master skills you <span className="text-[#FF6B30] relative inline-block">desire<span className="absolute bottom-1 left-0 w-full h-3 bg-orange-100 -z-10 rounded-sm" /></span>.<br />
+            Share knowledge you <span className="text-sky-600 relative inline-block">excel in<span className="absolute bottom-1 left-0 w-full h-3 bg-sky-100 -z-10 rounded-sm" /></span>.
           </h1>
 
           {/* Subtitle */}
           <p className="text-base text-slate-600 font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
-            Tanpa uang sepeser pun. Dapatkan partner belajar 1-on-1, rancang roadmap belajar otomatis dari AI Companion, dan selesaikan tantangan bersama!
+            Zero subscription fees. Connect 1-on-1 with reciprocal partners, build AI learning roadmaps, and tackle milestones together.
           </p>
 
           {/* Action CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
             <Link
               href="/register"
-              className="soft-button text-sm sm:text-base px-8 py-3.5 flex items-center justify-center gap-2.5 w-full sm:w-auto shadow-md"
+              className="soft-button text-sm sm:text-base px-8 py-3.5 flex items-center justify-center gap-2.5 w-full sm:w-auto shadow-md cursor-pointer"
             >
-              <span>Mulai Belajar Gratis</span>
+              <span>Get Started Free</span>
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/discovery"
-              className="px-7 py-3.5 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm font-bold hover:bg-slate-50 transition shadow-xs flex items-center justify-center gap-2 w-full sm:w-auto"
+              className="px-7 py-3.5 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm font-bold hover:bg-slate-50 transition shadow-xs flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
             >
               <Compass className="w-5 h-5 text-slate-600" />
-              <span>Jelajahi Skill Map</span>
+              <span>Explore Skill Map</span>
             </Link>
           </div>
 
@@ -63,9 +62,9 @@ export function ParallaxHero() {
           </div>
         </div>
 
-        {/* Right Column: Asymmetrical Overlapping Floating Cards (5 Cols) */}
+        {/* Right Column */}
         <div className="lg:col-span-5 relative flex justify-center py-6">
-          {/* Card 1: Simbi AI Chat Card (Top Offset & Slightly Tilted) */}
+          {/* Card 1 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -85,11 +84,11 @@ export function ParallaxHero() {
               <span className="soft-badge bg-sky-100 text-sky-800 border-sky-300 text-[9px]">Active AI</span>
             </div>
             <p className="text-xs font-medium text-slate-700 leading-relaxed bg-white/80 p-3 rounded-xl border border-sky-100">
-              &quot;Halo Alex & Faifai! 🐾 Roadmap UI/UX Design & React TS kalian sudah siap! Yuk bahas modul pertamanya 🚀&quot;
+              &quot;Hello Alex & Jordan! Your UI/UX Design & React TS mutual roadmap is ready. Let&apos;s dive into module 1!&quot;
             </p>
           </motion.div>
 
-          {/* Card 2: Skill Swap Preview Card (Bottom Offset Overlapping) */}
+          {/* Card 2 */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -108,7 +107,7 @@ export function ParallaxHero() {
             <div className="text-[11px] font-medium text-slate-500 flex justify-between border-t border-slate-100 pt-2">
               <span>Alex M. (Frontend)</span>
               <span className="text-[#FF6B30] font-bold">⇄</span>
-              <span>Faifai (UI/UX)</span>
+              <span>Jordan K. (UI/UX)</span>
             </div>
           </motion.div>
         </div>

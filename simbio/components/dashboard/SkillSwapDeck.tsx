@@ -123,36 +123,33 @@ export function SkillSwapDeck({ onActiveCandidateChange }: Props) {
             <span>Skill Match Swap Hub</span>
           </span>
           <span className="soft-badge bg-slate-100 text-slate-800 border-slate-200 text-xs">
-            Kandidat {currentIndex + 1} dari {totalQueue}
+            Candidate {currentIndex + 1} of {totalQueue}
           </span>
         </div>
       )}
 
-      {/* Card area — flex-1 fills all remaining height */}
       <div className="flex-1 flex justify-center items-stretch min-h-0">
         <div className="w-full max-w-md flex flex-col min-h-0">
           {loading ? (
             <div className="flex-1 rounded-3xl bg-white border border-slate-200/80 flex flex-col items-center justify-center space-y-3 animate-pulse shadow-sm">
               <Sparkles className="w-8 h-8 text-[#FF6B30] animate-spin" />
-              <p className="text-xs text-slate-500 font-bold">Mencari rekomendasi partner reciprocal...</p>
+              <p className="text-xs text-slate-500 font-bold">Searching reciprocal partner recommendations...</p>
             </div>
           ) : !activeCandidate || currentIndex >= totalQueue ? (
             <div className="flex-1 rounded-3xl bg-white border border-slate-200/80 flex flex-col items-center justify-center space-y-4 p-8 shadow-sm text-center">
-              <div className="w-16 h-16 rounded-full bg-orange-50 text-[#FF6B30] flex items-center justify-center shadow-2xs">
-                <Heart className="w-8 h-8 fill-current" />
-              </div>
+              <Heart className="w-10 h-10 text-[#FF6B30] fill-current" />
               <div className="space-y-1 max-w-xs">
-                <h4 className="text-lg font-black text-slate-900">Semua Rekomendasi Telah Dilihat! 🎉</h4>
+                <h4 className="text-lg font-black text-slate-900">All Recommendations Reviewed</h4>
                 <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                  Tidak ada kandidat tersisa. Muat ulang antrean untuk menjelajahi kembali partner yang tersedia.
+                  No remaining candidates in this batch. Reset the queue to explore available partners again.
                 </p>
               </div>
               <button
                 onClick={() => setCurrentIndex(0)}
-                className="soft-button text-xs px-6 py-3 inline-flex items-center gap-2 shadow-sm font-bold"
+                className="soft-button text-xs px-6 py-3 inline-flex items-center gap-2 shadow-sm font-bold cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>Ulang Antrean Swap</span>
+                <span>Reset Swap Queue</span>
               </button>
             </div>
           ) : (
@@ -170,9 +167,7 @@ export function SkillSwapDeck({ onActiveCandidateChange }: Props) {
                 transition={{ duration: 0.2 }}
                 className="flex-1 rounded-3xl relative overflow-hidden shadow-2xl border border-slate-200/80 bg-slate-950 group select-none flex flex-col justify-between min-h-0"
               >
-                {/* Full-Bleed Photo Background */}
                 <div className="absolute inset-0 w-full h-full">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={activeCandidate.user.avatarUrl || PORTRAIT_FALLBACKS[currentIndex % PORTRAIT_FALLBACKS.length]}
                     alt={activeCandidate.user.name}
@@ -181,17 +176,15 @@ export function SkillSwapDeck({ onActiveCandidateChange }: Props) {
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-black/15" />
                 </div>
 
-                {/* Top Badges — Rating instead of raw match score */}
                 <div className="relative p-3 sm:p-5 flex items-center justify-between z-10 shrink-0">
                   <span className="soft-badge bg-black/60 backdrop-blur-md text-white border-white/20 text-xs sm:text-sm px-3 sm:px-4 py-1.5 font-bold flex items-center gap-1.5 shadow-md">
                     <MapPin className="w-3.5 h-3.5 text-[#FF6B30]" />
                     <span>
                       {activeCandidate.distanceKm
                         ? `${activeCandidate.distanceKm} km`
-                        : activeCandidate.user.country || 'Indonesia'}
+                        : activeCandidate.user.country || 'Global'}
                     </span>
                   </span>
-                  {/* Star Rating Badge */}
                   {activeCandidate.reputation.overall != null ? (
                     <span className="soft-badge bg-amber-500/90 backdrop-blur-md text-white border-amber-300/30 text-xs sm:text-sm px-3 sm:px-4 py-1.5 font-bold flex items-center gap-1.5 shadow-md">
                       <Star className="w-3.5 h-3.5 text-white fill-white" />
@@ -200,14 +193,12 @@ export function SkillSwapDeck({ onActiveCandidateChange }: Props) {
                   ) : (
                     <span className="soft-badge bg-slate-700/70 backdrop-blur-md text-white border-white/20 text-xs px-3 py-1.5 font-bold flex items-center gap-1 shadow-md">
                       <Sparkles className="w-3.5 h-3.5 text-slate-300" />
-                      <span>Baru</span>
+                      <span>New</span>
                     </span>
                   )}
                 </div>
 
-                {/* Bottom Info + Skills + Buttons */}
                 <div className="relative p-3 sm:p-6 lg:p-8 space-y-2 sm:space-y-4 z-10 text-white shrink-0">
-                  {/* User name & username */}
                   <div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                       <h3 className="font-black text-white text-xl sm:text-3xl lg:text-4xl tracking-tight drop-shadow-md">
@@ -227,16 +218,15 @@ export function SkillSwapDeck({ onActiveCandidateChange }: Props) {
                     )}
                   </div>
 
-                  {/* Reciprocal Skill Matrix */}
                   <div className="grid grid-cols-2 gap-1.5 sm:gap-3 bg-black/55 backdrop-blur-md p-2.5 sm:p-4 rounded-2xl border border-white/15">
                     <div>
                       <span className="text-[9px] sm:text-xs font-bold uppercase text-emerald-300 flex items-center gap-1 mb-1">
                         <BookOpen className="w-3 h-3 text-emerald-400" />
-                        Mengajar:
+                        Teaches:
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {activeCandidate.teachSkills.length === 0 ? (
-                          <span className="text-slate-400 text-[9px] sm:text-xs italic">Belum dicantumkan</span>
+                          <span className="text-slate-400 text-[9px] sm:text-xs italic">None listed</span>
                         ) : (
                           activeCandidate.teachSkills.slice(0, 3).map((s) => (
                             <span key={s.id} className="soft-badge bg-emerald-500/30 text-emerald-100 border-emerald-400/40 text-[9px] sm:text-xs px-1.5 sm:px-2 py-0.5 font-bold">
@@ -248,12 +238,12 @@ export function SkillSwapDeck({ onActiveCandidateChange }: Props) {
                     </div>
                     <div>
                       <span className="text-[9px] sm:text-xs font-bold uppercase text-orange-300 flex items-center gap-1 mb-1">
-                        <Award className="w-3 h-3 text-orange-400" />
-                        Mau Belajar:
+                        <Sparkles className="w-3 h-3 text-orange-400" />
+                        Learns:
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {activeCandidate.learnSkills.length === 0 ? (
-                          <span className="text-slate-400 text-[9px] sm:text-xs italic">Belum dicantumkan</span>
+                          <span className="text-slate-400 text-[9px] sm:text-xs italic">None listed</span>
                         ) : (
                           activeCandidate.learnSkills.slice(0, 3).map((s) => (
                             <span key={s.id} className="soft-badge bg-orange-500/30 text-orange-100 border-orange-400/40 text-[9px] sm:text-xs px-1.5 sm:px-2 py-0.5 font-bold">
@@ -265,21 +255,20 @@ export function SkillSwapDeck({ onActiveCandidateChange }: Props) {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 pt-1">
                     <button
                       onClick={() => handleNextCandidate('left')}
-                      className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-white/15 backdrop-blur-md border border-white/30 text-white flex items-center justify-center hover:bg-white/30 hover:scale-105 active:scale-95 transition-all shadow-lg shrink-0 cursor-pointer"
-                      title="Skip"
+                      className="p-3 sm:p-4 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white transition hover:scale-105 active:scale-95 shadow-md flex items-center justify-center cursor-pointer shrink-0"
+                      title="Skip candidate"
                     >
-                      <X className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                      <X className="w-5 h-5 sm:w-6 sm:h-6 text-slate-200" />
                     </button>
                     <button
                       onClick={() => setProposalCandidate(activeCandidate)}
-                      className="flex-1 h-10 sm:h-14 rounded-2xl bg-gradient-to-r from-[#FF6B30] to-orange-500 hover:from-[#E0531A] hover:to-orange-600 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 shadow-xl hover:scale-[1.01] active:scale-[0.98] transition-all cursor-pointer"
+                      className="flex-1 py-3 sm:py-4 px-4 sm:px-6 rounded-2xl bg-gradient-to-r from-[#FF6B30] to-orange-500 hover:from-[#E0531A] hover:to-[#FF6B30] text-white font-black text-xs sm:text-base flex items-center justify-center gap-2 transition hover:scale-[1.02] active:scale-95 shadow-lg shadow-orange-500/30 cursor-pointer"
                     >
                       <UserCheck className="w-4 h-4 sm:w-5 sm:h-5 text-white shrink-0" />
-                      <span>Hubungkan Exchange</span>
+                      <span>Connect Exchange</span>
                     </button>
                   </div>
                 </div>

@@ -183,8 +183,8 @@ export function RoadmapProposalCard({
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h4 className="text-sm font-black text-[#0F172A]">Proposal AI Roadmap Topik Belajar</h4>
-            <p className="text-[11px] text-gray-600 font-bold">Dibuat oleh {payload.createdByName}</p>
+            <h4 className="text-sm font-black text-[#0F172A]">AI Learning Roadmap Proposal</h4>
+            <p className="text-[11px] text-gray-600 font-bold">Created by {payload.createdByName}</p>
           </div>
         </div>
 
@@ -196,17 +196,17 @@ export function RoadmapProposalCard({
           }`}
         >
           {isApproved
-            ? 'APPROVED ✅'
-            : `${approvedCount}/2 APPROVALS ⏳`}
+            ? 'APPROVED'
+            : `${approvedCount}/2 APPROVALS`}
         </span>
       </div>
 
       {/* Topics Draft List */}
       <div className="space-y-3">
-        {/* User A Drafts (Saya Belajar) */}
+        {/* User A Drafts (My Learning) */}
         <div className="space-y-1.5 p-3 rounded-xl bg-[#FFFDF7] border-2 border-[#0F172A]">
           <span className="text-[11px] font-black text-[#FF7A30] uppercase">
-            Topik Belajar Saya ({myDrafts[0]?.category || 'Target Skill'}):
+            My Learning Topics ({myDrafts[0]?.category || 'Target Skill'}):
           </span>
           <div className="space-y-1.5 pt-1">
             {myDrafts.map((item) => (
@@ -224,7 +224,7 @@ export function RoadmapProposalCard({
                     />
                     <button
                       onClick={() => handleSaveTitleEdit(item.id)}
-                      className="p-1 bg-[#84CC16] text-white rounded-md border border-[#0F172A]"
+                      className="p-1 bg-[#84CC16] text-white rounded-md border border-[#0F172A] cursor-pointer"
                     >
                       <Check className="w-3.5 h-3.5 text-[#0F172A]" />
                     </button>
@@ -236,13 +236,15 @@ export function RoadmapProposalCard({
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleStartEdit(item)}
-                          className="text-gray-400 hover:text-cyan-600 p-0.5"
+                          className="text-gray-400 hover:text-cyan-600 p-0.5 cursor-pointer"
+                          title="Edit title"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteDraftItem(item.id)}
-                          className="text-gray-400 hover:text-red-500 p-0.5"
+                          className="text-gray-400 hover:text-red-500 p-0.5 cursor-pointer"
+                          title="Delete draft item"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -255,10 +257,10 @@ export function RoadmapProposalCard({
           </div>
         </div>
 
-        {/* User B Drafts (Partner Belajar) */}
+        {/* User B Drafts (Partner Learning) */}
         <div className="space-y-1.5 p-3 rounded-xl bg-[#FFFDF7] border-2 border-[#0F172A]">
           <span className="text-[11px] font-black text-[#84CC16] uppercase">
-            Topik Belajar {partnerName} ({partnerDrafts[0]?.category || 'Target Skill'}):
+            {partnerName}&apos;s Learning Topics ({partnerDrafts[0]?.category || 'Target Skill'}):
           </span>
           <div className="space-y-1.5 pt-1">
             {partnerDrafts.map((item) => (
@@ -276,7 +278,7 @@ export function RoadmapProposalCard({
                     />
                     <button
                       onClick={() => handleSaveTitleEdit(item.id)}
-                      className="p-1 bg-[#84CC16] text-white rounded-md border border-[#0F172A]"
+                      className="p-1 bg-[#84CC16] text-white rounded-md border border-[#0F172A] cursor-pointer"
                     >
                       <Check className="w-3.5 h-3.5 text-[#0F172A]" />
                     </button>
@@ -288,13 +290,15 @@ export function RoadmapProposalCard({
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleStartEdit(item)}
-                          className="text-gray-400 hover:text-cyan-600 p-0.5"
+                          className="text-gray-400 hover:text-cyan-600 p-0.5 cursor-pointer"
+                          title="Edit title"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteDraftItem(item.id)}
-                          className="text-gray-400 hover:text-red-500 p-0.5"
+                          className="text-gray-400 hover:text-red-500 p-0.5 cursor-pointer"
+                          title="Delete draft item"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -317,9 +321,9 @@ export function RoadmapProposalCard({
               onChange={(e) => setNewTargetUserId(e.target.value)}
               className="text-[11px] font-bold px-2 py-1.5 bg-white border-2 border-[#0F172A] rounded-lg focus:outline-hidden"
             >
-              <option value={myUserId}>Untuk Saya Belajar</option>
+              <option value={myUserId}>For My Learning</option>
               <option value={topics.find((t) => t.targetUserId !== myUserId)?.targetUserId || 'partner'}>
-                Untuk {partnerName} Belajar
+                For {partnerName}&apos;s Learning
               </option>
             </select>
 
@@ -327,14 +331,14 @@ export function RoadmapProposalCard({
               type="text"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Tambah/edit draf topik..."
+              placeholder="Add/edit draft topic..."
               className="flex-1 px-3 py-1.5 text-xs bg-white rounded-lg border-2 border-[#0F172A] font-bold focus:outline-hidden"
             />
 
             <button
               type="submit"
               disabled={!newTitle.trim()}
-              className="px-3 py-1.5 rounded-lg bg-[#FACC15] border-2 border-[#0F172A] text-xs font-black hover:bg-amber-400 transition"
+              className="px-3 py-1.5 rounded-lg bg-[#FACC15] border-2 border-[#0F172A] text-xs font-black hover:bg-amber-400 transition cursor-pointer"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -347,22 +351,22 @@ export function RoadmapProposalCard({
         {isApproved ? (
           <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-900 border-2 border-[#0F172A] text-xs font-black flex items-center gap-2 w-full justify-center shadow-[2px_2px_0px_0px_#0F172A]">
             <CheckCircle2 className="w-4.5 h-4.5 text-[#84CC16]" />
-            <span>Proposal Roadmap telah Disetujui oleh Kedua Pihak & Masuk ke List Belajar!</span>
+            <span>Roadmap Proposal Approved by Both Partners & Added to Learning Checklist!</span>
           </div>
         ) : hasIApproved ? (
           <div className="p-2.5 rounded-xl bg-amber-50 text-amber-900 border-2 border-[#0F172A] text-xs font-black flex items-center gap-2 w-full justify-center shadow-[2px_2px_0px_0px_#0F172A]">
             <Clock className="w-4 h-4 text-[#FF7A30] animate-spin" />
-            <span>Menunggu Persetujuan dari {partnerName}... ({approvedCount}/2 Disetujui)</span>
+            <span>Waiting for Approval from {partnerName}... ({approvedCount}/2 Approved)</span>
           </div>
         ) : (
           <button
             type="button"
             disabled={submitting}
             onClick={handleApproveProposal}
-            className="w-full py-3 rounded-xl bg-[#84CC16] text-[#0F172A] border-2 border-[#0F172A] text-xs font-black hover:bg-emerald-400 transition flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_#0F172A]"
+            className="w-full py-3 rounded-xl bg-[#84CC16] text-[#0F172A] border-2 border-[#0F172A] text-xs font-black hover:bg-emerald-400 transition flex items-center justify-center gap-2 shadow-[3px_3px_0px_0px_#0F172A] cursor-pointer"
           >
             <CheckCircle2 className="w-4.5 h-4.5" />
-            <span>{submitting ? 'Approving...' : `Setujui Proposal Roadmap (${approvedCount}/2 Disetujui)`}</span>
+            <span>{submitting ? 'Approving...' : `Approve Roadmap Proposal (${approvedCount}/2 Approved)`}</span>
           </button>
         )}
       </div>

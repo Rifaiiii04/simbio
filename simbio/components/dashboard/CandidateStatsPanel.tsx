@@ -30,10 +30,10 @@ interface Props {
 const DIMENSION_COLORS = ['#FF6B30', '#f59e0b', '#10b981', '#6366f1'];
 
 const DIMENSION_LABELS = [
-  { key: 'consistency', label: 'Konsistensi' },
-  { key: 'communication', label: 'Komunikasi' },
-  { key: 'knowledgeSharing', label: 'Berbagi Ilmu' },
-  { key: 'collaboration', label: 'Kolaborasi' },
+  { key: 'consistency', label: 'Consistency' },
+  { key: 'communication', label: 'Communication' },
+  { key: 'knowledgeSharing', label: 'Teaching Quality' },
+  { key: 'collaboration', label: 'Collaboration' },
 ];
 
 // Custom tooltip for the bar chart
@@ -73,8 +73,8 @@ export function CandidateStatsPanel({ reputation, candidateName }: Props) {
           <Star className="w-6 h-6 text-slate-400" />
         </div>
         <div>
-          <p className="text-xs font-bold text-slate-700">{candidateName} belum punya review</p>
-          <p className="text-[10px] text-slate-400 mt-0.5">Jadilah partner pertama mereka!</p>
+          <p className="text-xs font-bold text-slate-700">{candidateName} has no reviews yet</p>
+          <p className="text-[10px] text-slate-400 mt-0.5">Be their first study partner!</p>
         </div>
       </div>
     );
@@ -93,11 +93,11 @@ export function CandidateStatsPanel({ reputation, candidateName }: Props) {
           <div className="w-7 h-7 rounded-xl bg-amber-50 flex items-center justify-center">
             <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
           </div>
-          <span className="text-xs font-black text-slate-800">Reputasi Peer Review</span>
+          <span className="text-xs font-black text-slate-800">Peer Review Reputation</span>
         </div>
         <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
-          <MessageSquare className="w-3 h-3" />
-          {reputation.count} review
+          <MessageSquare className="w-3.5 h-3.5" />
+          {reputation.count} review{reputation.count === 1 ? '' : 's'}
         </span>
       </div>
 
@@ -129,7 +129,7 @@ export function CandidateStatsPanel({ reputation, candidateName }: Props) {
             <YAxis
               type="category"
               dataKey="name"
-              width={72}
+              width={100}
               tick={{ fontSize: 9, fill: '#64748b', fontWeight: 700 }}
               axisLine={false}
               tickLine={false}
@@ -147,7 +147,7 @@ export function CandidateStatsPanel({ reputation, candidateName }: Props) {
       {/* Partner count badge */}
       <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-semibold shrink-0">
         <Users className="w-3 h-3" />
-        <span>Berdasarkan {reputation.count} partner yang pernah berkolaborasi</span>
+        <span>Based on {reputation.count} collaboration partner{reputation.count === 1 ? '' : 's'}</span>
       </div>
     </div>
   );

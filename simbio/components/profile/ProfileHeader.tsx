@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, ChangeEvent } from 'react';
-import { Camera, Loader2, ShieldCheck, Mail, MapPin, Award, BookOpen, Sparkles } from 'lucide-react';
+import { Camera, Loader2, ShieldCheck, Mail, MapPin, Sparkles } from 'lucide-react';
 import { apiFetch, getAvatarUrl } from '@/lib/api/client';
 
 interface ProfileHeaderProps {
@@ -34,7 +34,7 @@ export function ProfileHeader({ user, teachCount, learnCount, onAvatarUpdated }:
 
     // Validate size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setErrorMsg('Ukuran file maksimal 5MB');
+      setErrorMsg('File size must be under 5MB');
       return;
     }
 
@@ -52,7 +52,7 @@ export function ProfileHeader({ user, teachCount, learnCount, onAvatarUpdated }:
       const newAvatarUrl = res.avatarUrl || res.user.avatarUrl;
       onAvatarUpdated(newAvatarUrl);
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Gagal mengunggah foto profil');
+      setErrorMsg(err instanceof Error ? err.message : 'Failed to upload profile photo');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -68,7 +68,7 @@ export function ProfileHeader({ user, teachCount, learnCount, onAvatarUpdated }:
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
         <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white text-[11px] font-black flex items-center gap-1.5 shadow-2xs">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Profil Pengguna Simbioly</span>
+          <span>Simbioly Member Profile</span>
         </div>
       </div>
 
@@ -90,17 +90,17 @@ export function ProfileHeader({ user, teachCount, learnCount, onAvatarUpdated }:
               onClick={handleAvatarClick}
               disabled={uploading}
               className="absolute inset-0 bg-black/50 backdrop-blur-2xs flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer disabled:opacity-100"
-              title="Klik untuk mengganti foto profil"
+              title="Click to update profile photo"
             >
               {uploading ? (
                 <>
                   <Loader2 className="w-6 h-6 animate-spin text-white mb-1" />
-                  <span className="text-[10px] font-bold">Mengunggah...</span>
+                  <span className="text-[10px] font-bold">Uploading...</span>
                 </>
               ) : (
                 <>
                   <Camera className="w-6 h-6 mb-1 drop-shadow-md" />
-                  <span className="text-[10px] font-black uppercase tracking-wider drop-shadow-md">Ganti Foto</span>
+                  <span className="text-[10px] font-black uppercase tracking-wider drop-shadow-md">Change Photo</span>
                 </>
               )}
             </button>
@@ -121,7 +121,7 @@ export function ProfileHeader({ user, teachCount, learnCount, onAvatarUpdated }:
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">{user.name}</h2>
               <span className="soft-badge bg-emerald-50 text-emerald-800 border-emerald-200 text-xs font-black flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Terverifikasi</span>
+                <span>Verified</span>
               </span>
             </div>
 
@@ -133,7 +133,7 @@ export function ProfileHeader({ user, teachCount, learnCount, onAvatarUpdated }:
               </span>
               <span className="flex items-center gap-1 text-slate-500">
                 <MapPin className="w-3.5 h-3.5 text-[#FF6B30]" />
-                <span>{user.country || 'Indonesia'}</span>
+                <span>{user.country || 'Global'}</span>
               </span>
             </div>
 
@@ -144,13 +144,13 @@ export function ProfileHeader({ user, teachCount, learnCount, onAvatarUpdated }:
         {/* Right: Quick Stats Counter */}
         <div className="flex items-center gap-3 self-start sm:self-end pt-2 sm:pt-0">
           <div className="px-4 py-2.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-center min-w-[90px]">
-            <span className="text-xs font-black text-emerald-600 uppercase tracking-wider block">Mengajar</span>
-            <span className="text-xl font-black text-emerald-900">{teachCount} Skill</span>
+            <span className="text-xs font-black text-emerald-600 uppercase tracking-wider block">Teaches</span>
+            <span className="text-xl font-black text-emerald-900">{teachCount} Skills</span>
           </div>
 
           <div className="px-4 py-2.5 rounded-2xl bg-orange-50/80 border border-orange-200 text-center min-w-[90px]">
-            <span className="text-xs font-black text-[#FF6B30] uppercase tracking-wider block">Belajar</span>
-            <span className="text-xl font-black text-orange-900">{learnCount} Skill</span>
+            <span className="text-xs font-black text-[#FF6B30] uppercase tracking-wider block">Learns</span>
+            <span className="text-xl font-black text-orange-900">{learnCount} Skills</span>
           </div>
         </div>
       </div>

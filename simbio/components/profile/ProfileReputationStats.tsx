@@ -30,10 +30,10 @@ interface Props {
 const DIMENSION_COLORS = ['#FF6B30', '#f59e0b', '#10b981', '#6366f1'];
 
 const DIMENSION_LABELS = [
-  { key: 'consistency', label: 'Konsistensi', description: 'Ketepatan waktu & komitmen sesi belajar' },
-  { key: 'communication', label: 'Komunikasi', description: 'Kejelasan penyampaian dan responsif' },
-  { key: 'knowledgeSharing', label: 'Berbagi Ilmu', description: 'Kualitas materi dan cara pengajaran' },
-  { key: 'collaboration', label: 'Kolaborasi', description: 'Kemampuan kerja sama dalam sesi barter' },
+  { key: 'consistency', label: 'Consistency', description: 'Punctuality & study commitment' },
+  { key: 'communication', label: 'Communication', description: 'Clarity, responsiveness & listening' },
+  { key: 'knowledgeSharing', label: 'Teaching Quality', description: 'Depth and quality of skill exchange' },
+  { key: 'collaboration', label: 'Collaboration', description: 'Cooperation in joint focus sessions' },
 ];
 
 function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
@@ -81,16 +81,16 @@ export function ProfileReputationStats({ reputation, loading }: Props) {
           <div className="w-8 h-8 rounded-2xl bg-amber-50 flex items-center justify-center">
             <Award className="w-4 h-4 text-amber-500" />
           </div>
-          <h2 className="text-sm font-black text-slate-900">Statistik Reputasi Saya</h2>
+          <h2 className="text-sm font-black text-slate-900">My Reputation Statistics</h2>
         </div>
         <div className="flex flex-col items-center gap-3 py-6 text-center border-2 border-dashed border-slate-200 rounded-2xl">
           <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
             <Star className="w-6 h-6 text-slate-400" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-700">Belum ada review</p>
+            <p className="text-xs font-bold text-slate-700">No peer reviews yet</p>
             <p className="text-[10px] text-slate-400 mt-0.5 max-w-xs">
-              Mulai berkolaborasi dengan partner untuk mendapatkan peer review dan membangun reputasi kamu.
+              Complete collaboration sessions with study partners to receive verified peer reviews and build your reputation.
             </p>
           </div>
         </div>
@@ -111,11 +111,11 @@ export function ProfileReputationStats({ reputation, loading }: Props) {
           <div className="w-8 h-8 rounded-2xl bg-amber-50 flex items-center justify-center">
             <Award className="w-4 h-4 text-amber-500" />
           </div>
-          <h2 className="text-sm font-black text-slate-900">Statistik Reputasi Saya</h2>
+          <h2 className="text-sm font-black text-slate-900">My Reputation Statistics</h2>
         </div>
         <span className="text-xs text-slate-400 font-semibold flex items-center gap-1">
           <Users className="w-3.5 h-3.5" />
-          {reputation.count} peer review
+          {reputation.count} peer review{reputation.count === 1 ? '' : 's'}
         </span>
       </div>
 
@@ -168,7 +168,7 @@ export function ProfileReputationStats({ reputation, loading }: Props) {
               <YAxis
                 type="category"
                 dataKey="name"
-                width={88}
+                width={100}
                 tick={{ fontSize: 10, fill: '#64748b', fontWeight: 700 }}
                 axisLine={false}
                 tickLine={false}
