@@ -241,13 +241,13 @@ export default function PartnershipRoomPage({ params }: { params: Promise<{ id: 
       )}
 
       {/* ================================================================ */}
-      {/* MAIN WORKSPACE CANVAS (Full screen on mobile)                     */}
+      {/* MAIN WORKSPACE CANVAS (Full screen on mobile, 65/35 on desktop)   */}
       {/* ================================================================ */}
-      <div className="flex-1 min-h-0 w-full max-w-full flex overflow-hidden lg:p-4 lg:gap-4 lg:max-w-[1700px] lg:mx-auto">
+      <div className="flex-1 min-h-0 w-full max-w-full flex flex-col lg:flex-row gap-4 overflow-hidden lg:p-4 lg:max-w-[1700px] lg:mx-auto">
         {/* ============================================================== */}
-        {/* CHAT CANVAS (Full screen on mobile, 7 cols on desktop)          */}
+        {/* CHAT CANVAS (Full screen on mobile, 65% on desktop)             */}
         {/* ============================================================== */}
-        <div className="flex-1 flex flex-col min-w-0 min-h-0 w-full max-w-full overflow-hidden lg:rounded-2xl lg:border lg:border-slate-200/80 lg:shadow-xs bg-white">
+        <div className="w-full lg:w-[65%] flex flex-col min-w-0 min-h-0 overflow-hidden lg:rounded-2xl lg:border lg:border-slate-200/80 lg:shadow-xs bg-white">
           {/* Scrollable Message List */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 sm:px-3 py-2 space-y-1 bg-slate-50/30 min-h-0 w-full">
             {messages.length === 0 ? (
@@ -346,27 +346,25 @@ export default function PartnershipRoomPage({ params }: { params: Promise<{ id: 
         </div>
 
         {/* ============================================================== */}
-        {/* DESKTOP RIGHT PANEL: Roadmap & Focus (hidden on mobile)         */}
+        {/* DESKTOP RIGHT PANEL (35% on desktop): Roadmap & Focus           */}
         {/* ============================================================== */}
-        <div className="hidden lg:flex w-[380px] xl:w-[420px] shrink-0 flex-col min-h-0 space-y-3">
+        <div className="hidden lg:flex lg:w-[35%] flex-col min-w-0 min-h-0 h-full space-y-2.5 overflow-hidden">
           {/* Tab Switcher */}
           <div className="p-1 bg-white rounded-2xl border border-slate-200/80 shadow-2xs grid grid-cols-2 gap-1 shrink-0">
             <button
               type="button"
               onClick={() => setSidebarTab('ROADMAP')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                sidebarTab === 'ROADMAP' ? 'bg-[#FF6B30] text-white' : 'text-slate-600 hover:bg-slate-100'
-              }`}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${sidebarTab === 'ROADMAP' ? 'bg-[#FF6B30] text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+                }`}
             >
               <BookOpen className="w-4 h-4" />
-              <span>Roadmap</span>
+              <span>Learning Roadmap & Checklist</span>
             </button>
             <button
               type="button"
               onClick={() => setSidebarTab('FOCUS')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 relative cursor-pointer ${
-                sidebarTab === 'FOCUS' ? 'bg-[#FF6B30] text-white' : 'text-slate-600 hover:bg-slate-100'
-              }`}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 relative cursor-pointer ${sidebarTab === 'FOCUS' ? 'bg-[#FF6B30] text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+                }`}
             >
               <Clock className="w-4 h-4" />
               <span>Focus Session</span>
@@ -376,7 +374,7 @@ export default function PartnershipRoomPage({ params }: { params: Promise<{ id: 
             </button>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto space-y-3">
+          <div className="flex-1 min-h-0 overflow-hidden">
             {sidebarTab === 'ROADMAP' ? (
               <ReciprocalRoadmapCard
                 partnershipId={partnershipId}
@@ -385,15 +383,17 @@ export default function PartnershipRoomPage({ params }: { params: Promise<{ id: 
                 socket={socketRef.current}
               />
             ) : (
-              <FocusTimerCard
-                partnershipId={partnershipId}
-                myUserId={myUserId}
-                partnerName={partner?.name || 'Partner'}
-                socket={socketRef.current}
-                onFocusStateChange={(isActive) => setIsFocusModeActive(isActive)}
-              />
+              <div className="h-full overflow-y-auto space-y-3">
+                <FocusTimerCard
+                  partnershipId={partnershipId}
+                  myUserId={myUserId}
+                  partnerName={partner?.name || 'Partner'}
+                  socket={socketRef.current}
+                  onFocusStateChange={(isActive) => setIsFocusModeActive(isActive)}
+                />
+                <SimbiAvatar state="happy" message="Pomodoro focus session helps you and your partner stay synchronized!" />
+              </div>
             )}
-            <SimbiAvatar state="happy" message="Switch between Roadmap & Focus Timer using the tabs above." />
           </div>
         </div>
       </div>
@@ -422,9 +422,8 @@ export default function PartnershipRoomPage({ params }: { params: Promise<{ id: 
                 <button
                   type="button"
                   onClick={() => setSidebarTab('ROADMAP')}
-                  className={`py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer ${
-                    sidebarTab === 'ROADMAP' ? 'bg-[#FF6B30] text-white shadow-xs' : 'text-slate-600 hover:bg-white/60'
-                  }`}
+                  className={`py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer ${sidebarTab === 'ROADMAP' ? 'bg-[#FF6B30] text-white shadow-xs' : 'text-slate-600 hover:bg-white/60'
+                    }`}
                 >
                   <BookOpen className="w-3.5 h-3.5" />
                   <span>Roadmap</span>
@@ -432,9 +431,8 @@ export default function PartnershipRoomPage({ params }: { params: Promise<{ id: 
                 <button
                   type="button"
                   onClick={() => setSidebarTab('FOCUS')}
-                  className={`py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 relative cursor-pointer ${
-                    sidebarTab === 'FOCUS' ? 'bg-[#FF6B30] text-white shadow-xs' : 'text-slate-600 hover:bg-white/60'
-                  }`}
+                  className={`py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 relative cursor-pointer ${sidebarTab === 'FOCUS' ? 'bg-[#FF6B30] text-white shadow-xs' : 'text-slate-600 hover:bg-white/60'
+                    }`}
                 >
                   <Clock className="w-3.5 h-3.5" />
                   <span>Focus Session</span>

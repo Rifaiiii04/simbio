@@ -139,6 +139,16 @@ export async function generateAiProposalForPartnership(userId: string, partnersh
 
   if (!p) throw new AppError(ErrorCode.FORBIDDEN, 'Access denied to partnership', 403);
 
+  // Check if there are active uncompleted topics for this partnership
+  const existingTopics = await repo.findByPartnership(partnershipId);
+  if (existingTopics.length > 0 && existingTopics.some((t) => !t.isCompleted)) {
+    throw new AppError(
+      ErrorCode.CONFLICT,
+      'You cannot generate a new AI roadmap proposal while there are active uncompleted topics. Please complete all current checklist topics first, or manage them manually.',
+      409
+    );
+  }
+
   const requesterId = p.requesterId;
   const recipientId = p.recipientId;
 
