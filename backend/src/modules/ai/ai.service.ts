@@ -154,3 +154,67 @@ export async function recommendAiPartners(userId: string) {
     };
   }).sort((a, b) => b.aiMatchScore - a.aiMatchScore);
 }
+
+// ─── Simbi Match Consultation ────────────────────────────────────────────────
+// Builds a context-rich prompt from both users' data and lets Simbi answer
+// user questions about reciprocal skill compatibility.
+export async function simbiMatchConsult(myUserId: string, candidateId: string, userMessage: string): Promise<string> {
+  const [me, candidate] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: myUserId },
+      include: { userSkills: { include: { skill: true } } },
+    }),
+    prisma.user.findUnique({
+      where: { id: candidateId },
+      include: { userSkills: { include: { skill: true } } },
+    }),
+  ]);
+
+  if (!me) throw new AppError(ErrorCode.NOT_FOUND, 'Your profile was not found', 404);
+  if (!candidate) throw new AppError(ErrorCode.NOT_FOUND, 'Candidate not found', 404);
+
+  // Fetch reputation for candidate
+  const reviews = await prisma.partnershipReview.findMany({
+    where: { revieweeId: candidateId },
+    select: { consistency: true, communication: true, knowledgeSharing: true, collaboration: true },
+  });
+  const reviewCount = reviews.length;
+  let reputationSummary = 'Belum ada review dari partner sebelumnya.';
+  if (reviewCount > 0) {
+    const avg = {
+      consistency: Math.round((reviews.reduce((s, r) => s + r.consistency, 0) / reviewCount) * 10) / 10,
+      communication: Math.round((reviews.reduce((s, r) => s + r.communication, 0) / reviewCount) * 10) / 10,
+      knowledgeSharing: Math.round((reviews.reduce((s, r) => s + r.knowledgeSharing, 0) / reviewCount) * 10) / 10,
+      collaboration: Math.round((reviews.reduce((s, r) => s + r.collaboration, 0) / reviewCount) * 10) / 10,
+    };
+    const overall = Math.round(((avg.consistency + avg.communication + avg.knowledgeSharing + avg.collaboration) / 4) * 10) / 10;
+    reputationSummary = `Rating keseluruhan: ${overall}/5 (dari ${reviewCount} review). Konsistensi: ${avg.consistency}/5, Komunikasi: ${avg.communication}/5, Berbagi Ilmu: ${avg.knowledgeSharing}/5, Kolaborasi: ${avg.collaboration}/5.`;
+  }
+
+  const myTeach = me.userSkills.filter((s) => s.type === 'TEACH').map((s) => `${s.skill.name} (${s.level})`);
+  const myLearn = me.userSkills.filter((s) => s.type === 'LEARN').map((s) => `${s.skill.name} (${s.level})`);
+  const candTeach = candidate.userSkills.filter((s) => s.type === 'TEACH').map((s) => `${s.skill.name} (${s.level})`);
+  const candLearn = candidate.userSkills.filter((s) => s.type === 'LEARN').map((s) => `${s.skill.name} (${s.level})`);
+
+  const systemPrompt = `Kamu adalah Simbi, asisten AI capybara yang ceria dan cerdas di platform Simbioly — platform pertukaran skill timbal-balik (reciprocal skill exchange) antar manusia.
+
+Konteks saat ini:
+- Pengguna yang bertanya: ${me.name}
+  - Skill yang bisa dia AJARKAN: ${myTeach.join(', ') || 'Belum dicantumkan'}
+  - Skill yang ingin dia PELAJARI: ${myLearn.join(', ') || 'Belum dicantumkan'}
+
+- Kandidat partner yang sedang dievaluasi: ${candidate.name} (${candidate.country ?? 'Negara tidak diketahui'})
+  - Bio: ${candidate.bio ?? 'Tidak ada bio.'}
+  - Skill yang bisa dia AJARKAN: ${candTeach.join(', ') || 'Belum dicantumkan'}
+  - Skill yang ingin dia PELAJARI: ${candLearn.join(', ') || 'Belum dicantumkan'}
+  - Reputasi dari peer review: ${reputationSummary}
+
+Tugasmu: Bantu ${me.name} mengevaluasi apakah ${candidate.name} adalah partner barter skill yang cocok. Fokus pada keseimbangan timbal balik (reciprocal): apakah skill mengajar kandidat sesuai kebutuhan belajar user, dan sebaliknya. Berikan penilaian jujur, konstruktif, dan semangat. Jawab dalam Bahasa Indonesia. Maksimal 200 kata.`;
+
+  try {
+    return await llmProvider.generateChatResponse(systemPrompt, userMessage);
+  } catch (err) {
+    logger.warn({ err }, 'Simbi match consult LLM call failed');
+    throw new AppError(ErrorCode.AI_UNAVAILABLE, 'Simbi sedang tidak tersedia, coba beberapa saat lagi.', 503);
+  }
+}

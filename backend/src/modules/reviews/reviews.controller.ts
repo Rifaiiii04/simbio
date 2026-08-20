@@ -47,3 +47,10 @@ export async function getReputationHandler(req: Request, res: Response, next: Ne
     sendSuccess(res, { reputation });
   } catch (err) { next(err); }
 }
+
+export async function getMyReputationHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const reputation = await repo.getReputation(uid(req));
+    sendSuccess(res, { reputation });
+  } catch (err) { next(err); }
+}

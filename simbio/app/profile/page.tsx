@@ -8,6 +8,7 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileIdentityForm } from '@/components/profile/ProfileIdentityForm';
 import { ProfileSkillsSection } from '@/components/profile/ProfileSkillsSection';
 import { ProfileLocationSettings } from '@/components/profile/ProfileLocationSettings';
+import { ProfileReputationStats } from '@/components/profile/ProfileReputationStats';
 import { AddSkillModal } from '@/components/profile/AddSkillModal';
 import { CheckCircle2, AlertCircle, Loader2, Save } from 'lucide-react';
 
@@ -36,11 +37,19 @@ interface Skill {
   category?: { name: string };
 }
 
+interface Reputation {
+  count: number;
+  overall: number | null;
+  averages: { consistency: number; communication: number; knowledgeSharing: number; collaboration: number } | null;
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [userSkills, setUserSkills] = useState<UserSkill[]>([]);
   const [allSkills, setAllSkills] = useState<Skill[]>([]);
+  const [reputation, setReputation] = useState<Reputation | null>(null);
+  const [reputationLoading, setReputationLoading] = useState(true);
 
   // Form State
   const [name, setName] = useState('');
@@ -75,10 +84,11 @@ export default function ProfilePage() {
     async function loadData() {
       try {
         setLoading(true);
-        const [userData, userSkillsData, skillsData] = await Promise.all([
+        const [userData, userSkillsData, skillsData, reputationData] = await Promise.all([
           apiFetch<{ user: UserProfile }>('/users/me'),
           apiFetch<{ skills: UserSkill[] }>('/skills/me/skills').catch(() => ({ skills: [] })),
           apiFetch<{ skills: Skill[] }>('/skills').catch(() => ({ skills: [] })),
+          apiFetch<{ reputation: Reputation }>('/reviews/reputation/me').catch(() => ({ reputation: { count: 0, overall: null, averages: null } })),
         ]);
 
         const u = userData.user;
@@ -92,6 +102,8 @@ export default function ProfilePage() {
 
         setUserSkills(userSkillsData.skills || []);
         setAllSkills(skillsData.skills || []);
+        setReputation(reputationData.reputation);
+        setReputationLoading(false);
       } catch (err: unknown) {
         setErrorMsg(err instanceof Error ? err.message : 'Gagal memuat data profil');
       } finally {
@@ -285,10 +297,10 @@ export default function ProfilePage() {
   const learnCount = userSkills.filter((s) => s.type === 'LEARN').length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 pb-16 selection:bg-orange-100 selection:text-[#FF6B30]">
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-orange-100 selection:text-[#FF6B30]">
       <Navbar />
 
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6 space-y-6">
+      <main className="flex-1 w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-5 pb-24 md:pb-6 space-y-5">
         {/* Toast Feedback */}
         {successMsg && (
           <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 shadow-xs animate-in fade-in slide-in-from-top-2">
@@ -319,6 +331,9 @@ export default function ProfilePage() {
           learnCount={learnCount}
           onAvatarUpdated={handleAvatarUpdated}
         />
+
+        {/* 2. REPUTATION STATISTICS */}
+        <ProfileReputationStats reputation={reputation} loading={reputationLoading} />
 
         {/* 2. IDENTITY & PERSONAL INFO FORM */}
         <form onSubmit={handleSaveProfile} className="space-y-6">

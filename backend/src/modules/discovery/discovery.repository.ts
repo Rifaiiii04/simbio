@@ -19,12 +19,19 @@ interface DiscoveryFilters {
   country?: string;
 }
 
+export interface CandidateReputation {
+  count: number;
+  overall: number | null; // 1-5 average
+  averages: { consistency: number; communication: number; knowledgeSharing: number; collaboration: number } | null;
+}
+
 export interface CandidateResult {
   user: { id: string; name: string; username: string | null; avatarUrl: string | null; bio: string | null; country: string | null };
   teachSkills: Array<{ id: string; name: string; level: string }>;
   learnSkills: Array<{ id: string; name: string; level: string }>;
   matchScore: number;
   distanceKm: number | null;
+  reputation: CandidateReputation;
 }
 
 export async function findCandidates(
@@ -114,6 +121,7 @@ export async function findCandidates(
       learnSkills: candidateLearn.map((s) => ({ id: s.skill.id, name: s.skill.name, level: s.level })),
       matchScore,
       distanceKm,
+      reputation: { count: 0, overall: null, averages: null }, // populated below
     };
   });
 
@@ -123,13 +131,47 @@ export async function findCandidates(
     : results;
 
   // Sort: matchScore DESC → distanceKm ASC (null pushed to end)
-  return filtered.sort((a, b) => {
+  const sorted = filtered.sort((a, b) => {
     if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
     if (a.distanceKm != null && b.distanceKm != null) return a.distanceKm - b.distanceKm;
-    if (a.distanceKm != null) return -1; // a has distance, b doesn't → a first
+    if (a.distanceKm != null) return -1;
     if (b.distanceKm != null) return 1;
     return 0;
   });
+
+  // Batch-fetch reputation for all candidate IDs
+  const candidateIds = sorted.map((r) => r.user.id);
+  const reviews = await prisma.partnershipReview.findMany({
+    where: { revieweeId: { in: candidateIds } },
+    select: { revieweeId: true, consistency: true, communication: true, knowledgeSharing: true, collaboration: true },
+  });
+
+  // Group reviews by user and compute averages (all scores are 1-5)
+  const reputationMap = new Map<string, CandidateReputation>();
+  for (const id of candidateIds) {
+    const userReviews = reviews.filter((r) => r.revieweeId === id);
+    const count = userReviews.length;
+    if (count === 0) {
+      reputationMap.set(id, { count: 0, overall: null, averages: null });
+    } else {
+      const sum = userReviews.reduce((acc, r) => ({
+        consistency: acc.consistency + r.consistency,
+        communication: acc.communication + r.communication,
+        knowledgeSharing: acc.knowledgeSharing + r.knowledgeSharing,
+        collaboration: acc.collaboration + r.collaboration,
+      }), { consistency: 0, communication: 0, knowledgeSharing: 0, collaboration: 0 });
+      const avg = {
+        consistency: Math.round((sum.consistency / count) * 10) / 10,
+        communication: Math.round((sum.communication / count) * 10) / 10,
+        knowledgeSharing: Math.round((sum.knowledgeSharing / count) * 10) / 10,
+        collaboration: Math.round((sum.collaboration / count) * 10) / 10,
+      };
+      const overall = Math.round(((avg.consistency + avg.communication + avg.knowledgeSharing + avg.collaboration) / 4) * 10) / 10;
+      reputationMap.set(id, { count, overall, averages: avg });
+    }
+  }
+
+  return sorted.map((r) => ({ ...r, reputation: reputationMap.get(r.user.id) ?? { count: 0, overall: null, averages: null } }));
 }
 
 export async function getMapData(currentUserId: string, radius?: number) {

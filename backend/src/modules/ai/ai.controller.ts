@@ -1,5 +1,5 @@
 import { type Request, type Response, type NextFunction } from 'express';
-import { generateRoadmapDraft, recommendAiPartners } from './ai.service.js';
+import { generateRoadmapDraft, recommendAiPartners, simbiMatchConsult } from './ai.service.js';
 import { sendSuccess } from '../../shared/response/success.js';
 import { AppError } from '../../shared/errors/AppError.js';
 import { ErrorCode } from '../../shared/errors/codes.js';
@@ -25,6 +25,20 @@ export async function recommendationsHandler(req: Request, res: Response, next: 
   try {
     const recommendations = await recommendAiPartners(uid(req));
     sendSuccess(res, { recommendations });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function simbiMatchConsultHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { candidateId, message } = req.body as { candidateId?: string; message?: string };
+    if (!candidateId) throw new AppError(ErrorCode.VALIDATION_ERROR, 'candidateId is required', 400);
+    if (!message || message.trim().length === 0) throw new AppError(ErrorCode.VALIDATION_ERROR, 'message is required', 400);
+    if (message.length > 500) throw new AppError(ErrorCode.VALIDATION_ERROR, 'message too long (max 500 chars)', 400);
+
+    const reply = await simbiMatchConsult(uid(req), candidateId, message.trim());
+    sendSuccess(res, { reply });
   } catch (err) {
     next(err);
   }

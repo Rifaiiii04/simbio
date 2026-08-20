@@ -15,7 +15,19 @@ import {
   Award,
   RotateCcw,
   Heart,
+  Star,
 } from 'lucide-react';
+
+export interface CandidateReputation {
+  count: number;
+  overall: number | null;
+  averages: {
+    consistency: number;
+    communication: number;
+    knowledgeSharing: number;
+    collaboration: number;
+  } | null;
+}
 
 export interface Candidate {
   user: {
@@ -30,6 +42,7 @@ export interface Candidate {
   learnSkills: Array<{ id: string; name: string; level: string }>;
   matchScore: number;
   distanceKm: number | null;
+  reputation: CandidateReputation;
 }
 
 const PORTRAIT_FALLBACKS = [
@@ -40,7 +53,11 @@ const PORTRAIT_FALLBACKS = [
   'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80',
 ];
 
-export function SkillSwapDeck() {
+interface Props {
+  onActiveCandidateChange?: (candidate: Candidate | null) => void;
+}
+
+export function SkillSwapDeck({ onActiveCandidateChange }: Props) {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -73,8 +90,13 @@ export function SkillSwapDeck() {
     }, 200);
   };
 
-  const activeCandidate = candidates[currentIndex];
+  const activeCandidate = candidates[currentIndex] ?? null;
   const totalQueue = candidates.length;
+
+  // Notify parent when active candidate changes
+  useEffect(() => {
+    onActiveCandidateChange?.(activeCandidate ?? null);
+  }, [activeCandidate, onActiveCandidateChange]);
 
   /*
    * Layout strategy:
@@ -159,8 +181,8 @@ export function SkillSwapDeck() {
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-black/15" />
                 </div>
 
-                {/* Top Badges */}
-                <div className="relative p-4 sm:p-5 flex items-center justify-between z-10 shrink-0">
+                {/* Top Badges — Rating instead of raw match score */}
+                <div className="relative p-3 sm:p-5 flex items-center justify-between z-10 shrink-0">
                   <span className="soft-badge bg-black/60 backdrop-blur-md text-white border-white/20 text-xs sm:text-sm px-3 sm:px-4 py-1.5 font-bold flex items-center gap-1.5 shadow-md">
                     <MapPin className="w-3.5 h-3.5 text-[#FF6B30]" />
                     <span>
@@ -169,10 +191,18 @@ export function SkillSwapDeck() {
                         : activeCandidate.user.country || 'Indonesia'}
                     </span>
                   </span>
-                  <span className="soft-badge bg-emerald-500/90 backdrop-blur-md text-white border-emerald-300/30 text-xs sm:text-sm px-3 sm:px-4 py-1.5 font-bold flex items-center gap-1.5 shadow-md">
-                    <Zap className="w-3.5 h-3.5 text-white" />
-                    <span>Skor: {activeCandidate.matchScore} pts</span>
-                  </span>
+                  {/* Star Rating Badge */}
+                  {activeCandidate.reputation.overall != null ? (
+                    <span className="soft-badge bg-amber-500/90 backdrop-blur-md text-white border-amber-300/30 text-xs sm:text-sm px-3 sm:px-4 py-1.5 font-bold flex items-center gap-1.5 shadow-md">
+                      <Star className="w-3.5 h-3.5 text-white fill-white" />
+                      <span>{activeCandidate.reputation.overall} / 5</span>
+                    </span>
+                  ) : (
+                    <span className="soft-badge bg-slate-700/70 backdrop-blur-md text-white border-white/20 text-xs px-3 py-1.5 font-bold flex items-center gap-1 shadow-md">
+                      <Sparkles className="w-3.5 h-3.5 text-slate-300" />
+                      <span>Baru</span>
+                    </span>
+                  )}
                 </div>
 
                 {/* Bottom Info + Skills + Buttons */}
