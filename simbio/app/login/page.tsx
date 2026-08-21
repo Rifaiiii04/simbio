@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api/client';
 import { ArrowRight, Globe, AlertCircle, UserPlus } from 'lucide-react';
 import WarpText from '@/components/ui/WarpText';
+import { motion } from 'framer-motion';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#FCFCFD] text-slate-900 antialiased selection:bg-orange-100 selection:text-[#FF6B30]">
+    <div className="min-h-screen flex flex-col justify-between bg-[#FCFCFD] text-slate-900 antialiased selection:bg-orange-100 selection:text-[#FF6B30] overflow-x-hidden">
       {/* Toast Notification for Social Sign-In */}
       {toastMessage && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
@@ -57,7 +58,12 @@ export default function LoginPage() {
       )}
 
       {/* 1. TOP MINIMAL HEADER */}
-      <header className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+      <motion.header
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between"
+      >
         {/* Logo & Support Email */}
         <div className="flex items-center gap-2 sm:gap-3 text-sm">
           <Link href="/" className="flex items-center gap-1.5 group">
@@ -102,12 +108,17 @@ export default function LoginPage() {
             <span>Get Started</span>
           </Link>
         </div>
-      </header>
+      </motion.header>
 
       {/* 2. MAIN CONTENT AREA */}
       <main className="w-full max-w-5xl mx-auto px-6 py-8 sm:py-14 flex flex-col items-center">
         {/* WarpText Interactive Headline (1 Single Line) */}
-        <div className="text-center w-full max-w-2xl mx-auto space-y-3 mb-10 sm:mb-14">
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center w-full max-w-2xl mx-auto space-y-3 mb-10 sm:mb-14"
+        >
           <WarpText
             text="Login To Your Account"
             color="#0F172A"
@@ -128,7 +139,7 @@ export default function LoginPage() {
           <p className="text-xs sm:text-sm md:text-base text-slate-500 font-medium max-w-lg mx-auto">
             Uncover the Untapped Potential of Your Growth to Connect with Peers
           </p>
-        </div>
+        </motion.div>
 
         {/* Error Alert */}
         {error && (
@@ -141,7 +152,13 @@ export default function LoginPage() {
         {/* 2-Column Split: 50% Form Input (Left: 3 Rows) / 50% Social Sign-In (Right: 3 Rows) */}
         <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-14 items-center relative">
           {/* LEFT 50%: 3 rows (Email, Password, Submit Button) */}
-          <form onSubmit={handleSubmit} className="space-y-4 w-full">
+          <motion.form
+            initial={{ opacity: 0, x: -24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            onSubmit={handleSubmit}
+            className="space-y-4 w-full"
+          >
             <div>
               <input
                 type="text"
@@ -172,10 +189,15 @@ export default function LoginPage() {
               <span>{loading ? 'Logging in...' : 'Login to Your Account'}</span>
               <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-          </form>
+          </motion.form>
 
           {/* RIGHT 50%: 3 rows (Gmail, Facebook, Apple) */}
-          <div className="w-full space-y-4 relative">
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full space-y-4 relative"
+          >
             {/* Minimal vertical slash divider for desktop */}
             <div className="hidden md:flex absolute -left-4 lg:-left-7 top-1/2 -translate-y-1/2 text-slate-300 font-light text-xl select-none pointer-events-none">
               /
@@ -228,11 +250,16 @@ export default function LoginPage() {
               </svg>
               <span className="truncate">Sign in Apple Secure ID</span>
             </button>
-          </div>
+          </motion.div>
         </div>
 
         {/* Bottom Actions: Register & Forgot Passcode */}
-        <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm"
+        >
           <p className="text-slate-600 font-medium">
             Don&apos;t have an account?{' '}
             <Link href="/register" className="font-bold text-[#FF6B30] hover:underline underline-offset-4">
@@ -249,11 +276,16 @@ export default function LoginPage() {
           >
             Forgot Passcode?
           </button>
-        </div>
+        </motion.div>
       </main>
 
       {/* 3. BOTTOM CLEAN FOOTER */}
-      <footer className="w-full max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3 border-t border-slate-100">
+      <motion.footer
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="w-full max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3 border-t border-slate-100"
+      >
         <div className="flex items-center gap-4">
           <Link href="/#how-it-works" className="hover:text-slate-600 transition">
             Privacy Policy
@@ -265,7 +297,7 @@ export default function LoginPage() {
         </div>
 
         <p className="font-medium">Copyrights @simbioly.group 2026</p>
-      </footer>
+      </motion.footer>
     </div>
   );
 }
