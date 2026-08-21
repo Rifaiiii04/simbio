@@ -37,6 +37,8 @@ export default function OnboardingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [customSkillNames, setCustomSkillNames] = useState<Record<string, string>>({});
+
   useEffect(() => {
     const token = localStorage.getItem('simbioly_token');
     if (!token) {
@@ -44,6 +46,7 @@ export default function OnboardingPage() {
       return;
     }
 
+    // Read local cache for immediate display
     try {
       const storedUser = localStorage.getItem('simbioly_user');
       if (storedUser) {
@@ -68,8 +71,33 @@ export default function OnboardingPage() {
       .catch((err) => setError(err.message));
   }, [router]);
 
-  const handleAddTeachSkill = (skillId: string) => {
+  // Synchronize any newly created skill IDs against the DB catalog
+  useEffect(() => {
+    const missing = [...teachSkillIds, ...learnSkillIds].some(
+      (id) => id && id !== 'OTHER' && !skills.some((s) => s.id === id)
+    );
+    if (missing) {
+      apiFetch<{ skills: Skill[] }>('/skills')
+        .then((res) => setSkills(res.skills))
+        .catch(() => {});
+    }
+  }, [teachSkillIds, learnSkillIds, skills]);
+
+  const getSkillDisplayName = (id: string) => {
+    const found = skills.find((s) => s.id === id);
+    if (found) return found.name;
+    if (customSkillNames[id]) return customSkillNames[id];
+    return id;
+  };
+
+  const handleAddTeachSkill = (skillId: string, _customName?: string, skillObj?: Skill) => {
     if (!skillId || skillId === 'OTHER') return;
+    if (skillObj) {
+      setSkills((prev) => (prev.some((s) => s.id === skillObj.id) ? prev : [...prev, skillObj]));
+      setCustomSkillNames((prev) => ({ ...prev, [skillObj.id]: skillObj.name }));
+    } else if (_customName && _customName !== 'OTHER') {
+      setCustomSkillNames((prev) => ({ ...prev, [skillId]: _customName }));
+    }
     if (teachSkillIds.includes(skillId)) return;
     if (teachSkillIds.length >= 5) {
       setError('Maximum 5 teaching skills allowed.');
@@ -83,8 +111,14 @@ export default function OnboardingPage() {
     setTeachSkillIds((prev) => prev.filter((id) => id !== skillId));
   };
 
-  const handleAddLearnSkill = (skillId: string) => {
+  const handleAddLearnSkill = (skillId: string, _customName?: string, skillObj?: Skill) => {
     if (!skillId || skillId === 'OTHER') return;
+    if (skillObj) {
+      setSkills((prev) => (prev.some((s) => s.id === skillObj.id) ? prev : [...prev, skillObj]));
+      setCustomSkillNames((prev) => ({ ...prev, [skillObj.id]: skillObj.name }));
+    } else if (_customName && _customName !== 'OTHER') {
+      setCustomSkillNames((prev) => ({ ...prev, [skillId]: _customName }));
+    }
     if (learnSkillIds.includes(skillId)) return;
     if (learnSkillIds.length >= 5) {
       setError('Maximum 5 target learning skills allowed.');
@@ -152,7 +186,7 @@ export default function OnboardingPage() {
       {/* Top Focused Header */}
       <header className="w-full max-w-2xl mx-auto px-6 py-6 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-1.5 group">
-          <span className="font-serif font-black text-2xl tracking-tight text-slate-950 group-hover:text-[#FF6B30] transition">
+          <span className="font-black text-2xl tracking-tight text-slate-950 group-hover:text-[#FF6B30] transition">
             simbioly<span className="text-[#FF6B30]">.</span>
           </span>
         </Link>
@@ -216,7 +250,7 @@ export default function OnboardingPage() {
                   <SearchableSkillSelect
                     skills={skills}
                     selectedSkillId=""
-                    onSelectSkill={(id) => handleAddTeachSkill(id)}
+                    onSelectSkill={(id, customName, skillObj) => handleAddTeachSkill(id, customName, skillObj)}
                     placeholder="Search or pick skill to teach..."
                   />
                 </div>
@@ -229,20 +263,21 @@ export default function OnboardingPage() {
                       <span>Selected Teaching Skills ({teachSkillIds.length}/5):</span>
                     </span>
                     <div className="flex flex-wrap gap-2">
-                      {teachSkillIds.map((id) => {
-                        const s = skills.find((item) => item.id === id);
-                        return (
-                          <span
-                            key={id}
-                            className="soft-badge bg-white text-emerald-900 border-emerald-300 text-xs px-3 py-1 font-bold flex items-center gap-1.5 shadow-2xs"
+                      {teachSkillIds.map((id) => (
+                        <span
+                          key={id}
+                          className="soft-badge bg-white text-emerald-900 border-emerald-300 text-xs px-3 py-1 font-bold flex items-center gap-1.5 shadow-2xs"
+                        >
+                          <span>{getSkillDisplayName(id)}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTeachSkill(id)}
+                            className="text-emerald-500 hover:text-red-600 cursor-pointer"
                           >
-                            <span>{s?.name || id}</span>
-                            <button onClick={() => handleRemoveTeachSkill(id)} className="text-emerald-500 hover:text-red-600 cursor-pointer">
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </span>
-                        );
-                      })}
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </span>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -292,7 +327,7 @@ export default function OnboardingPage() {
                   <SearchableSkillSelect
                     skills={skills}
                     selectedSkillId=""
-                    onSelectSkill={(id) => handleAddLearnSkill(id)}
+                    onSelectSkill={(id, customName, skillObj) => handleAddLearnSkill(id, customName, skillObj)}
                     placeholder="Search or pick skill to learn..."
                   />
                 </div>
@@ -305,20 +340,21 @@ export default function OnboardingPage() {
                       <span>Selected Learning Targets ({learnSkillIds.length}/5):</span>
                     </span>
                     <div className="flex flex-wrap gap-2">
-                      {learnSkillIds.map((id) => {
-                        const s = skills.find((item) => item.id === id);
-                        return (
-                          <span
-                            key={id}
-                            className="soft-badge bg-white text-orange-900 border-orange-300 text-xs px-3 py-1 font-bold flex items-center gap-1.5 shadow-2xs"
+                      {learnSkillIds.map((id) => (
+                        <span
+                          key={id}
+                          className="soft-badge bg-white text-orange-900 border-orange-300 text-xs px-3 py-1 font-bold flex items-center gap-1.5 shadow-2xs"
+                        >
+                          <span>{getSkillDisplayName(id)}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveLearnSkill(id)}
+                            className="text-orange-500 hover:text-red-600 cursor-pointer"
                           >
-                            <span>{s?.name || id}</span>
-                            <button onClick={() => handleRemoveLearnSkill(id)} className="text-orange-500 hover:text-red-600 cursor-pointer">
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </span>
-                        );
-                      })}
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </span>
+                      ))}
                     </div>
                   </div>
                 )}

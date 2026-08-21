@@ -4,9 +4,10 @@ import QueryProvider from "@/lib/providers/QueryProvider";
 import "./globals.css";
 
 const poppins = Poppins({
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
   variable: "--font-poppins",
+  display: "swap",
 });
 
 export const metadata: Metadata = {

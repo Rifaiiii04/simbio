@@ -42,12 +42,82 @@ export async function getSkillById(id: string) {
   return skill;
 }
 
-export async function addSkill(data: { categoryId: string; name: string; slug: string; description?: string }) {
-  try {
-    return await repo.createSkill(data);
-  } catch {
-    throw new AppError(ErrorCode.CONFLICT, 'Skill slug already exists or category invalid', 409);
+export function normalizeSkillKey(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+export function generateCanonicalSlug(name: string): string {
+  return (
+    name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'skill'
+  );
+}
+
+export async function addSkill(data: { name: string; categoryId?: string; slug?: string; description?: string }) {
+  const trimmedName = data.name.trim();
+  if (!trimmedName) {
+    throw new AppError(ErrorCode.VALIDATION_ERROR, 'Skill name cannot be empty', 400);
   }
+
+  const normKey = normalizeSkillKey(trimmedName);
+  const canonSlug = generateCanonicalSlug(trimmedName);
+
+  // 1. Check all existing skills for duplicates (case, dots, spaces, commas normalization)
+  const allSkills = await prisma.skill.findMany({
+    include: { category: { select: { id: true, name: true, slug: true } } },
+  });
+
+  const existing = allSkills.find((s) => {
+    const sNormKey = normalizeSkillKey(s.name);
+    const sSlugNorm = normalizeSkillKey(s.slug);
+    return (
+      sNormKey === normKey ||
+      sSlugNorm === normKey ||
+      s.slug === canonSlug ||
+      s.name.toLowerCase() === trimmedName.toLowerCase()
+    );
+  });
+
+  if (existing) {
+    // Return existing skill without duplicate row
+    return existing;
+  }
+
+  // 2. Resolve categoryId (fallback to first category or create General category)
+  let targetCategoryId = data.categoryId;
+  if (targetCategoryId) {
+    const catExists = await prisma.skillCategory.findUnique({ where: { id: targetCategoryId } });
+    if (!catExists) targetCategoryId = undefined;
+  }
+
+  if (!targetCategoryId) {
+    const firstCat = await prisma.skillCategory.findFirst({ orderBy: { createdAt: 'asc' } });
+    if (firstCat) {
+      targetCategoryId = firstCat.id;
+    } else {
+      const generalCat = await prisma.skillCategory.create({
+        data: { name: 'General', slug: 'general' },
+      });
+      targetCategoryId = generalCat.id;
+    }
+  }
+
+  // 3. Resolve slug collision
+  let finalSlug = data.slug || canonSlug;
+  const slugCollision = await prisma.skill.findUnique({ where: { slug: finalSlug } });
+  if (slugCollision) {
+    finalSlug = `${finalSlug}-${Date.now().toString().slice(-4)}`;
+  }
+
+  return await repo.createSkill({
+    categoryId: targetCategoryId,
+    name: trimmedName,
+    slug: finalSlug,
+    description: data.description || 'User added skill',
+  });
 }
 
 export async function updateSkill(id: string, data: { categoryId?: string; name?: string; slug?: string; description?: string | null }) {

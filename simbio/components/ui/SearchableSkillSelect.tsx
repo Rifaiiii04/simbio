@@ -14,7 +14,7 @@ interface SearchableSkillSelectProps {
   skills: SkillItem[];
   selectedSkillId: string;
   customSkillName?: string;
-  onSelectSkill: (skillId: string, customName?: string) => void;
+  onSelectSkill: (skillId: string, customName?: string, skillObj?: SkillItem) => void;
   placeholder?: string;
 }
 
@@ -63,60 +63,51 @@ export function SearchableSkillSelect({
 
   const selectedSkill = skills.find((s) => s.id === selectedSkillId);
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const handleSelect = (s: SkillItem) => {
     setIsOtherSelected(false);
-    onSelectSkill(s.id, '');
+    onSelectSkill(s.id, s.name, s);
     setIsOpen(false);
   };
 
   const handleSelectOther = () => {
     setIsOtherSelected(true);
-    onSelectSkill('OTHER', otherInput);
     setIsOpen(false);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
   };
 
   const handleOtherInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setOtherInput(val);
-    onSelectSkill('OTHER', val);
   };
 
   const handleCreateCustomSkillOnFly = async () => {
-    if (!otherInput.trim()) return;
+    const trimmed = otherInput.trim();
+    if (!trimmed || creatingCustom) return;
     setCreatingCustom(true);
     try {
-      const categoriesRes = await apiFetch<{ categories: Array<{ id: string }> }>('/skills/categories');
-      const categoryId = categoriesRes.categories[0]?.id;
+      const created = await apiFetch<{ skill: SkillItem }>('/skills', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: trimmed,
+        }),
+      });
 
-      if (categoryId) {
-        const slug = otherInput
-          .toLowerCase()
-          .trim()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-');
-
-        const created = await apiFetch<{ skill: SkillItem }>('/skills', {
-          method: 'POST',
-          body: JSON.stringify({
-            categoryId,
-            name: otherInput.trim(),
-            slug: `${slug}-${Date.now().toString().slice(-4)}`,
-            description: 'User added custom skill',
-          }),
-        });
-
-        setIsOtherSelected(false);
-        onSelectSkill(created.skill.id, '');
-      }
-    } catch {
-      onSelectSkill('OTHER', otherInput.trim());
+      setIsOtherSelected(false);
+      setOtherInput('');
+      onSelectSkill(created.skill.id, created.skill.name, created.skill);
+    } catch (err) {
+      console.error('Failed to create/deduplicate custom skill:', err);
     } finally {
       setCreatingCustom(false);
     }
   };
 
   return (
-    <div ref={containerRef} className="relative w-full space-y-2">
+    <div ref={containerRef} className="relative w-full space-y-2 font-sans">
       {/* Dropdown Selector Button */}
       <button
         type="button"
@@ -141,9 +132,16 @@ export function SearchableSkillSelect({
           </label>
           <div className="flex gap-2">
             <input
+              ref={inputRef}
               type="text"
               value={otherInput}
               onChange={handleOtherInputChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleCreateCustomSkillOnFly();
+                }
+              }}
               placeholder="e.g. Quantum Computing, Sound Design..."
               className="flex-1 px-3 py-2 text-xs bg-white rounded-lg border border-slate-200 font-medium focus:outline-hidden focus:border-[#FF6B30]"
             />
@@ -154,7 +152,7 @@ export function SearchableSkillSelect({
               className="soft-button text-xs px-3 py-2 flex items-center gap-1 disabled:opacity-50 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>{creatingCustom ? 'Adding...' : 'Add'}</span>
+              <span>{creatingCustom ? 'Adding...' : '+ Add'}</span>
             </button>
           </div>
         </div>

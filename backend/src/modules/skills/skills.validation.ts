@@ -12,9 +12,9 @@ export const updateCategorySchema = z.object({
 });
 
 export const createSkillSchema = z.object({
-  categoryId: z.string().uuid(),
   name: z.string().min(1).max(100),
-  slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/),
+  categoryId: z.string().uuid().optional(),
+  slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/).optional(),
   description: z.string().max(500).optional(),
 });
 

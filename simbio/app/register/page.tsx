@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api/client';
-import { ArrowRight, Globe, AlertCircle, LogIn } from 'lucide-react';
+import { ArrowRight, Globe, AlertCircle, LogIn, Eye, EyeOff } from 'lucide-react';
 import WarpText from '@/components/ui/WarpText';
 import { motion } from 'framer-motion';
 
@@ -13,6 +13,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -37,7 +38,12 @@ export default function RegisterPage() {
       localStorage.setItem('simbioly_user', JSON.stringify(res.user));
       router.push('/onboarding');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
+      const msg = err instanceof Error ? err.message : 'Registration failed';
+      if (msg.includes('fetch') || msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+        setError('Cannot connect to the server. Please ensure the Backend API is running on http://localhost:3001.');
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -179,16 +185,28 @@ export default function RegisterPage() {
               />
             </div>
 
-            <div>
+            <div className="relative">
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password (Min. 8 characters)"
-                className="w-full h-14 sm:h-[60px] px-6 rounded-full bg-white border border-slate-200 text-sm sm:text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-[#FF6B30] focus:ring-2 focus:ring-orange-500/10 shadow-xs transition"
+                className="w-full h-14 sm:h-[60px] pl-6 pr-14 rounded-full bg-white border border-slate-200 text-sm sm:text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-[#FF6B30] focus:ring-2 focus:ring-orange-500/10 shadow-xs transition"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition cursor-pointer p-1 focus:outline-hidden"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
             </div>
 
             <button
