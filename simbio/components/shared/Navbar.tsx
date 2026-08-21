@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { io, Socket } from 'socket.io-client';
 import {
   Sparkles,
   Compass,
@@ -14,7 +15,9 @@ import {
   LogIn,
   UserPlus,
 } from 'lucide-react';
-import { getAvatarUrl } from '@/lib/api/client';
+import { getAvatarUrl, apiFetch } from '@/lib/api/client';
+
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
 interface NavItem {
   name: string;
@@ -40,6 +43,8 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
   const [token, setToken] = useState<string | null>(null);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [notificationCount, setNotificationCount] = useState<number>(0);
+  const socketRef = useRef<Socket | null>(null);
   const isPartnershipRoom = Boolean(pathname && /^\/partnerships\/[^/]+$/.test(pathname));
 
   useEffect(() => {
@@ -47,18 +52,56 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
     setToken(storedToken);
 
     if (storedToken) {
-      // Optional quick profile cache
+      let currentUserId = '';
       try {
         const storedUser = localStorage.getItem('simbioly_user');
         if (storedUser) {
           const parsed = JSON.parse(storedUser);
           setUserAvatar(parsed.avatarUrl || null);
           setUserName(parsed.name || null);
+          currentUserId = parsed.id || '';
         }
       } catch {
         // ignore
       }
+
+      // Fetch notification summary
+      async function loadNotificationCount() {
+        try {
+          const res = await apiFetch<{ totalCount: number }>('/partnerships/notifications/summary');
+          setNotificationCount(res.totalCount || 0);
+        } catch {
+          // ignore
+        }
+      }
+      loadNotificationCount();
+
+      // Connect global socket for real-time notification badges
+      if (!socketRef.current) {
+        const socket = io(SOCKET_URL, {
+          transports: ['websocket', 'polling'],
+        });
+        socketRef.current = socket;
+
+        socket.on('connect', () => {
+          if (currentUserId) {
+            socket.emit('join_user', currentUserId);
+          }
+        });
+
+        socket.on('notification_badge_update', () => {
+          loadNotificationCount();
+        });
+
+        socket.on('messages_read', () => {
+          loadNotificationCount();
+        });
+      }
     }
+
+    return () => {
+      // Keep global listener or disconnect if unmounting
+    };
   }, [pathname]);
 
   const handleLogout = () => {
@@ -108,6 +151,7 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
               NAV_ITEMS.map((item) => {
                 const active = isNavActive(item);
                 const Icon = item.icon;
+                const hasBadge = item.name === 'Partnerships' && notificationCount > 0;
 
                 return (
                   <Link
@@ -126,6 +170,11 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
                     )}
                     <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'scale-110' : 'group-hover:scale-105'}`} />
                     <span>{item.name}</span>
+                    {hasBadge && (
+                      <span className="ml-0.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[#E41E3F] text-white text-[9.5px] font-black flex items-center justify-center leading-none shadow-2xs">
+                        {notificationCount > 99 ? '99+' : notificationCount}
+                      </span>
+                    )}
                   </Link>
                 );
               })
@@ -141,42 +190,42 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
                   href="/#skills"
                   className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white/80 transition"
                 >
-                  Skill Catalog
+                  Skill Matrix
                 </Link>
               </div>
             )}
           </nav>
 
-          {/* RIGHT ACTION BUTTONS & USER AVATAR */}
-          <div className="flex items-center gap-2.5">
+          {/* User Profile / Auth Action Controls */}
+          <div className="flex items-center gap-3">
             {token ? (
-              <div className="flex items-center gap-2">
-                {/* User quick avatar preview on tablet/desktop */}
+              <div className="flex items-center gap-2.5">
                 <Link
                   href="/profile"
-                  className="hidden sm:flex items-center gap-2 p-1.5 pr-3 rounded-2xl bg-slate-50 hover:bg-orange-50/70 border border-slate-200/80 hover:border-orange-200 transition group"
-                  title="View my profile"
+                  className="flex items-center gap-2.5 p-1 pr-3 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-2xl transition shadow-2xs group"
                 >
-                  <div className="w-7 h-7 rounded-xl overflow-hidden bg-orange-100 border border-orange-200 shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-xs overflow-hidden shadow-2xs">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={getAvatarUrl(userAvatar, 'me')}
-                      alt="Avatar"
+                      alt="Profile"
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://api.dicebear.com/7.x/thumbs/svg?seed=me';
+                      }}
                     />
                   </div>
-                  <span className="text-xs font-black text-slate-800 group-hover:text-[#FF6B30] max-w-[100px] truncate">
-                    {userName || 'Profile'}
+                  <span className="text-xs font-extrabold text-slate-800 group-hover:text-[#FF6B30] transition hidden sm:inline max-w-[120px] truncate">
+                    {userName || 'My Account'}
                   </span>
                 </Link>
 
-                {/* Logout Button */}
                 <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.96 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-50/90 border border-red-200/80 px-3.5 py-2 rounded-xl hover:bg-red-100/90 hover:border-red-300 transition shadow-2xs cursor-pointer"
-                  title="Log out of account"
+                  className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-500 hover:text-red-600 hover:bg-red-50 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Sign out of Simbioly"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Log Out</span>
@@ -213,6 +262,7 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
             {NAV_ITEMS.map((item) => {
               const active = isNavActive(item);
               const Icon = item.icon;
+              const hasBadge = item.name === 'Partnerships' && notificationCount > 0;
 
               return (
                 <Link
@@ -236,6 +286,11 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
                     }`}
                   >
                     <Icon className="w-5 h-5" />
+                    {hasBadge && (
+                      <span className="absolute -top-1 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-[#E41E3F] text-white text-[8.5px] font-black flex items-center justify-center leading-none border-2 border-white shadow-2xs">
+                        {notificationCount > 99 ? '99+' : notificationCount}
+                      </span>
+                    )}
                   </motion.div>
 
                   <span

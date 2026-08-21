@@ -2,7 +2,7 @@
 
 import { Socket } from 'socket.io-client';
 import { RoadmapProposalCard } from './RoadmapProposalCard';
-import { CornerDownRight, Reply, Sparkles } from 'lucide-react';
+import { CornerDownRight, Reply, Sparkles, Check, CheckCheck } from 'lucide-react';
 
 interface QuotedMessage {
   id: string;
@@ -21,6 +21,8 @@ export interface Message {
   content: string;
   replyToId?: string | null;
   replyTo?: QuotedMessage | null;
+  isRead?: boolean;
+  readAt?: string | null;
   createdAt: string;
 }
 
@@ -46,7 +48,22 @@ export function ChatMessageItem({
   const m = message;
   const isMine = m.senderId === myUserId;
   const isSimbiAi = m.senderType === 'SIMBI_AI';
+  const isSystem = m.senderType === 'SYSTEM';
   const isProposal = m.content.includes('ROADMAP_PROPOSAL');
+
+  // 1. System Event Announcement (Milestone completed, Partnership accepted, etc.)
+  if (isSystem) {
+    return (
+      <div className="flex justify-center w-full my-2.5 animate-in fade-in duration-200">
+        <div className="px-4 py-1.5 rounded-full bg-slate-100/90 border border-slate-200/80 text-[11px] font-semibold text-slate-700 shadow-2xs flex items-center gap-1.5 max-w-md text-center leading-normal">
+          <span>{m.content}</span>
+          <span className="text-[9.5px] text-slate-400 font-normal">
+            • {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   if (isProposal) {
     return (
@@ -64,7 +81,7 @@ export function ChatMessageItem({
     );
   }
 
-  // 1. Simbi AI Companion Message Bubble
+  // 2. Simbi AI Companion Message Bubble
   if (isSimbiAi) {
     return (
       <div className="flex gap-2 items-start w-full my-1.5">
@@ -118,13 +135,15 @@ export function ChatMessageItem({
     );
   }
 
-  // 2. Regular User Message (Mine vs Partner)
+  // 3. Regular User Message (Mine vs Partner)
   const getQuotedSenderName = () => {
     if (!m.replyTo) return '';
     if (m.replyTo.senderType === 'SIMBI_AI') return 'Simbi AI';
     if (m.replyTo.senderId === myUserId) return 'Me';
     return partnerName;
   };
+
+  const isRead = Boolean(m.isRead || m.readAt);
 
   return (
     <div className={`flex gap-2 items-end ${isMine ? 'flex-row-reverse' : 'flex-row'} w-full my-1`}>
@@ -164,9 +183,22 @@ export function ChatMessageItem({
           </button>
         </div>
 
-        <span className="text-[10px] text-slate-400 font-medium mt-0.5 px-0.5">
-          {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </span>
+        <div className={`flex items-center gap-1 text-[10px] text-slate-400 font-medium mt-0.5 px-0.5 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
+          <span>{new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          {isMine && (
+            isRead ? (
+              <span className="text-[#FF6B30] flex items-center gap-0.5 font-bold" title="Read by partner">
+                <CheckCheck className="w-3 h-3 text-[#FF6B30]" />
+                <span className="text-[9px]">Read</span>
+              </span>
+            ) : (
+              <span className="text-slate-400 flex items-center gap-0.5" title="Sent">
+                <Check className="w-3 h-3 text-slate-400" />
+                <span className="text-[9px]">Sent</span>
+              </span>
+            )
+          )}
+        </div>
       </div>
     </div>
   );

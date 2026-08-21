@@ -27,6 +27,14 @@ export async function requestPartnership(requesterId: string, recipientId: strin
     });
   }
 
+  // Real-time notify recipient
+  try {
+    const { getIO } = await import('../../infrastructure/websocket/socket.js');
+    getIO()?.to(`user_${recipientId}`).emit('notification_badge_update');
+  } catch {
+    // ignore
+  }
+
   return partnership;
 }
 
@@ -35,20 +43,68 @@ export async function acceptPartnership(userId: string, id: string) {
   if (!p) throw new AppError(ErrorCode.NOT_FOUND, 'Partnership not found', 404);
   if (p.recipientId !== userId) throw new AppError(ErrorCode.FORBIDDEN, 'Only recipient can accept', 403);
   if (p.status !== 'PENDING') throw new AppError(ErrorCode.VALIDATION_ERROR, 'Partnership is not pending', 400);
-  return repo.updateStatus(id, 'ACCEPTED', new Date());
+  
+  const updated = await repo.updateStatus(id, 'ACCEPTED', new Date());
+
+  // Post system announcement message into partnership chat
+  try {
+    const systemMsg = await repo.createMessage({
+      partnershipId: id,
+      senderId: null,
+      senderType: 'SYSTEM',
+      senderName: 'System',
+      content: '🤝 Partnership connected! You can now share resources, build AI learning roadmaps, and launch collaborative focus sessions.',
+      isRead: false,
+    });
+
+    const { getIO } = await import('../../infrastructure/websocket/socket.js');
+    const io = getIO();
+    io?.to(id).emit('receive_message', systemMsg);
+    io?.to(`user_${p.requesterId}`).emit('notification_badge_update');
+    io?.to(`user_${p.recipientId}`).emit('notification_badge_update');
+  } catch {
+    // ignore
+  }
+
+  return updated;
 }
 
 export async function rejectPartnership(userId: string, id: string) {
   const p = await repo.findById(id);
   if (!p) throw new AppError(ErrorCode.NOT_FOUND, 'Partnership not found', 404);
   if (p.recipientId !== userId) throw new AppError(ErrorCode.FORBIDDEN, 'Only recipient can reject', 403);
-  return repo.updateStatus(id, 'REJECTED');
+  const updated = await repo.updateStatus(id, 'REJECTED');
+
+  try {
+    const { getIO } = await import('../../infrastructure/websocket/socket.js');
+    getIO()?.to(`user_${p.requesterId}`).emit('notification_badge_update');
+  } catch {
+    // ignore
+  }
+
+  return updated;
 }
 
-export async function endPartnership(userId: string, id: string) {
+export async function endPartnership(userId: string, id: string, messageText?: string) {
   const p = await repo.findById(id);
   if (!p) throw new AppError(ErrorCode.NOT_FOUND, 'Partnership not found', 404);
   if (p.requesterId !== userId && p.recipientId !== userId) throw new AppError(ErrorCode.FORBIDDEN, 'Access denied', 403);
+
+  if (messageText && messageText.trim()) {
+    const farewellMsg = await repo.createMessage({
+      partnershipId: id,
+      senderId: userId,
+      content: messageText.trim(),
+    });
+
+    try {
+      const { getIO } = await import('../../infrastructure/websocket/socket.js');
+      getIO()?.to(id).emit('receive_message', farewellMsg);
+    } catch {
+      // ignore
+    }
+  }
+
   return repo.updateStatus(id, 'ENDED');
 }
 
@@ -67,4 +123,26 @@ export async function sendPartnershipMessage(userId: string, partnershipId: stri
     content: content.trim(),
     replyToId: replyToId || null,
   });
+}
+
+export async function markAsRead(userId: string, partnershipId: string) {
+  await getPartnership(userId, partnershipId);
+  const result = await repo.markMessagesAsRead(partnershipId, userId);
+
+  if (result.count > 0) {
+    try {
+      const { getIO } = await import('../../infrastructure/websocket/socket.js');
+      const io = getIO();
+      io?.to(partnershipId).emit('messages_read', { partnershipId, readerId: userId, readAt: result.readAt });
+      io?.to(`user_${userId}`).emit('notification_badge_update');
+    } catch {
+      // ignore
+    }
+  }
+
+  return result;
+}
+
+export async function getNotificationSummary(userId: string) {
+  return repo.getNotificationSummaryData(userId);
 }

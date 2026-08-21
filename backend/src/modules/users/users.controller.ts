@@ -20,6 +20,21 @@ export async function getMeHandler(
   }
 }
 
+export async function checkUsernameHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const { username } = req.query as { username?: string };
+    const currentUserId = req.user?.id;
+    const result = await usersService.checkUsername(username || '', currentUserId);
+    sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function updateMeHandler(
   req: Request,
   res: Response,

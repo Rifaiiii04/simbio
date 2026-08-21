@@ -95,6 +95,13 @@ export default function PartnershipRoomPage({ params }: { params: Promise<{ id: 
         setPartnership(partRes.partnership);
         setMessages(msgRes.messages);
 
+        // Mark messages as read upon entering study room
+        try {
+          apiFetch(`/partnerships/${partnershipId}/read`, { method: 'POST' });
+        } catch {
+          // ignore
+        }
+
         const socket = io(SOCKET_URL, {
           auth: { token },
           transports: ['websocket'],
@@ -104,10 +111,39 @@ export default function PartnershipRoomPage({ params }: { params: Promise<{ id: 
         socket.on('connect', () => {
           setIsSocketConnected(true);
           socket.emit('join_room', partnershipId);
+          socket.emit('mark_read', { partnershipId, readerId: meRes.user.id });
+        });
+
+        socket.on('receive_message', (msg: Message) => {
+          setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+          if (msg.senderId !== meRes.user.id) {
+            try {
+              apiFetch(`/partnerships/${partnershipId}/read`, { method: 'POST' });
+              socket.emit('mark_read', { partnershipId, readerId: meRes.user.id });
+            } catch {
+              // ignore
+            }
+          }
         });
 
         socket.on('new_message', (msg: Message) => {
           setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+          if (msg.senderId !== meRes.user.id) {
+            try {
+              apiFetch(`/partnerships/${partnershipId}/read`, { method: 'POST' });
+              socket.emit('mark_read', { partnershipId, readerId: meRes.user.id });
+            } catch {
+              // ignore
+            }
+          }
+        });
+
+        socket.on('messages_read', (data: { partnershipId: string; readerId: string; readAt: string }) => {
+          if (data.partnershipId === partnershipId && data.readerId !== meRes.user.id) {
+            setMessages((prev) =>
+              prev.map((m) => (m.senderId === meRes.user.id ? { ...m, isRead: true, readAt: data.readAt } : m))
+            );
+          }
         });
 
         socket.on('user_typing', (data: { userId: string }) => {
@@ -115,6 +151,14 @@ export default function PartnershipRoomPage({ params }: { params: Promise<{ id: 
         });
 
         socket.on('user_stopped_typing', (data: { userId: string }) => {
+          if (data.userId !== meRes.user.id) setIsPartnerTyping(false);
+        });
+
+        socket.on('partner_typing', (data: { userId: string }) => {
+          if (data.userId !== meRes.user.id) setIsPartnerTyping(true);
+        });
+
+        socket.on('partner_stop_typing', (data: { userId: string }) => {
           if (data.userId !== meRes.user.id) setIsPartnerTyping(false);
         });
 

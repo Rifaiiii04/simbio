@@ -45,7 +45,8 @@ export async function rejectHandler(req: Request, res: Response, next: NextFunct
 export async function leaveHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id } = req.params as { id: string };
-    sendSuccess(res, { partnership: await service.endPartnership(uid(req), id) });
+    const { messageText } = (req.body || {}) as { messageText?: string };
+    sendSuccess(res, { partnership: await service.endPartnership(uid(req), id, messageText) });
   } catch (err) { next(err); }
 }
 
@@ -61,5 +62,18 @@ export async function sendMessageHandler(req: Request, res: Response, next: Next
     const { id } = req.params as { id: string };
     const { content, replyToId } = req.body as { content: string; replyToId?: string };
     sendSuccess(res, { message: await service.sendPartnershipMessage(uid(req), id, content, replyToId) }, 201);
+  } catch (err) { next(err); }
+}
+
+export async function markReadHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params as { id: string };
+    sendSuccess(res, await service.markAsRead(uid(req), id));
+  } catch (err) { next(err); }
+}
+
+export async function notificationSummaryHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    sendSuccess(res, await service.getNotificationSummary(uid(req)));
   } catch (err) { next(err); }
 }

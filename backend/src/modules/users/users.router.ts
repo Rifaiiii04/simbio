@@ -3,6 +3,7 @@ import { authenticate } from '../../middleware/authenticate.js';
 import { uploadAvatarMiddleware } from '../../infrastructure/storage/upload.js';
 import {
   getMeHandler,
+  checkUsernameHandler,
   updateMeHandler,
   uploadAvatarHandler,
   updateLocationHandler,
@@ -14,6 +15,7 @@ import {
 
 const router = Router();
 
+router.get('/check-username', checkUsernameHandler);
 router.get('/admin/analytics', getAdminAnalyticsHandler);
 router.get('/admin/ai-analytics', getAdminAiAnalyticsHandler);
 router.get('/admin/list', getAdminUsersHandler);

@@ -7,6 +7,10 @@ import { processSimbiAiMention } from '../../modules/partnerships/simbi-ai.servi
 
 let io: SocketIOServer | null = null;
 
+export function getIO(): SocketIOServer | null {
+  return io;
+}
+
 export function initWebSocketServer(httpServer: HttpServer): SocketIOServer {
   io = new SocketIOServer(httpServer, {
     cors: {
@@ -17,6 +21,14 @@ export function initWebSocketServer(httpServer: HttpServer): SocketIOServer {
 
   io.on('connection', (socket: Socket) => {
     logger.info({ socketId: socket.id }, '⚡ Real-time WebSocket partner client connected');
+
+    // Join personal user notification channel (for real-time Navbar and bottom bar badge counts)
+    socket.on('join_user', (userId: string) => {
+      if (userId) {
+        socket.join(`user_${userId}`);
+        logger.info({ socketId: socket.id, userId }, 'Joined user notification room');
+      }
+    });
 
     // Join specific partnership chat room
     socket.on('join_room', (partnershipId: string) => {
@@ -46,6 +58,17 @@ export function initWebSocketServer(httpServer: HttpServer): SocketIOServer {
         // Broadcast real-time message to all clients in the partnership room
         io?.to(partnershipId).emit('receive_message', savedMessage);
 
+        // Notify recipient personal room to update notification badges in real-time
+        const p = await partnershipsRepo.findById(partnershipId);
+        if (p) {
+          const recipientId = p.requesterId === senderId ? p.recipientId : p.requesterId;
+          io?.to(`user_${recipientId}`).emit('notification_badge_update', {
+            partnershipId,
+            senderId,
+            message: savedMessage,
+          });
+        }
+
         // Process @SimbiAI mention if present in user message
         if (/@simbiai/i.test(content)) {
           processSimbiAiMention({
@@ -59,6 +82,21 @@ export function initWebSocketServer(httpServer: HttpServer): SocketIOServer {
         }
       } catch (err) {
         logger.error({ err }, 'Failed to process WebSocket message');
+      }
+    });
+
+    // Real-time mark messages as read event
+    socket.on('mark_read', async (data: { partnershipId: string; readerId: string }) => {
+      try {
+        const { partnershipId, readerId } = data;
+        if (!partnershipId || !readerId) return;
+        const { count, readAt } = await partnershipsRepo.markMessagesAsRead(partnershipId, readerId);
+        if (count > 0) {
+          io?.to(partnershipId).emit('messages_read', { partnershipId, readerId, readAt });
+          io?.to(`user_${readerId}`).emit('notification_badge_update');
+        }
+      } catch (err) {
+        logger.error({ err }, 'Failed to mark messages as read via WebSocket');
       }
     });
 

@@ -28,6 +28,13 @@ export async function findPublicProfile(userId: string): Promise<PublicUser | nu
   return prisma.user.findUnique({ where: { id: userId }, select: PUBLIC_SELECT });
 }
 
+export async function findByUsername(username: string): Promise<{ id: string; username: string | null } | null> {
+  return prisma.user.findFirst({
+    where: { username: { equals: username } },
+    select: { id: true, username: true },
+  });
+}
+
 export async function updateProfile(
   userId: string,
   data: UpdateProfileInput,

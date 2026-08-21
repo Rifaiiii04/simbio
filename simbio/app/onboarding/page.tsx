@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { apiFetch } from '@/lib/api/client';
-import { Navbar } from '@/components/shared/Navbar';
 import { SimbiAvatar } from '@/components/shared/SimbiAvatar';
 import { SearchableSkillSelect } from '@/components/ui/SearchableSkillSelect';
-import { ArrowRight, ArrowLeft, Rocket, X, BookOpen, Award, CheckCircle2, MapPin, Loader2 } from 'lucide-react';
+import { UsernameStep } from '@/components/onboarding/UsernameStep';
+import { LocationStep } from '@/components/onboarding/LocationStep';
+import { ArrowRight, ArrowLeft, Rocket, X, BookOpen, Award } from 'lucide-react';
 
 interface Skill {
   id: string;
@@ -18,6 +20,8 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [skills, setSkills] = useState<Skill[]>([]);
+  const [userFullName, setUserFullName] = useState('');
+  const [currentUsername, setCurrentUsername] = useState('');
 
   // Multi-skill selection arrays (Max 5 items each)
   const [teachSkillIds, setTeachSkillIds] = useState<string[]>([]);
@@ -30,9 +34,6 @@ export default function OnboardingPage() {
   const [targetOutcome, setTargetOutcome] = useState('');
 
   const [locationEnabled, setLocationEnabled] = useState(false);
-  const [locationLoading, setLocationLoading] = useState(false);
-  const [locationError, setLocationError] = useState<string | null>(null);
-
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +43,25 @@ export default function OnboardingPage() {
       router.push('/login');
       return;
     }
+
+    try {
+      const storedUser = localStorage.getItem('simbioly_user');
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        setUserFullName(parsed.name || '');
+        setCurrentUsername(parsed.username || '');
+      }
+    } catch {
+      // ignore
+    }
+
+    // Fetch user profile & skills list
+    apiFetch<{ user: { name: string; username?: string | null } }>('/users/me')
+      .then((res) => {
+        if (res.user.name) setUserFullName(res.user.name);
+        if (res.user.username) setCurrentUsername(res.user.username);
+      })
+      .catch(() => {});
 
     apiFetch<{ skills: Skill[] }>('/skills')
       .then((res) => setSkills(res.skills))
@@ -128,11 +148,19 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 selection:bg-orange-100 selection:text-[#FF6B30]">
-      <Navbar />
+    <div className="min-h-screen flex flex-col justify-between bg-[#FCFCFD] text-slate-900 selection:bg-orange-100 selection:text-[#FF6B30]">
+      {/* Top Focused Header */}
+      <header className="w-full max-w-2xl mx-auto px-6 py-6 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-1.5 group">
+          <span className="font-serif font-black text-2xl tracking-tight text-slate-950 group-hover:text-[#FF6B30] transition">
+            simbioly<span className="text-[#FF6B30]">.</span>
+          </span>
+        </Link>
+        <span className="text-xs font-bold text-slate-500">Welcome Onboarding</span>
+      </header>
 
-      <div className="flex-1 max-w-2xl mx-auto w-full p-4 flex flex-col justify-center my-6">
-        <div className="soft-card p-6 sm:p-10 space-y-6 bg-white border border-slate-200/80 shadow-xs">
+      <div className="flex-1 max-w-2xl mx-auto w-full px-4 sm:px-6 flex flex-col justify-center my-4">
+        <div className="soft-card p-6 sm:p-10 space-y-6 bg-white border border-slate-200/80 shadow-xs rounded-3xl">
           {/* Step Progress Bar */}
           <div className="flex items-center justify-between text-xs font-bold text-slate-500">
             <span>STEP {step} OF 5</span>
@@ -154,12 +182,24 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* STEP 1: Skills You Can Teach (Max 5) */}
+          {/* STEP 1: Unique Username Selection */}
           {step === 1 && (
+            <UsernameStep
+              initialUsername={currentUsername}
+              userFullName={userFullName || 'Learner'}
+              onSuccess={(saved) => {
+                setCurrentUsername(saved);
+                setStep(2);
+              }}
+            />
+          )}
+
+          {/* STEP 2: Skills You Can Teach (Max 5) */}
+          {step === 2 && (
             <div className="space-y-6">
               <div className="space-y-1">
                 <span className="soft-badge bg-emerald-50 text-emerald-700 border-emerald-200 text-xs font-bold">
-                  Reciprocal Teach Skills (Max 5)
+                  Step 2: Reciprocal Teach Skills
                 </span>
                 <h2 className="text-2xl font-black text-slate-900">What Skills Can You Teach?</h2>
                 <p className="text-xs text-slate-500 font-medium">Select up to 5 skills you are comfortable sharing or mentoring others in.</p>
@@ -208,25 +248,34 @@ export default function OnboardingPage() {
                 )}
               </div>
 
-              <button
-                disabled={teachSkillIds.length === 0}
-                onClick={() => setStep(2)}
-                className={`w-full soft-button py-3.5 text-xs flex items-center justify-center gap-2 shadow-2xs font-bold cursor-pointer ${
-                  teachSkillIds.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <span>Next: Skills You Want to Learn</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setStep(1)}
+                  className="w-1/3 py-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-200 transition cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4 inline mr-1" />
+                  <span>Back</span>
+                </button>
+                <button
+                  disabled={teachSkillIds.length === 0}
+                  onClick={() => setStep(3)}
+                  className={`w-2/3 soft-button py-3.5 text-xs flex items-center justify-center gap-2 shadow-2xs font-bold cursor-pointer ${
+                    teachSkillIds.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <span>Next: Skills You Want to Learn</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           )}
 
-          {/* STEP 2: Skills You Want to Learn (Max 5) */}
-          {step === 2 && (
+          {/* STEP 3: Skills You Want to Learn (Max 5) */}
+          {step === 3 && (
             <div className="space-y-6">
               <div className="space-y-1">
                 <span className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-xs font-bold">
-                  Reciprocal Learn Skills (Max 5)
+                  Step 3: Reciprocal Learn Skills
                 </span>
                 <h2 className="text-2xl font-black text-slate-900">What Skills Do You Want to Learn?</h2>
                 <p className="text-xs text-slate-500 font-medium">Pick up to 5 priority skills you want to learn from reciprocal partners.</p>
@@ -277,7 +326,7 @@ export default function OnboardingPage() {
 
               <div className="flex gap-3">
                 <button
-                  onClick={() => setStep(1)}
+                  onClick={() => setStep(2)}
                   className="w-1/3 py-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-200 transition cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4 inline mr-1" />
@@ -285,8 +334,8 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   disabled={learnSkillIds.length === 0}
-                  onClick={() => setStep(3)}
-                  className={`w-2/3 soft-button py-3 text-xs flex items-center justify-center gap-2 font-bold cursor-pointer ${
+                  onClick={() => setStep(4)}
+                  className={`w-2/3 soft-button py-3.5 text-xs flex items-center justify-center gap-2 shadow-2xs font-bold cursor-pointer ${
                     learnSkillIds.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
@@ -297,123 +346,23 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* STEP 3: Location Consent */}
-          {step === 3 && (
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <span className="soft-badge bg-blue-50 text-blue-700 border-blue-200 text-xs font-bold">
-                  Nearby Map Feature
-                </span>
-                <h2 className="text-2xl font-black text-slate-900">Be Discovered on the Map?</h2>
-                <p className="text-xs text-slate-500 font-medium">
-                  Enable location to appear on the discovery map and connect with partners near you. You can turn this off anytime in Settings.
-                </p>
-              </div>
-
-              <SimbiAvatar state="happy" message="Enable location so nearby learning partners can easily find you on the map!" />
-
-              <div className="space-y-3">
-                {/* Location benefit cards */}
-                <div className="grid gap-3">
-                  {[
-                    { title: 'Appear on Discovery Map', desc: 'Partners in your city can view your profile directly on the map.' },
-                    { title: 'Local Priority', desc: 'Your profile appears earlier for searches in your local area.' },
-                    { title: 'Privacy Protected', desc: 'Coordinates are stored securely with zero continuous tracking.' },
-                  ].map((item) => (
-                    <div key={item.title} className="flex items-start gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
-                      <MapPin className="w-5 h-5 text-[#FF6B30] shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-black text-slate-900">{item.title}</p>
-                        <p className="text-[11px] text-slate-500 font-medium mt-0.5">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {locationEnabled && (
-                  <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span className="text-xs font-bold text-emerald-700">Location enabled! You will now appear on the map.</span>
-                  </div>
-                )}
-
-                {locationError && (
-                  <div className="p-3 bg-red-50 rounded-xl border border-red-200">
-                    <p className="text-xs font-bold text-red-700">{locationError}</p>
-                  </div>
-                )}
-
-                {!locationEnabled && (
-                  <button
-                    onClick={() => {
-                      if (!navigator.geolocation) {
-                        setLocationError('Browser does not support geolocation.');
-                        return;
-                      }
-                      setLocationLoading(true);
-                      setLocationError(null);
-                      navigator.geolocation.getCurrentPosition(
-                        async (pos) => {
-                          try {
-                            await apiFetch('/users/me/location', {
-                              method: 'PUT',
-                              body: JSON.stringify({
-                                latitude: pos.coords.latitude,
-                                longitude: pos.coords.longitude,
-                                locationEnabled: true,
-                              }),
-                            });
-                            setLocationEnabled(true);
-                          } catch {
-                            setLocationError('Failed to save location. Please try again.');
-                          } finally {
-                            setLocationLoading(false);
-                          }
-                        },
-                        (err) => {
-                          setLocationLoading(false);
-                          setLocationError(
-                            err.code === 1
-                              ? 'Location permission denied. Please allow GPS access in your browser.'
-                              : 'Failed to retrieve location.',
-                          );
-                        },
-                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
-                      );
-                    }}
-                    disabled={locationLoading}
-                    className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 text-white font-black text-xs flex items-center justify-center gap-2 hover:from-blue-700 hover:to-blue-600 transition shadow-md disabled:opacity-60 cursor-pointer"
-                  >
-                    {locationLoading
-                      ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Detecting Location...</span></>
-                      : <><MapPin className="w-4 h-4" /><span>Enable Location Now</span></>}
-                  </button>
-                )}
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setStep(2)}
-                  className="w-1/3 py-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-200 transition cursor-pointer"
-                >
-                  <ArrowLeft className="w-4 h-4 inline mr-1" />
-                  <span>Back</span>
-                </button>
-                <button
-                  onClick={() => setStep(4)}
-                  className="w-2/3 soft-button py-3 text-xs flex items-center justify-center gap-2 font-bold cursor-pointer"
-                >
-                  <span>{locationEnabled ? 'Next: Learning Goal' : 'Skip for Now'}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+          {/* STEP 4: Location Consent */}
+          {step === 4 && (
+            <LocationStep
+              locationEnabled={locationEnabled}
+              onLocationChange={(val) => setLocationEnabled(val)}
+              onBack={() => setStep(3)}
+              onNext={() => setStep(5)}
+            />
           )}
 
-          {/* STEP 4: Define Goal */}
-          {step === 4 && (
+          {/* STEP 5: Define Goal & Finish */}
+          {step === 5 && (
             <div className="space-y-6">
               <div className="space-y-1">
+                <span className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-xs font-bold">
+                  Step 5: Define Target Goal
+                </span>
                 <h2 className="text-2xl font-black text-slate-900">Define Your Learning Goal</h2>
                 <p className="text-xs text-slate-500 font-medium">What specific milestone or outcome do you want to achieve?</p>
               </div>
@@ -447,83 +396,31 @@ export default function OnboardingPage() {
 
               <div className="flex gap-3">
                 <button
-                  onClick={() => setStep(3)}
+                  onClick={() => setStep(4)}
                   className="w-1/3 py-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-200 transition cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4 inline mr-1" />
                   <span>Back</span>
                 </button>
                 <button
-                  disabled={!goalTitle}
-                  onClick={() => setStep(5)}
-                  className={`w-2/3 soft-button py-3 text-xs flex items-center justify-center gap-2 font-bold cursor-pointer ${
-                    !goalTitle ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                  disabled={submitting}
+                  onClick={handleCompleteOnboarding}
+                  className="w-2/3 soft-button py-3.5 text-xs flex items-center justify-center gap-2 shadow-2xs font-bold cursor-pointer disabled:opacity-60"
                 >
-                  <span>Next: Review & Finish</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <Rocket className="w-4 h-4" />
+                  <span>{submitting ? 'Setting up Profile...' : 'Complete & Enter Simbioly'}</span>
                 </button>
               </div>
             </div>
           )}
-
-          {/* STEP 5: Summary Confirmation */}
-          {step === 5 && (
-            <div className="space-y-6 text-center">
-              <div className="space-y-1">
-                <h2 className="text-2xl font-black text-slate-900">Ready to Start Swapping!</h2>
-                <p className="text-xs text-slate-500 font-medium">Review your registered skills before entering the discovery hub.</p>
-              </div>
-
-              <SimbiAvatar state="cheering" message="Click complete below to jump straight into your reciprocal swap deck!" />
-
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-3 text-xs font-bold">
-                <div>
-                  <span className="text-slate-400 uppercase text-[10px]">Primary Goal:</span>
-                  <p className="text-slate-900 text-sm font-black">{goalTitle}</p>
-                </div>
-
-                <div>
-                  <span className="text-emerald-700 uppercase text-[10px]">Can Teach ({teachSkillIds.length}):</span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {teachSkillIds.map((id) => (
-                      <span key={id} className="soft-badge bg-emerald-50 text-emerald-800 border-emerald-200 text-[10px]">
-                        {skills.find((s) => s.id === id)?.name || id}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-[#FF6B30] uppercase text-[10px]">Want to Learn ({learnSkillIds.length}):</span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {learnSkillIds.map((id) => (
-                      <span key={id} className="soft-badge bg-orange-50 text-[#FF6B30] border-orange-200 text-[10px]">
-                        {skills.find((s) => s.id === id)?.name || id}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <button
-                disabled={submitting}
-                onClick={handleCompleteOnboarding}
-                className="w-full soft-button py-4 text-sm flex items-center justify-center gap-2 font-bold shadow-md cursor-pointer"
-              >
-                {submitting ? (
-                  <span>Saving your profile...</span>
-                ) : (
-                  <>
-                    <Rocket className="w-5 h-5 text-white" />
-                    <span>Complete & Enter Swap Dashboard</span>
-                  </>
-                )}
-              </button>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Bottom Footer */}
+      <footer className="w-full max-w-2xl mx-auto px-6 py-6 flex items-center justify-between text-xs text-slate-400 border-t border-slate-100">
+        <p>Mutual Skill Exchange & Learning</p>
+        <p className="font-medium">© Simbioly 2026</p>
+      </footer>
     </div>
   );
 }

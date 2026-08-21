@@ -9,6 +9,8 @@ import {
   leaveHandler,
   getMessagesHandler,
   sendMessageHandler,
+  markReadHandler,
+  notificationSummaryHandler,
 } from './partnerships.controller.js';
 import {
   startAudioSessionHandler,
@@ -33,10 +35,12 @@ const router = Router();
 router.use(authenticate);
 router.get('/', listHandler);
 router.post('/', createHandler);
+router.get('/notifications/summary', notificationSummaryHandler);
 router.get('/:id', getHandler);
 router.post('/:id/accept', acceptHandler);
 router.post('/:id/reject', rejectHandler);
 router.post('/:id/leave', leaveHandler);
+router.post('/:id/read', markReadHandler);
 router.get('/:id/messages', getMessagesHandler);
 router.post('/:id/messages', sendMessageHandler);
 

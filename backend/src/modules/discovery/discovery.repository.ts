@@ -38,7 +38,7 @@ export async function findCandidates(
   currentUserId: string,
   filters: DiscoveryFilters,
 ): Promise<CandidateResult[]> {
-  // Load current user's skills and location
+  // Load current user's skills with categories and location
   const me = await prisma.user.findUnique({
     where: { id: currentUserId },
     select: {
@@ -46,13 +46,29 @@ export async function findCandidates(
       longitude: true,
       locationEnabled: true,
       country: true,
-      userSkills: { select: { skillId: true, type: true, level: true } },
+      userSkills: {
+        select: {
+          skillId: true,
+          type: true,
+          level: true,
+          skill: {
+            select: { id: true, name: true, categoryId: true, category: { select: { id: true, name: true, slug: true } } },
+          },
+        },
+      },
     },
   });
   if (!me) return [];
 
-  const myLearnSkillIds = me.userSkills.filter((s) => s.type === 'LEARN').map((s) => s.skillId);
-  const myTeachSkillIds = me.userSkills.filter((s) => s.type === 'TEACH').map((s) => s.skillId);
+  const myLearnSkills = me.userSkills.filter((s) => s.type === 'LEARN');
+  const myTeachSkills = me.userSkills.filter((s) => s.type === 'TEACH');
+
+  const myLearnSkillIds = new Set(myLearnSkills.map((s) => s.skillId));
+  const myLearnCategoryIds = new Set(myLearnSkills.map((s) => s.skill.categoryId));
+
+  const myTeachSkillIds = new Set(myTeachSkills.map((s) => s.skillId));
+  const myTeachCategoryIds = new Set(myTeachSkills.map((s) => s.skill.categoryId));
+
   const myCountry = me.country?.toLowerCase().trim() ?? null;
 
   // Exclude current user and existing partners
@@ -72,7 +88,16 @@ export async function findCandidates(
     select: {
       id: true, name: true, username: true, avatarUrl: true, bio: true, country: true,
       latitude: true, longitude: true, locationEnabled: true,
-      userSkills: { select: { skillId: true, type: true, level: true, skill: { select: { id: true, name: true } } } },
+      userSkills: {
+        select: {
+          skillId: true,
+          type: true,
+          level: true,
+          skill: {
+            select: { id: true, name: true, categoryId: true, category: { select: { id: true, name: true, slug: true } } },
+          },
+        },
+      },
     },
   });
 
@@ -81,30 +106,72 @@ export async function findCandidates(
     const candidateLearn = candidate.userSkills.filter((s) => s.type === 'LEARN');
 
     /*
-     * Priority-weighted scoring:
+     * Advanced Data Mining & Recommendation Affinity Scoring:
      *
-     * 1. teachMatch (PRIMARY): How many of the candidate's TEACH skills overlap
-     *    with what the current user wants to LEARN — this is the core value.
-     *    Weight: 10 pts per matching skill.
+     * 1. Exact Skill Overlap (Confidence = 1.0):
+     *    Candidate teaches what user specifically seeks -> Highest Affinity (+20 pts/skill).
      *
-     * 2. sameCountry (SECONDARY): Candidate lives in the same country as the
-     *    current user — local community-first discovery.
-     *    Weight: 5 pts flat bonus.
+     * 2. Domain / Category Association (Confidence = 0.6):
+     *    Candidate teaches skills within the same knowledge domain/category
+     *    (e.g., User wants TypeScript, Candidate teaches Python/React in Programming & Tech) -> Strong Association (+10 pts/skill).
      *
-     * 3. reciprocalBonus (TERTIARY): How many of the candidate's LEARN skills
-     *    overlap with what the current user can TEACH — true reciprocal exchange.
-     *    Weight: 3 pts per matching skill.
+     * 3. Reciprocal Exchange Affinity:
+     *    - Candidate wants to learn user's exact skill: +15 pts.
+     *    - Candidate wants to learn skills in user's teaching domain: +8 pts.
      *
-     * Final sort order:
-     *   a. matchScore DESC (higher is better)
-     *   b. distanceKm ASC (closer is better, null last)
+     * 4. Bidirectional Harmonic Reciprocity:
+     *    Simultaneous mutual teach/learn synergy bonus (+20 pts).
+     *
+     * 5. Local Community Proximity (+5 pts).
      */
-    const teachMatchCount = candidateTeach.filter((s) => myLearnSkillIds.includes(s.skillId)).length;
-    const reciprocalBonus = candidateLearn.filter((s) => myTeachSkillIds.includes(s.skillId)).length;
+    let teachAffinityScore = 0;
+    let exactTeachCount = 0;
+    let relatedTeachCount = 0;
+
+    const scoredTeachSkills = candidateTeach.map((s) => {
+      const isExact = myLearnSkillIds.has(s.skillId) || (!!filters.skillId && s.skillId === filters.skillId);
+      const isRelated = !isExact && myLearnCategoryIds.has(s.skill.categoryId);
+
+      let itemScore = 0;
+      if (isExact) {
+        itemScore = 20 + (filters.skillId && s.skillId === filters.skillId ? 10 : 0);
+        exactTeachCount++;
+      } else if (isRelated) {
+        itemScore = 10;
+        relatedTeachCount++;
+      }
+
+      teachAffinityScore += itemScore;
+      return { ...s, isExact, isRelated, itemScore };
+    });
+
+    let learnAffinityScore = 0;
+    let exactLearnCount = 0;
+    let relatedLearnCount = 0;
+
+    const scoredLearnSkills = candidateLearn.map((s) => {
+      const isExact = myTeachSkillIds.has(s.skillId);
+      const isRelated = !isExact && myTeachCategoryIds.has(s.skill.categoryId);
+
+      let itemScore = 0;
+      if (isExact) {
+        itemScore = 15;
+        exactLearnCount++;
+      } else if (isRelated) {
+        itemScore = 8;
+        relatedLearnCount++;
+      }
+
+      learnAffinityScore += itemScore;
+      return { ...s, isExact, isRelated, itemScore };
+    });
+
+    const isHarmonicReciprocal = (exactTeachCount > 0 || relatedTeachCount > 0) && (exactLearnCount > 0 || relatedLearnCount > 0);
+    const reciprocalSynergyBonus = isHarmonicReciprocal ? 20 : 0;
     const candidateCountry = candidate.country?.toLowerCase().trim() ?? null;
     const sameCountryBonus = myCountry && candidateCountry && myCountry === candidateCountry ? 5 : 0;
 
-    const matchScore = teachMatchCount * 10 + sameCountryBonus + reciprocalBonus * 3;
+    const matchScore = teachAffinityScore + learnAffinityScore + reciprocalSynergyBonus + sameCountryBonus;
 
     let distanceKm: number | null = null;
     if (
@@ -115,10 +182,26 @@ export async function findCandidates(
       distanceKm = Math.round(haversine(me.latitude, me.longitude, candidate.latitude, candidate.longitude) * 10) / 10;
     }
 
+    // Sort candidate skills: Exact Match > Domain Related > Others
+    const sortedCandidateTeach = scoredTeachSkills.sort((a, b) => b.itemScore - a.itemScore);
+    const sortedCandidateLearn = scoredLearnSkills.sort((a, b) => b.itemScore - a.itemScore);
+
     return {
       user: { id: candidate.id, name: candidate.name, username: candidate.username, avatarUrl: candidate.avatarUrl, bio: candidate.bio, country: candidate.country },
-      teachSkills: candidateTeach.map((s) => ({ id: s.skill.id, name: s.skill.name, level: s.level })),
-      learnSkills: candidateLearn.map((s) => ({ id: s.skill.id, name: s.skill.name, level: s.level })),
+      teachSkills: sortedCandidateTeach.map((s) => ({
+        id: s.skill.id,
+        name: s.skill.name,
+        level: s.level,
+        isMatch: s.isExact,
+        isRelated: s.isRelated,
+      })),
+      learnSkills: sortedCandidateLearn.map((s) => ({
+        id: s.skill.id,
+        name: s.skill.name,
+        level: s.level,
+        isMatch: s.isExact,
+        isRelated: s.isRelated,
+      })),
       matchScore,
       distanceKm,
       reputation: { count: 0, overall: null, averages: null }, // populated below

@@ -399,7 +399,35 @@ export async function toggleTopic(userId: string, topicId: string) {
     );
   }
 
-  return repo.toggleCompletion(topicId, !topic.isCompleted);
+  const willBeCompleted = !topic.isCompleted;
+  const updated = await repo.toggleCompletion(topicId, willBeCompleted);
+
+  // If marked completed, announce milestone progress in room chat
+  if (willBeCompleted) {
+    try {
+      const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
+      const userName = user?.name || 'Partner';
+
+      const announcementMsg = await prisma.partnershipMessage.create({
+        data: {
+          partnershipId: topic.partnershipId,
+          senderId: null,
+          senderType: 'SYSTEM',
+          senderName: 'System',
+          content: `🎯 ${userName} completed milestone: "${topic.title}"!`,
+        },
+      });
+
+      const { getIO } = await import('../../infrastructure/websocket/socket.js');
+      const io = getIO();
+      io?.to(topic.partnershipId).emit('receive_message', announcementMsg);
+      io?.to(topic.partnershipId).emit('topic_updated');
+    } catch {
+      // ignore
+    }
+  }
+
+  return updated;
 }
 
 export async function deleteTopic(userId: string, topicId: string) {
