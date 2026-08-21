@@ -278,80 +278,88 @@ export function AudioCallModal({
   const isFirstSpeaker = session?.firstSpeakerId === myUserId;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
       {/* Hidden audio element for WebRTC audio playback */}
       <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" />
 
-      <div className="w-full max-w-xl neo-box p-6 sm:p-8 space-y-6 bg-white shadow-[10px_10px_0px_0px_#0F172A]">
+      <div className="w-full max-w-lg bg-white/95 backdrop-blur-2xl rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-200">
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#FF7A30] border-2.5 border-[#0F172A] text-white font-black flex items-center justify-center text-lg shadow-[3px_3px_0px_0px_#0F172A]">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#FF6B30] to-orange-400 text-white font-bold flex items-center justify-center text-base shadow-sm shrink-0 overflow-hidden">
               {partner.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={partner.avatarUrl} alt={partner.name} className="w-full h-full object-cover rounded-2xl" />
+                <img src={partner.avatarUrl} alt={partner.name} className="w-full h-full object-cover" />
               ) : (
-                partner.name.charAt(0)
+                partner.name.charAt(0).toUpperCase()
               )}
             </div>
             <div>
-              <h2 className="text-xl font-black text-[#0F172A]">{partner.name}</h2>
-              <span className="text-xs text-gray-600 font-bold">Partner Audio Call Session</span>
+              <h2 className="text-base font-bold text-slate-900 leading-snug">{partner.name}</h2>
+              <span className="text-[11px] text-slate-500 font-medium">Partner Audio Call Session</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <span
-              className={`neo-badge text-xs px-3 py-1 font-black flex items-center gap-1.5 ${
-                isConnected ? 'bg-[#84CC16] text-[#0F172A]' : 'bg-[#FACC15] text-[#0F172A]'
+              className={`text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1.5 border transition-colors ${
+                isConnected
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-amber-50 text-amber-700 border-amber-200'
               }`}
             >
-              <ZapIcon className="w-4 h-4" />
+              <ZapIcon className="w-3.5 h-3.5" />
               <span>{isConnected ? 'Audio Connected' : 'Waiting Connection'}</span>
             </span>
 
             <button
               onClick={handleEndCall}
-              className="w-9 h-9 rounded-xl bg-white border-2 border-[#0F172A] font-black text-sm flex items-center justify-center text-[#0F172A] hover:bg-red-500 hover:text-white transition shadow-[2px_2px_0px_0px_#0F172A]"
+              className="w-8 h-8 rounded-xl bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center cursor-pointer"
               title="Close modal"
             >
-              <XIcon className="w-5 h-5" />
+              <XIcon className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* STEP 1: Mode Selection View */}
         {!session && !loading && (
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div className="text-center space-y-1">
-              <h3 className="text-lg font-black text-[#0F172A]">Choose Audio Call Mode</h3>
-              <p className="text-xs text-gray-600 font-bold">Select how you want to conduct your exchange call session.</p>
+              <h3 className="text-base font-bold text-slate-900">Choose Audio Call Mode</h3>
+              <p className="text-xs text-slate-500 font-medium">Select how you want to conduct your exchange call session.</p>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-3.5">
               <button
                 onClick={() => handleStartCall('NORMAL')}
-                className="p-5 rounded-2xl border-2.5 border-[#0F172A] bg-[#FFFDF7] hover:bg-[#FACC15] transition space-y-3 text-left shadow-[5px_5px_0px_0px_#0F172A] group"
+                className="p-4.5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-orange-50/50 hover:border-orange-200 transition-all text-left space-y-2.5 group cursor-pointer shadow-2xs hover:shadow-xs"
               >
-                <div className="w-10 h-10 rounded-xl bg-white border-2 border-[#0F172A] flex items-center justify-center text-[#FF7A30] shadow-[2px_2px_0px_0px_#0F172A]">
-                  <PhoneIcon className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#FF6B30] group-hover:scale-105 transition-transform shadow-2xs">
+                  <PhoneIcon className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="font-black text-sm text-[#0F172A]">Normal Audio Call</h4>
-                  <p className="text-xs text-gray-600 font-bold mt-1">Talk freely with your partner. Maximum 10 minutes total.</p>
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-[#FF6B30] transition-colors">
+                    Normal Audio Call
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-0.5">
+                    Talk freely with your partner. Maximum 10 minutes total.
+                  </p>
                 </div>
               </button>
 
               <button
                 onClick={() => handleStartCall('AI_TOPIC_EXCHANGE')}
-                className="p-5 rounded-2xl border-2.5 border-[#0F172A] bg-[#FFFDF7] hover:bg-[#84CC16] transition space-y-3 text-left shadow-[5px_5px_0px_0px_#0F172A] group"
+                className="p-4.5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-orange-50/50 hover:border-orange-200 transition-all text-left space-y-2.5 group cursor-pointer shadow-2xs hover:shadow-xs"
               >
-                <div className="w-10 h-10 rounded-xl bg-white border-2 border-[#0F172A] flex items-center justify-center text-[#06B6D4] shadow-[2px_2px_0px_0px_#0F172A]">
-                  <SparklesIcon className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-cyan-600 group-hover:scale-105 transition-transform shadow-2xs">
+                  <SparklesIcon className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="font-black text-sm text-[#0F172A]">AI Topic Exchange</h4>
-                  <p className="text-xs text-gray-600 font-bold mt-1">
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-[#FF6B30] transition-colors">
+                    AI Topic Exchange
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-0.5">
                     Guided 5-minute topics generated for both partners after call acceptance.
                   </p>
                 </div>
@@ -362,54 +370,54 @@ export function AudioCallModal({
 
         {/* STEP 2: Ringing / Waiting Confirmation Screen */}
         {session && session.status === 'WAITING' && !loading && (
-          <div className="py-8 text-center space-y-6">
+          <div className="py-6 text-center space-y-5">
             {session.requesterId === myUserId ? (
               // Outbound Call: User A Waiting for User B to pick up
-              <div className="space-y-6">
-                <div className="w-20 h-20 bg-[#FACC15] rounded-3xl border-3 border-[#0F172A] flex items-center justify-center mx-auto animate-bounce shadow-[4px_4px_0px_0px_#0F172A]">
-                  <PhoneIcon className="w-10 h-10 text-[#0F172A]" />
+              <div className="space-y-5">
+                <div className="w-18 h-18 bg-gradient-to-tr from-[#FF6B30] to-orange-400 rounded-3xl flex items-center justify-center mx-auto shadow-lg shadow-orange-500/25 animate-pulse text-white">
+                  <PhoneIcon className="w-8 h-8" />
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-black text-[#0F172A]">Calling {partner.name}...</h3>
-                  <p className="text-xs text-gray-600 font-bold">
+                <div className="space-y-1">
+                  <h3 className="text-lg font-bold text-slate-900">Calling {partner.name}...</h3>
+                  <p className="text-xs text-slate-500 font-medium">
                     Waiting for partner to accept your {session.mode === 'NORMAL' ? 'Normal Audio Call' : 'AI Topic Exchange'} invite.
                   </p>
                 </div>
                 <button
                   onClick={handleEndCall}
-                  className="px-6 py-3 rounded-2xl bg-red-600 text-white font-black text-xs border-2 border-[#0F172A] shadow-[3px_3px_0px_0px_#0F172A] hover:bg-red-700 transition"
+                  className="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition border border-slate-200 cursor-pointer"
                 >
                   Cancel Call
                 </button>
               </div>
             ) : (
               // Inbound Call: User B Receiving call with Accept/Decline options
-              <div className="space-y-6">
-                <div className="w-20 h-20 bg-[#84CC16] rounded-3xl border-3 border-[#0F172A] flex items-center justify-center mx-auto animate-pulse shadow-[4px_4px_0px_0px_#0F172A]">
-                  <PhoneIcon className="w-10 h-10 text-[#0F172A]" />
+              <div className="space-y-5">
+                <div className="w-18 h-18 bg-gradient-to-tr from-emerald-500 to-teal-500 rounded-3xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/25 animate-bounce text-white">
+                  <PhoneIcon className="w-8 h-8" />
                 </div>
-                <div className="space-y-2">
-                  <span className="neo-badge bg-[#FF7A30] text-white text-xs font-black px-3 py-1">
+                <div className="space-y-1.5">
+                  <span className="inline-block px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-[#FF6B30] text-[11px] font-bold">
                     Incoming Audio Call
                   </span>
-                  <h3 className="text-xl font-black text-[#0F172A]">{partner.name} is calling you!</h3>
-                  <p className="text-xs text-gray-600 font-bold">
+                  <h3 className="text-lg font-bold text-slate-900">{partner.name} is calling you!</h3>
+                  <p className="text-xs text-slate-500 font-medium">
                     Mode: {session.mode === 'NORMAL' ? 'Normal Audio Call (10m)' : 'AI Topic Exchange Session'}
                   </p>
                 </div>
-                <div className="flex justify-center gap-4 pt-2">
+                <div className="flex justify-center gap-3 pt-2">
                   <button
                     onClick={handleDeclineCall}
-                    className="px-6 py-3.5 rounded-2xl bg-gray-100 border-2 border-[#0F172A] font-black text-xs flex items-center gap-2 shadow-[3px_3px_0px_0px_#0F172A] hover:bg-gray-200 transition"
+                    className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition flex items-center gap-1.5 cursor-pointer"
                   >
-                    <XIcon className="w-4 h-4 text-red-600" />
+                    <XIcon className="w-4 h-4 text-rose-500" />
                     <span>Decline</span>
                   </button>
                   <button
                     onClick={handleAcceptCall}
-                    className="px-8 py-3.5 rounded-2xl bg-[#84CC16] text-[#0F172A] border-2 border-[#0F172A] font-black text-xs flex items-center gap-2 shadow-[3px_3px_0px_0px_#0F172A] hover:bg-emerald-400 transition"
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-emerald-500/25 cursor-pointer"
                   >
-                    <CheckIcon className="w-5 h-5 text-[#0F172A]" />
+                    <CheckIcon className="w-4 h-4" />
                     <span>Accept Call</span>
                   </button>
                 </div>
@@ -420,13 +428,13 @@ export function AudioCallModal({
 
         {/* Dedicated Loading View during Topic Generation */}
         {loading && (
-          <div className="py-14 text-center space-y-4">
-            <div className="w-16 h-16 bg-[#FFFDF7] border-2.5 border-[#0F172A] rounded-2xl flex items-center justify-center mx-auto shadow-[4px_4px_0px_0px_#0F172A]">
-              <SparklesIcon className="w-8 h-8 text-[#FF7A30] animate-spin" />
+          <div className="py-10 text-center space-y-3">
+            <div className="w-14 h-14 bg-orange-50 border border-orange-200 rounded-2xl flex items-center justify-center mx-auto text-[#FF6B30]">
+              <SparklesIcon className="w-6 h-6 animate-spin" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-black text-[#0F172A]">Connecting Audio & Generating Topics...</h3>
-              <p className="text-xs text-gray-600 font-bold max-w-sm mx-auto">
+              <h3 className="text-sm font-bold text-slate-900">Connecting Audio & Generating Topics...</h3>
+              <p className="text-xs text-slate-500 font-medium max-w-xs mx-auto">
                 Call accepted! Generating exchange topics for both partners & shuffling turn order...
               </p>
             </div>
@@ -435,14 +443,14 @@ export function AudioCallModal({
 
         {/* STEP 3: Active Audio Session View */}
         {session && session.status !== 'WAITING' && !loading && (
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Live State & Timer Display */}
-            <div className="neo-box bg-[#FACC15] p-6 text-center space-y-3 shadow-[6px_6px_0px_0px_#0F172A]">
-              <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-2">
-                <span className="neo-badge bg-white text-[#0F172A] text-xs font-black">
+            <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl p-5 text-center space-y-3 shadow-xl relative overflow-hidden">
+              <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+                <span className="text-[11px] font-bold text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full backdrop-blur-xs">
                   {session.mode === 'NORMAL' ? 'Normal Audio Call' : 'AI Topic Exchange'}
                 </span>
-                <span className="text-xs font-black text-[#0F172A] uppercase flex items-center gap-1">
+                <span className="text-[11px] font-bold text-orange-400 uppercase flex items-center gap-1">
                   <ClockIcon className="w-3.5 h-3.5" />
                   <span>
                     {session.status === 'PREPARING'
@@ -454,18 +462,18 @@ export function AudioCallModal({
                 </span>
               </div>
 
-              <div className="text-6xl font-mono font-black text-[#0F172A] py-4 bg-white rounded-2xl border-3 border-[#0F172A] shadow-[4px_4px_0px_0px_#0F172A]">
+              <div className="text-5xl sm:text-6xl font-mono font-black text-white tracking-wider py-2">
                 {formatTimer(timeRemaining)}
               </div>
             </div>
 
             {/* AI Topic Exchange Banner & Guided Topics */}
             {session.mode === 'AI_TOPIC_EXCHANGE' && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Random Selection Result Banner */}
-                <div className="p-3.5 rounded-xl border-2 border-[#0F172A] bg-[#F0F9FF] text-[#06B6D4] text-xs font-black flex items-center justify-between shadow-[3px_3px_0px_0px_#0F172A]">
+                <div className="p-3 rounded-2xl bg-cyan-50/80 border border-cyan-200/80 text-cyan-900 text-xs font-bold flex items-center justify-between shadow-2xs">
                   <div className="flex items-center gap-2">
-                    <DicesIcon className="w-5 h-5 flex-shrink-0" />
+                    <DicesIcon className="w-4 h-4 text-cyan-600 shrink-0" />
                     <span>
                       Random Turn Selection: {isFirstSpeaker ? 'You present first (Speaker 1)!' : `${partner.name} presents first (Speaker 1)!`}
                     </span>
@@ -474,25 +482,25 @@ export function AudioCallModal({
 
                 {/* 30s Preparation Stage Banner with SKIP PREP Button */}
                 {session.status === 'PREPARING' && (
-                  <div className="p-4 rounded-2xl border-2 border-[#0F172A] bg-[#FFFDF7] space-y-3 shadow-[4px_4px_0px_0px_#0F172A]">
+                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2 shadow-2xs">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs font-black text-[#FF7A30] uppercase">
-                        <LightbulbIcon className="w-4 h-4" />
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800 uppercase">
+                        <LightbulbIcon className="w-4 h-4 text-amber-600" />
                         <span>30s Warm-Up Prep Phase</span>
                       </div>
 
                       {isFirstSpeaker && (
                         <button
                           onClick={handleSkipPrep}
-                          className="px-3 py-1.5 rounded-xl bg-[#84CC16] text-[#0F172A] border-2 border-[#0F172A] text-xs font-black hover:bg-emerald-400 transition flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#0F172A]"
+                          className="px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 text-[11px] font-bold hover:bg-amber-100 transition flex items-center gap-1 shadow-2xs cursor-pointer"
                         >
-                          <FastForwardIcon className="w-4 h-4" />
-                          <span>Skip Prep & Start Now</span>
+                          <FastForwardIcon className="w-3.5 h-3.5" />
+                          <span>Skip Prep</span>
                         </button>
                       )}
                     </div>
 
-                    <p className="text-sm font-black text-[#0F172A]">
+                    <p className="text-xs font-bold text-slate-800">
                       {isFirstSpeaker
                         ? 'Prepare your presentation! Your 5-minute turn starts right after this 30-second warm-up.'
                         : `${partner.name} is preparing! Get ready for your turn.`}
@@ -501,17 +509,17 @@ export function AudioCallModal({
                 )}
 
                 {/* Generated Exchange Topics for Both Partners */}
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <div className="p-4 rounded-2xl border-2 border-[#0F172A] bg-[#FFFDF7] space-y-1 shadow-[3px_3px_0px_0px_#0F172A]">
-                    <span className="text-[10px] font-black uppercase text-gray-500">Your Exchange Topic</span>
-                    <p className="text-sm font-black text-[#0F172A]">
+                <div className="grid sm:grid-cols-2 gap-2.5">
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1 shadow-2xs">
+                    <span className="text-[10px] font-bold uppercase text-slate-400">Your Exchange Topic</span>
+                    <p className="text-xs font-bold text-slate-800 leading-snug">
                       {session.userTopic || 'Open reciprocal skill exchange'}
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl border-2 border-[#0F172A] bg-[#FFFDF7] space-y-1 shadow-[3px_3px_0px_0px_#0F172A]">
-                    <span className="text-[10px] font-black uppercase text-gray-500">{partner.name}&apos;s Exchange Topic</span>
-                    <p className="text-sm font-black text-[#0F172A]">
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1 shadow-2xs">
+                    <span className="text-[10px] font-bold uppercase text-slate-400">{partner.name}&apos;s Exchange Topic</span>
+                    <p className="text-xs font-bold text-slate-800 leading-snug">
                       {session.partnerTopic || 'Open reciprocal skill exchange'}
                     </p>
                   </div>
@@ -520,22 +528,24 @@ export function AudioCallModal({
             )}
 
             {/* Controls Bar: Mute Microphone & Leave Call */}
-            <div className="flex justify-center items-center gap-4 pt-2 border-t-2 border-[#0F172A]">
+            <div className="flex justify-center items-center gap-3 pt-2 border-t border-slate-100">
               <button
                 onClick={toggleMute}
-                className={`p-4 rounded-2xl border-2 border-[#0F172A] font-black text-xs flex items-center gap-2 shadow-[3px_3px_0px_0px_#0F172A] transition ${
-                  isMuted ? 'bg-red-500 text-white' : 'bg-white text-[#0F172A] hover:bg-gray-100'
+                className={`px-5 py-3 rounded-2xl border font-bold text-xs flex items-center gap-2 transition cursor-pointer ${
+                  isMuted
+                    ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'
+                    : 'bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200'
                 }`}
               >
-                {isMuted ? <MicOffIcon className="w-5 h-5" /> : <MicIcon className="w-5 h-5 text-[#84CC16]" />}
+                {isMuted ? <MicOffIcon className="w-4 h-4" /> : <MicIcon className="w-4 h-4 text-emerald-600" />}
                 <span>{isMuted ? 'Muted' : 'Mute Mic'}</span>
               </button>
 
               <button
                 onClick={handleEndCall}
-                className="px-6 py-4 rounded-2xl bg-red-600 text-white border-2 border-[#0F172A] font-black text-xs hover:bg-red-700 transition flex items-center gap-2 shadow-[3px_3px_0px_0px_#0F172A]"
+                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white font-bold text-xs transition flex items-center gap-2 shadow-md shadow-rose-500/25 cursor-pointer"
               >
-                <PhoneOffIcon className="w-5 h-5" />
+                <PhoneOffIcon className="w-4 h-4" />
                 <span>End Audio Call</span>
               </button>
             </div>
