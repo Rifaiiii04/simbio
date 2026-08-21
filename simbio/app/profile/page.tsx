@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { apiFetch } from '@/lib/api/client';
 import { Navbar } from '@/components/shared/Navbar';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
@@ -380,23 +381,31 @@ export default function ProfilePage() {
           onAvatarUpdated={handleAvatarUpdated}
         />
 
-        {/* 2. REPUTATION STATISTICS */}
-        <ProfileReputationStats reputation={reputation} loading={reputationLoading} />
+        {/* PROFILE EDIT FORM & SECTIONS */}
+        <form onSubmit={handleSaveProfile} className="space-y-5">
+          {/* TOP 50/50 ROW: IDENTITY & REPUTATION STATS */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+            {/* Left Col (50%): Identity & Personal Info */}
+            <div className="h-full">
+              <ProfileIdentityForm
+                name={name}
+                username={username}
+                bio={bio}
+                country={country}
+                onChangeName={setName}
+                onChangeUsername={setUsername}
+                onChangeBio={setBio}
+                onChangeCountry={setCountry}
+              />
+            </div>
 
-        {/* 3. IDENTITY & PERSONAL INFO FORM */}
-        <form onSubmit={handleSaveProfile} className="space-y-6">
-          <ProfileIdentityForm
-            name={name}
-            username={username}
-            bio={bio}
-            country={country}
-            onChangeName={setName}
-            onChangeUsername={setUsername}
-            onChangeBio={setBio}
-            onChangeCountry={setCountry}
-          />
+            {/* Right Col (50%): Reputation Statistics */}
+            <div className="h-full">
+              <ProfileReputationStats reputation={reputation} loading={reputationLoading} />
+            </div>
+          </div>
 
-          {/* 4. SKILLS MATRIX SECTION */}
+          {/* 3. SKILLS MATRIX SECTION */}
           <ProfileSkillsSection
             userSkills={userSkills}
             onOpenAddSkill={(type) => setShowAddSkillModal(type)}

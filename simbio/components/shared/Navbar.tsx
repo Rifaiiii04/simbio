@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { io, Socket } from 'socket.io-client';
@@ -9,13 +9,10 @@ import {
   Sparkles,
   Compass,
   Handshake,
-  User,
-  LogOut,
   LayoutDashboard,
-  LogIn,
-  UserPlus,
 } from 'lucide-react';
-import { getAvatarUrl, apiFetch } from '@/lib/api/client';
+import { apiFetch } from '@/lib/api/client';
+import { NavUserProfile } from './NavUserProfile';
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
@@ -30,7 +27,6 @@ const NAV_ITEMS: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Discovery', href: '/discovery', icon: Compass },
   { name: 'Partnerships', href: '/partnerships', icon: Handshake, matchPrefix: true },
-  { name: 'Profile', href: '/profile', icon: User },
 ];
 
 interface NavbarProps {
@@ -39,15 +35,13 @@ interface NavbarProps {
 
 export function Navbar({ hideBottomNav }: NavbarProps = {}) {
   const pathname = usePathname();
-  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [token, setToken] = useState<string | null>(null);
-  const [userAvatar, setUserAvatar] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string | null>(null);
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const socketRef = useRef<Socket | null>(null);
-  const isPartnershipRoom = Boolean(pathname && /^\/partnerships\/[^/]+$/.test(pathname));
 
   useEffect(() => {
+    setMounted(true);
     const storedToken = localStorage.getItem('simbioly_token');
     setToken(storedToken);
 
@@ -57,8 +51,6 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
         const storedUser = localStorage.getItem('simbioly_user');
         if (storedUser) {
           const parsed = JSON.parse(storedUser);
-          setUserAvatar(parsed.avatarUrl || null);
-          setUserName(parsed.name || null);
           currentUserId = parsed.id || '';
         }
       } catch {
@@ -98,18 +90,7 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
         });
       }
     }
-
-    return () => {
-      // Keep global listener or disconnect if unmounting
-    };
   }, [pathname]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('simbioly_token');
-    localStorage.removeItem('simbioly_user');
-    setToken(null);
-    router.push('/login');
-  };
 
   const isNavActive = (item: NavItem) => {
     if (item.matchPrefix) {
@@ -118,36 +99,38 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
     return pathname === item.href;
   };
 
+  const brandHref = mounted && token ? '/dashboard' : '/';
+
   return (
     <>
       {/* ========================================================================= */}
       {/* 1. TOP HEADER (DESKTOP, TABLET & MOBILE TOP BAR)                          */}
       {/* ========================================================================= */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 py-2.5 transition-all duration-300">
-        <div className="w-full max-w-[1700px] mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-3 sm:px-5 lg:px-8 py-2 transition-all duration-300">
+        <div className="w-full max-w-[1700px] mx-auto flex items-center justify-between gap-2">
           {/* Brand Logo with Interactive Glow */}
           <Link
-            href={token ? '/dashboard' : '/'}
-            className="flex items-center gap-2.5 font-bold text-xl text-slate-900 group"
+            href={brandHref}
+            className="flex items-center gap-2 sm:gap-2.5 font-bold text-lg sm:text-xl text-slate-900 group shrink-0"
           >
             <motion.div
               whileHover={{ rotate: [0, -8, 8, 0], scale: 1.05 }}
               transition={{ duration: 0.4 }}
-              className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#FF6B30] to-orange-600 shadow-md shadow-orange-500/20 flex items-center justify-center text-white text-sm font-black"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#FF6B30] to-orange-600 shadow-md shadow-orange-500/20 flex items-center justify-center text-white text-sm font-black shrink-0"
             >
-              <Sparkles className="w-5 h-5 text-white animate-pulse" />
+              <Sparkles className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white animate-pulse" />
             </motion.div>
             <div className="flex flex-col">
-              <span className="leading-none text-lg tracking-tight font-black text-slate-900">Simbioly</span>
-              <span className="text-[10px] font-extrabold text-[#FF6B30] tracking-wider uppercase">
+              <span className="leading-none text-base sm:text-lg tracking-tight font-black text-slate-900">Simbioly</span>
+              <span className="text-[9px] sm:text-[10px] font-extrabold text-[#FF6B30] tracking-wider uppercase leading-tight mt-0.5">
                 Skill Exchange
               </span>
             </div>
           </Link>
 
-          {/* DESKTOP & TABLET ANIMATED NAV LINKS (Hidden on Mobile) */}
-          <nav className="hidden md:flex items-center bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/80 shadow-2xs relative">
-            {token ? (
+          {/* DESKTOP & TABLET ANIMATED NAV LINKS (Dashboard, Discovery, Partnerships) */}
+          <nav className="hidden md:flex items-center bg-slate-100/90 backdrop-blur-md p-1 rounded-2xl border border-slate-200/80 shadow-2xs relative">
+            {mounted && token ? (
               NAV_ITEMS.map((item) => {
                 const active = isNavActive(item);
                 const Icon = item.icon;
@@ -157,18 +140,13 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`relative px-4 py-2 rounded-xl text-xs font-black transition-colors duration-200 flex items-center gap-2 z-10 ${
-                      active ? 'text-white' : 'text-slate-600 hover:text-slate-950'
+                    className={`relative px-3.5 lg:px-4 py-1.5 lg:py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5 lg:gap-2 ${
+                      active
+                        ? 'bg-gradient-to-r from-[#FF6B30] to-orange-500 text-white shadow-sm shadow-orange-500/25'
+                        : 'text-slate-600 hover:text-slate-950 hover:bg-white/60'
                     }`}
                   >
-                    {active && (
-                      <motion.div
-                        layoutId="navbar-active-pill"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                        className="absolute inset-0 bg-gradient-to-r from-[#FF6B30] to-orange-500 rounded-xl shadow-md shadow-orange-500/30 -z-10"
-                      />
-                    )}
-                    <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'scale-110' : 'group-hover:scale-105'}`} />
+                    <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'scale-105' : 'group-hover:scale-105'}`} />
                     <span>{item.name}</span>
                     {hasBadge && (
                       <span className="ml-0.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[#E41E3F] text-white text-[9.5px] font-black flex items-center justify-center leading-none shadow-2xs">
@@ -182,13 +160,13 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
               <div className="flex items-center gap-1">
                 <Link
                   href="/#how-it-works"
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white/80 transition"
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white/80 transition"
                 >
                   How It Works
                 </Link>
                 <Link
                   href="/#skills"
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white/80 transition"
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white/80 transition"
                 >
                   Skill Matrix
                 </Link>
@@ -196,59 +174,9 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
             )}
           </nav>
 
-          {/* User Profile / Auth Action Controls */}
-          <div className="flex items-center gap-3">
-            {token ? (
-              <div className="flex items-center gap-2.5">
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-2.5 p-1 pr-3 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-2xl transition shadow-2xs group"
-                >
-                  <div className="w-8 h-8 rounded-xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-xs overflow-hidden shadow-2xs">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={getAvatarUrl(userAvatar, 'me')}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://api.dicebear.com/7.x/thumbs/svg?seed=me';
-                      }}
-                    />
-                  </div>
-                  <span className="text-xs font-extrabold text-slate-800 group-hover:text-[#FF6B30] transition hidden sm:inline max-w-[120px] truncate">
-                    {userName || 'My Account'}
-                  </span>
-                </Link>
-
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleLogout}
-                  className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-500 hover:text-red-600 hover:bg-red-50 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                  title="Sign out of Simbioly"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Log Out</span>
-                </motion.button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/login"
-                  className="text-xs font-black text-slate-700 hover:text-slate-900 px-3.5 py-2 rounded-xl hover:bg-slate-100 transition flex items-center gap-1.5"
-                >
-                  <LogIn className="w-3.5 h-3.5" />
-                  <span>Log In</span>
-                </Link>
-                <Link
-                  href="/register"
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF6B30] to-orange-500 hover:from-[#E0531A] hover:to-orange-600 text-white text-xs font-black transition flex items-center gap-1.5 shadow-md shadow-orange-500/20 active:scale-95"
-                >
-                  <UserPlus className="w-3.5 h-3.5" />
-                  <span>Sign Up Free</span>
-                </Link>
-              </div>
-            )}
+          {/* User Profile / Auth Action Controls (Separated Isolated Component) */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            <NavUserProfile />
           </div>
         </div>
       </header>
@@ -256,7 +184,7 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
       {/* ========================================================================= */}
       {/* 2. MOBILE BOTTOM NAVIGATION BAR (ONLY ON SCREENS < md)                     */}
       {/* ========================================================================= */}
-      {token && !hideBottomNav && (
+      {mounted && token && !hideBottomNav && (
         <nav aria-label="Mobile Navigation" className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-2xl px-3 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-around">
             {NAV_ITEMS.map((item) => {
@@ -268,19 +196,11 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-2xl transition-all duration-200"
+                  className={`relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-2xl transition-all duration-200 ${
+                    active ? 'bg-orange-50/90 text-[#FF6B30]' : 'text-slate-500 hover:text-slate-700'
+                  }`}
                 >
-                  {active && (
-                    <motion.div
-                      layoutId="mobile-nav-active-pill"
-                      transition={{ type: 'spring', stiffness: 450, damping: 32 }}
-                      className="absolute inset-0 bg-orange-50 border border-orange-200/80 rounded-2xl -z-10"
-                    />
-                  )}
-
-                  <motion.div
-                    animate={{ scale: active ? 1.1 : 1 }}
-                    transition={{ duration: 0.2 }}
+                  <div
                     className={`relative p-0.5 rounded-xl ${
                       active ? 'text-[#FF6B30]' : 'text-slate-400 hover:text-slate-600'
                     }`}
@@ -291,10 +211,10 @@ export function Navbar({ hideBottomNav }: NavbarProps = {}) {
                         {notificationCount > 99 ? '99+' : notificationCount}
                       </span>
                     )}
-                  </motion.div>
+                  </div>
 
                   <span
-                    className={`text-[10px] tracking-tight font-black transition-colors ${
+                    className={`text-[10px] tracking-tight font-bold transition-colors ${
                       active ? 'text-[#FF6B30]' : 'text-slate-500'
                     }`}
                   >

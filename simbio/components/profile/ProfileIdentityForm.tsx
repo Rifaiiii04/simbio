@@ -38,7 +38,7 @@ export function ProfileIdentityForm({
   onChangeCountry,
 }: ProfileIdentityFormProps) {
   return (
-    <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-5">
+    <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-5 h-full flex flex-col justify-between">
       <div className="flex items-center gap-2.5 pb-2 border-b border-slate-100">
         <div className="w-8 h-8 rounded-xl bg-orange-50 text-[#FF6B30] flex items-center justify-center border border-orange-200">
           <UserIcon className="w-4 h-4" />
@@ -51,7 +51,7 @@ export function ProfileIdentityForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
         {/* Full Name */}
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700">Full Name</label>
@@ -92,15 +92,19 @@ export function ProfileIdentityForm({
               <Globe className="w-3.5 h-3.5 text-[#FF6B30]" />
             </div>
             <select
-              value={country}
+              value={country || ''}
               onChange={(e) => onChangeCountry(e.target.value)}
               className="w-full pl-9 pr-8 py-2.5 text-xs font-bold text-slate-900 bg-slate-50/70 rounded-2xl border border-slate-200 focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition appearance-none cursor-pointer"
             >
+              <option value="">Select country...</option>
               {COUNTRIES.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
               ))}
+              {country && !COUNTRIES.includes(country) && (
+                <option value={country}>{country}</option>
+              )}
             </select>
           </div>
         </div>

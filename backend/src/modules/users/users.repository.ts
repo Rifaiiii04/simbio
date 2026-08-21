@@ -44,16 +44,17 @@ export async function updateProfile(
 
 export async function updateLocation(
   userId: string,
-  payload: { latitude: number | null; longitude: number | null; locationEnabled: boolean },
-): Promise<{ locationEnabled: boolean }> {
+  payload: { latitude: number | null; longitude: number | null; locationEnabled: boolean; country?: string | null },
+): Promise<{ locationEnabled: boolean; country?: string | null }> {
   return prisma.user.update({
     where: { id: userId },
     data: {
       latitude: payload.latitude,
       longitude: payload.longitude,
       locationEnabled: payload.locationEnabled,
+      ...(payload.country !== undefined ? { country: payload.country } : {}),
     },
-    select: { locationEnabled: true },
+    select: { locationEnabled: true, country: true },
   });
 }
 

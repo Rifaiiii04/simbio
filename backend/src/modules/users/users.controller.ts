@@ -57,10 +57,11 @@ export async function updateLocationHandler(
 ): Promise<void> {
   try {
     if (!req.user) throw new AppError(ErrorCode.UNAUTHORIZED, 'Authentication required', 401);
-    const { latitude, longitude, locationEnabled } = req.body as {
+    const { latitude, longitude, locationEnabled, country } = req.body as {
       latitude?: number | null;
       longitude?: number | null;
       locationEnabled: boolean;
+      country?: string | null;
     };
     if (typeof locationEnabled !== 'boolean') {
       throw new AppError(ErrorCode.VALIDATION_ERROR, 'locationEnabled must be boolean', 400);
@@ -73,6 +74,7 @@ export async function updateLocationHandler(
       latitude: locationEnabled ? (latitude ?? null) : null,
       longitude: locationEnabled ? (longitude ?? null) : null,
       locationEnabled,
+      country: locationEnabled ? (country ?? null) : null,
     });
     sendSuccess(res, result);
   } catch (err) {

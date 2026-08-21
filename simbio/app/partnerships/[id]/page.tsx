@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence, type PanInfo } from 'framer-motion';
 import { io, Socket } from 'socket.io-client';
 import { apiFetch } from '@/lib/api/client';
 import { Navbar } from '@/components/shared/Navbar';
@@ -12,6 +13,7 @@ import { TypingIndicatorBubble } from '@/components/partnerships/TypingIndicator
 import { MentionDropdown } from '@/components/partnerships/MentionDropdown';
 import { ReciprocalRoadmapCard } from '@/components/partnerships/ReciprocalRoadmapCard';
 import { FocusTimerCard } from '@/components/partnerships/FocusTimerCard';
+import { MobileRoomSidebarModal } from '@/components/partnerships/MobileRoomSidebarModal';
 import { AudioCallModal, AudioSessionData } from '@/components/partnerships/AudioCallModal';
 import { PeerReviewModal } from '@/components/partnerships/PeerReviewModal';
 import { ReportPartnerModal } from '@/components/partnerships/ReportPartnerModal';
@@ -442,80 +444,19 @@ export default function PartnershipRoomPage({ params }: { params: Promise<{ id: 
         </div>
       </div>
 
-      {/* ================================================================ */}
-      {/* MOBILE BOTTOM SHEET MODAL (ROADMAP & FOCUS - MAX 78VH)           */}
-      {/* ================================================================ */}
-      {isMobileSidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end">
-          {/* Backdrop Overlay */}
-          <div
-            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
-            onClick={() => setIsMobileSidebarOpen(false)}
-          />
-
-          {/* Bottom Sheet Panel (Max 78vh) */}
-          <div className="relative w-full max-w-lg mx-auto bg-white rounded-t-[28px] max-h-[78vh] flex flex-col shadow-2xl z-10 overflow-hidden animate-in slide-in-from-bottom duration-200 border-t border-slate-200">
-            {/* Drag Handle Indicator */}
-            <div className="pt-2 pb-1 flex justify-center shrink-0">
-              <div className="w-10 h-1 bg-slate-300 rounded-full" />
-            </div>
-
-            {/* Sheet Header & Tabs */}
-            <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between shrink-0">
-              <div className="p-1 bg-slate-100 rounded-xl grid grid-cols-2 gap-1 flex-1 mr-2">
-                <button
-                  type="button"
-                  onClick={() => setSidebarTab('ROADMAP')}
-                  className={`py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer ${sidebarTab === 'ROADMAP' ? 'bg-[#FF6B30] text-white shadow-xs' : 'text-slate-600 hover:bg-white/60'
-                    }`}
-                >
-                  <BookOpen className="w-3.5 h-3.5" />
-                  <span>Roadmap</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSidebarTab('FOCUS')}
-                  className={`py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 relative cursor-pointer ${sidebarTab === 'FOCUS' ? 'bg-[#FF6B30] text-white shadow-xs' : 'text-slate-600 hover:bg-white/60'
-                    }`}
-                >
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Focus Session</span>
-                  {isFocusModeActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping absolute right-1.5 top-1.5" />
-                  )}
-                </button>
-              </div>
-
-              <button
-                onClick={() => setIsMobileSidebarOpen(false)}
-                className="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition cursor-pointer shrink-0"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Sheet Scrollable Body */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-3">
-              {sidebarTab === 'ROADMAP' ? (
-                <ReciprocalRoadmapCard
-                  partnershipId={partnershipId}
-                  myUserId={myUserId}
-                  partnerName={partner?.name || 'Partner'}
-                  socket={socketRef.current}
-                />
-              ) : (
-                <FocusTimerCard
-                  partnershipId={partnershipId}
-                  myUserId={myUserId}
-                  partnerName={partner?.name || 'Partner'}
-                  socket={socketRef.current}
-                  onFocusStateChange={(isActive) => setIsFocusModeActive(isActive)}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Mobile Bottom Sheet Modal (Gesture Draggable & Expandable) */}
+      <MobileRoomSidebarModal
+        isOpen={isMobileSidebarOpen}
+        onClose={() => setIsMobileSidebarOpen(false)}
+        sidebarTab={sidebarTab}
+        setSidebarTab={setSidebarTab}
+        isFocusModeActive={isFocusModeActive}
+        partnershipId={partnershipId}
+        myUserId={myUserId}
+        partnerName={partner?.name || 'Partner'}
+        socket={socketRef.current}
+        onFocusStateChange={(isActive) => setIsFocusModeActive(isActive)}
+      />
 
       {/* Dialog Modals */}
       {showAudioCallModal && (

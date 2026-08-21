@@ -67,23 +67,23 @@ function StarRating({ value, size = 'md' }: { value: number; size?: 'sm' | 'md' 
 export function ProfileReputationStats({ reputation, loading }: Props) {
   if (loading) {
     return (
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-5 sm:p-6 animate-pulse">
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-5 sm:p-6 animate-pulse h-full flex flex-col justify-between">
         <div className="h-4 w-40 bg-slate-200 rounded-lg mb-4" />
-        <div className="h-40 bg-slate-100 rounded-2xl" />
+        <div className="h-40 bg-slate-100 rounded-2xl flex-1" />
       </div>
     );
   }
 
   if (!reputation || reputation.count === 0 || !reputation.averages) {
     return (
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-5 sm:p-6">
-        <div className="flex items-center gap-2 mb-5">
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-5 sm:p-6 h-full flex flex-col justify-between space-y-4">
+        <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-2xl bg-amber-50 flex items-center justify-center">
             <Award className="w-4 h-4 text-amber-500" />
           </div>
           <h2 className="text-sm font-black text-slate-900">My Reputation Statistics</h2>
         </div>
-        <div className="flex flex-col items-center gap-3 py-6 text-center border-2 border-dashed border-slate-200 rounded-2xl">
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 text-center border-2 border-dashed border-slate-200 rounded-2xl">
           <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
             <Star className="w-6 h-6 text-slate-400" />
           </div>
@@ -104,7 +104,7 @@ export function ProfileReputationStats({ reputation, loading }: Props) {
   }));
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-5 sm:p-6 space-y-5">
+    <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-5 sm:p-6 space-y-5 h-full flex flex-col justify-between">
       {/* Section Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

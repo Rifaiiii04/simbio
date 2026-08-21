@@ -68,13 +68,13 @@ export function CandidateStatsPanel({ reputation, candidateName }: Props) {
   // Empty state
   if (reputation.count === 0 || !reputation.averages) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 h-full py-6 text-center">
-        <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
-          <Star className="w-6 h-6 text-slate-400" />
+      <div className="flex flex-col items-center justify-center gap-2 h-full py-3 text-center">
+        <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
+          <Star className="w-4 h-4 text-slate-400" />
         </div>
         <div>
-          <p className="text-xs font-bold text-slate-700">{candidateName} has no reviews yet</p>
-          <p className="text-[10px] text-slate-400 mt-0.5">Be their first study partner!</p>
+          <p className="text-[11px] font-bold text-slate-700">{candidateName} has no reviews yet</p>
+          <p className="text-[9px] text-slate-400 mt-0.5">Be their first study partner!</p>
         </div>
       </div>
     );
@@ -86,33 +86,33 @@ export function CandidateStatsPanel({ reputation, candidateName }: Props) {
   }));
 
   return (
-    <div className="flex flex-col gap-3 h-full">
+    <div className="flex flex-col gap-2.5 h-full">
       {/* Header */}
       <div className="flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-xl bg-amber-50 flex items-center justify-center">
-            <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
+        <div className="flex items-center gap-1.5">
+          <div className="w-6 h-6 rounded-lg bg-amber-50 flex items-center justify-center">
+            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
           </div>
-          <span className="text-xs font-black text-slate-800">Peer Review Reputation</span>
+          <span className="text-[11px] font-black text-slate-800">Peer Review Reputation</span>
         </div>
-        <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
-          <MessageSquare className="w-3.5 h-3.5" />
+        <span className="text-[9px] text-slate-400 font-semibold flex items-center gap-1">
+          <MessageSquare className="w-3 h-3" />
           {reputation.count} review{reputation.count === 1 ? '' : 's'}
         </span>
       </div>
 
       {/* Overall rating */}
-      <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-3 border border-amber-100 flex items-center justify-between shrink-0">
+      <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-2.5 border border-amber-100 flex items-center justify-between shrink-0">
         <div>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Overall Rating</p>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-black text-slate-900">{reputation.overall}</span>
-            <span className="text-sm text-slate-400 font-bold">/5</span>
+          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Overall Rating</p>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xl font-black text-slate-900">{reputation.overall}</span>
+            <span className="text-xs text-slate-400 font-bold">/5</span>
           </div>
           <StarRating value={reputation.overall!} />
         </div>
-        <div className="w-12 h-12 rounded-2xl bg-amber-400/20 flex items-center justify-center">
-          <Sparkles className="w-6 h-6 text-amber-500" />
+        <div className="w-9 h-9 rounded-xl bg-amber-400/20 flex items-center justify-center">
+          <Sparkles className="w-4 h-4 text-amber-500" />
         </div>
       </div>
 

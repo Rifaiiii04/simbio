@@ -136,7 +136,7 @@ model User {
   longitude       Float?
   locationEnabled Boolean   @default(false)
   role            UserRole  @default(USER)
-  country         String?   @default("United States")
+  country         String?
   isBanned        Boolean   @default(false)
   bannedAt        DateTime?
   createdAt       DateTime  @default(now())

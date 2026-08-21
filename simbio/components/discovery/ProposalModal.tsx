@@ -148,52 +148,52 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
   if (!mounted || typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[99999] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="w-full max-w-lg neo-box p-6 sm:p-8 space-y-6 bg-white shadow-[10px_10px_0px_0px_#0F172A] relative max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="w-full max-w-lg rounded-3xl bg-white/95 backdrop-blur-xl border border-slate-200/80 p-6 sm:p-7 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between border-b-2 border-[#0F172A] pb-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#FF7A30] border-2.5 border-[#0F172A] text-white font-black flex items-center justify-center text-lg shadow-[3px_3px_0px_0px_#0F172A]">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#FF6B30] to-amber-500 text-white font-black flex items-center justify-center text-base shadow-md shadow-orange-500/20 shrink-0 overflow-hidden">
               {candidate.user.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={candidate.user.avatarUrl} alt={candidate.user.name} className="w-full h-full object-cover rounded-2xl" />
+                <img src={candidate.user.avatarUrl} alt={candidate.user.name} className="w-full h-full object-cover" />
               ) : (
                 candidate.user.name.charAt(0)
               )}
             </div>
             <div>
-              <h2 className="text-xl font-black text-[#0F172A]">Study Partnership Proposal</h2>
-              <p className="text-xs text-gray-600 font-bold">Connect with {candidate.user.name}</p>
+              <h2 className="text-base sm:text-lg font-black text-slate-900 leading-tight">Study Partnership Proposal</h2>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">Connect with {candidate.user.name}</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-xl bg-white border-2 border-[#0F172A] font-black text-sm flex items-center justify-center text-[#0F172A] hover:bg-red-500 hover:text-white transition shadow-[2px_2px_0px_0px_#0F172A] cursor-pointer"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {loading ? (
           <div className="py-12 text-center space-y-3">
-            <Sparkles className="w-8 h-8 text-[#FF7A30] mx-auto animate-spin" />
-            <p className="text-xs font-black text-[#0F172A]">Loading user skills & preparing proposal...</p>
+            <Sparkles className="w-8 h-8 text-[#FF6B30] mx-auto animate-spin" />
+            <p className="text-xs font-bold text-slate-600">Loading user skills & preparing proposal...</p>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-4">
             {/* Skill Selector Controls */}
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-3.5">
               {/* Dropdown 1: Partner Skill to learn */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-black text-[#0F172A] uppercase flex items-center gap-1">
-                  <GraduationCap className="w-3.5 h-3.5 text-[#FF7A30]" />
+                <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5 text-[#FF6B30]" />
                   <span>{candidate.user.name}&apos;s Skill:</span>
                 </label>
                 <select
                   value={selectedPartnerSkill}
                   onChange={(e) => handlePartnerSkillChange(e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold text-[#0F172A] focus:outline-hidden focus:border-[#FF7A30] shadow-[2px_2px_0px_0px_#0F172A]"
+                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 hover:bg-slate-100/70 focus:bg-white rounded-xl border border-slate-200 focus:border-[#FF6B30] font-semibold text-slate-800 focus:outline-none transition shadow-2xs cursor-pointer"
                 >
                   {sortedPartnerTeachSkills.length > 0 ? (
                     sortedPartnerTeachSkills.map((s) => (
@@ -209,14 +209,14 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
 
               {/* Dropdown 2: My Offered Skill */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-black text-[#0F172A] uppercase flex items-center gap-1">
-                  <BookOpen className="w-3.5 h-3.5 text-[#84CC16]" />
+                <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
                   <span>My Offered Skill:</span>
                 </label>
                 <select
                   value={selectedMySkill}
                   onChange={(e) => handleMySkillChange(e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs bg-white rounded-xl border-2 border-[#0F172A] font-bold text-[#0F172A] focus:outline-hidden focus:border-[#84CC16] shadow-[2px_2px_0px_0px_#0F172A]"
+                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 hover:bg-slate-100/70 focus:bg-white rounded-xl border border-slate-200 focus:border-[#FF6B30] font-semibold text-slate-800 focus:outline-none transition shadow-2xs cursor-pointer"
                 >
                   {myTeachSkills.length > 0 ? (
                     myTeachSkills.map((s) => (
@@ -233,8 +233,8 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
 
             {/* Proposal Message Textarea */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-[#0F172A] uppercase flex items-center gap-1">
-                <MessageSquare className="w-3.5 h-3.5 text-[#06B6D4]" />
+              <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-sky-600" />
                 <span>Partnership Message:</span>
               </label>
               <textarea
@@ -244,20 +244,20 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
                   setMessageText(e.target.value);
                   setIsCustomEdited(true);
                 }}
-                className="w-full p-3 text-xs bg-[#FFFDF7] rounded-xl border-2 border-[#0F172A] font-bold text-[#0F172A] focus:outline-hidden focus:border-[#06B6D4] shadow-[3px_3px_0px_0px_#0F172A]"
+                className="w-full p-3.5 text-xs bg-slate-50 focus:bg-white rounded-2xl border border-slate-200 focus:border-[#FF6B30] font-medium text-slate-800 focus:outline-none transition shadow-2xs leading-relaxed"
                 placeholder="Write a greeting or learning proposal..."
               />
-              <p className="text-[10px] text-gray-500 font-bold">
+              <p className="text-[10px] text-slate-400 font-medium">
                 *This message will be sent as your introductory greeting in the collaboration room.
               </p>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-3 border-t-2 border-[#0F172A]">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl bg-gray-100 border-2 border-[#0F172A] text-xs font-black hover:bg-gray-200 transition shadow-[2px_2px_0px_0px_#0F172A] cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -265,9 +265,9 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
                 type="button"
                 disabled={submitting}
                 onClick={handleSubmitProposal}
-                className="px-6 py-2.5 rounded-xl bg-[#84CC16] text-[#0F172A] border-2 border-[#0F172A] text-xs font-black hover:bg-emerald-400 transition flex items-center gap-2 shadow-[3px_3px_0px_0px_#0F172A] cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF6B30] to-orange-500 hover:from-[#E0531A] hover:to-[#FF6B30] text-white text-xs font-bold transition-all shadow-md shadow-orange-500/25 flex items-center gap-2 hover:scale-[1.02] active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <UserCheck className="w-4 h-4" />
+                <UserCheck className="w-4 h-4 text-white" />
                 <span>{submitting ? 'Sending...' : 'Send Proposal & Connect'}</span>
               </button>
             </div>

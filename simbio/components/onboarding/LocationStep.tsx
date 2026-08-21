@@ -15,6 +15,7 @@ interface LocationStepProps {
 export function LocationStep({ locationEnabled, onLocationChange, onBack, onNext }: LocationStepProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [detectedLocationName, setDetectedLocationName] = useState<string | null>(null);
 
   const handleEnableLocation = () => {
     if (!navigator.geolocation) {
@@ -26,12 +27,34 @@ export function LocationStep({ locationEnabled, onLocationChange, onBack, onNext
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
+          let detectedCountry: string | null = null;
+          let detectedCity: string | null = null;
+
+          try {
+            const geoRes = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&zoom=10&addressdetails=1`,
+              { headers: { 'Accept-Language': 'en' } }
+            );
+            if (geoRes.ok) {
+              const geoData = await geoRes.json();
+              detectedCountry = geoData.address?.country || null;
+              detectedCity = geoData.address?.city || geoData.address?.town || geoData.address?.county || geoData.address?.state || null;
+            }
+          } catch {
+            // Proceed if external geocoding is unavailable
+          }
+
+          if (detectedCountry) {
+            setDetectedLocationName(detectedCity ? `${detectedCity}, ${detectedCountry}` : detectedCountry);
+          }
+
           await apiFetch('/users/me/location', {
             method: 'PUT',
             body: JSON.stringify({
               latitude: pos.coords.latitude,
               longitude: pos.coords.longitude,
               locationEnabled: true,
+              country: detectedCountry,
             }),
           });
           onLocationChange(true);
@@ -87,7 +110,9 @@ export function LocationStep({ locationEnabled, onLocationChange, onBack, onNext
         {locationEnabled && (
           <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span className="text-xs font-bold text-emerald-700">Location enabled! You will now appear on the map.</span>
+            <span className="text-xs font-bold text-emerald-700">
+              Location enabled{detectedLocationName ? ` (${detectedLocationName})` : ''}! You will now appear on the map.
+            </span>
           </div>
         )}
 
