@@ -2,8 +2,18 @@
 
 import FallingText from './ui/FallingText';
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 export function UsecaseSection() {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const text = "Learning alone is boring, expensive, and frustrating. Experience free reciprocal skill exchange.";
   
   const fallingWords = [
@@ -30,7 +40,7 @@ export function UsecaseSection() {
           trigger="hover"
           backgroundColor="transparent"
           gravity={0.6}
-          fontSize="2.5rem"
+          fontSize={isMobile ? "1.6rem" : "2.5rem"}
           mouseConstraintStiffness={0.9}
         />
 
