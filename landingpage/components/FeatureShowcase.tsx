@@ -47,10 +47,6 @@ function FeatureBlock({
       
       {/* Text Column */}
       <div className="text-center lg:text-left w-full lg:w-[45%] shrink-0 px-2 flex flex-col items-center lg:items-start z-20">
-        <div className="inline-flex items-center gap-1.5 text-white/90 text-[10px] sm:text-xs font-semibold uppercase tracking-widest bg-white/10 border border-white/20 px-3 py-1.5 rounded-full mb-3 sm:mb-5 shadow-sm">
-          {tagIcon}
-          <span>{tag}</span>
-        </div>
         <h3 className="text-2xl sm:text-3xl lg:text-[2.5rem] font-extrabold text-white tracking-tight leading-tight mb-3 lg:mb-5 w-full">
           {title}
         </h3>

@@ -20,11 +20,6 @@ export function EarlyAccessCTA() {
         <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-sky-500/20 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-2xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 text-orange-400 px-4 py-1.5 rounded-full text-xs font-bold">
-            <Clock className="w-3.5 h-3.5" />
-            <span>Early Access & Waitlist</span>
-          </div>
-
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
             Ready to Pioneer the Future of Skill Barter?
           </h2>

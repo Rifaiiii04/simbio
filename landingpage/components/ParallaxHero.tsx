@@ -33,11 +33,6 @@ export function ParallaxHero() {
 
       {/* 3. MINIMALIST CENTERED CONTENT */}
       <div className="relative z-10 max-w-5xl mx-auto space-y-5 sm:space-y-6">
-        {/* Kicker */}
-        <p className="text-xs sm:text-sm font-semibold tracking-wider text-white uppercase">
-          Reciprocal Skill Exchange
-        </p>
-
         {/* Main Headline */}
         <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight sm:leading-tight">
           Everyone has something to teach.
