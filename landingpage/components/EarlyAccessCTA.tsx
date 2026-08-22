@@ -11,7 +11,7 @@ export function EarlyAccessCTA() {
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, margin: '-60px' }}
+        viewport={{ once: false, margin: '-60px' }}
         transition={{ duration: 0.8 }}
         className="relative rounded-3xl bg-gradient-to-tr from-slate-950 via-slate-900 to-slate-950 text-white p-8 sm:p-16 border border-slate-800 shadow-2xl overflow-hidden text-center space-y-8"
       >

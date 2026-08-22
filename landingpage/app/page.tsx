@@ -1,6 +1,7 @@
 'use client';
 
 import { LandingNavbar } from '@/components/LandingNavbar';
+import { motion } from 'framer-motion';
 import { ParallaxHero } from '@/components/ParallaxHero';
 import { UsecaseSection } from '@/components/UsecaseSection';
 import { CommunitySection } from '@/components/CommunitySection';
@@ -26,7 +27,13 @@ export default function LandingPage() {
       <CommunitySection />
 
       {/* Decorative Text Loop Separator */}
-      <div className="w-full -my-8 sm:-my-16 relative z-10 pointer-events-none">
+      <motion.div 
+        initial={{ opacity: 0, x: -100 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: false, margin: '-50px' }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="w-full -my-8 sm:-my-16 relative z-10 pointer-events-none"
+      >
         <TextLoop
           text="Simbioly"
           shape="wave"
@@ -44,7 +51,7 @@ export default function LandingPage() {
           ribbonWidth={86}
           pauseOnHover={false}
         />
-      </div>
+      </motion.div>
 
       {/* Core Feature Showcase with Real Product Mockups (Web & Mobile 3D Floating) */}
       <FeatureShowcase />

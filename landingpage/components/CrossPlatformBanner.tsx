@@ -15,7 +15,7 @@ export function CrossPlatformBanner() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
+          viewport={{ once: false, margin: '-60px' }}
           transition={{ duration: 0.7 }}
           className="text-center max-w-2xl mx-auto space-y-3"
         >
@@ -33,7 +33,7 @@ export function CrossPlatformBanner() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
+            viewport={{ once: false, margin: '-60px' }}
             transition={{ duration: 0.8, delay: 0.1 }}
             className="bg-white border border-slate-200/80 rounded-3xl p-8 space-y-6 hover:border-orange-300 transition-all duration-300 shadow-xl relative group"
           >
@@ -62,7 +62,7 @@ export function CrossPlatformBanner() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
+            viewport={{ once: false, margin: '-60px' }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="bg-white border border-slate-200/80 rounded-3xl p-8 space-y-6 hover:border-sky-300 transition-all duration-300 shadow-xl relative group"
           >

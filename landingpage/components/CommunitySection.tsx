@@ -5,12 +5,20 @@ import { ArrowRight, Users, Sparkles } from 'lucide-react';
 import peopleLearnImg from '@/assets/people/people-learn_chatroom.webp';
 import Link from 'next/link';
 
+import { motion } from 'framer-motion';
+
 export function CommunitySection() {
   const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
   return (
     <section className="w-full pt-4 pb-16 sm:pt-8 sm:pb-24 px-4 sm:px-6 lg:px-8 bg-white">
-      <div className="max-w-7xl mx-auto">
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: false, margin: '-50px' }}
+        transition={{ duration: 0.8 }}
+        className="max-w-7xl mx-auto"
+      >
         <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 lg:p-16 shadow-sm border border-slate-200/60 overflow-hidden relative">
           
           {/* Subtle background decoration */}
@@ -60,7 +68,7 @@ export function CommunitySection() {
 
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
