@@ -5,7 +5,7 @@ import { HeartHandshake, Sparkles, ShieldCheck, Users } from 'lucide-react';
 
 export function AboutSection() {
   return (
-    <section id="about" className="py-20 bg-white border-y border-slate-200/80 relative overflow-hidden">
+    <section id="about" className="py-20 relative overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
         {/* Concise Section Header */}
         <motion.div
