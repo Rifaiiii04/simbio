@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { apiFetch, getAvatarUrl } from '@/lib/api/client';
 import { Navbar } from '@/components/shared/Navbar';
-import { SearchableSkillSelect } from '@/components/ui/SearchableSkillSelect';
+import { CategorySkillFilterBar } from '@/components/discovery/CategorySkillFilterBar';
 import { ProposalModal } from '@/components/discovery/ProposalModal';
 import { MapView } from '@/components/discovery/MapView';
 import {
@@ -67,6 +67,7 @@ export default function DiscoveryPage() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [selectedSkillId, setSelectedSkillId] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedCategorySkills, setSelectedCategorySkills] = useState<string[]>([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
   const [view, setView] = useState<'list' | 'map'>('list');
@@ -76,6 +77,42 @@ export default function DiscoveryPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isFilterOpenMobile, setIsFilterOpenMobile] = useState(false);
   const [expandedSkills, setExpandedSkills] = useState<Record<string, { teach?: boolean; learn?: boolean }>>({});
+
+  // Compute popular skills ordered by candidate frequency / collaboration popularity
+  const popularSkills = useMemo(() => {
+    const frequencyMap: Record<string, { id: string; name: string; count: number }> = {};
+
+    // 1. Count from candidate teaching & learning skills
+    candidates.forEach((c) => {
+      [...c.teachSkills, ...c.learnSkills].forEach((s) => {
+        const key = s.name.trim();
+        if (key) {
+          if (!frequencyMap[key]) {
+            frequencyMap[key] = { id: s.id || key, name: key, count: 0 };
+          }
+          frequencyMap[key].count += 1;
+        }
+      });
+    });
+
+    // 2. Include any master skills from API
+    skills.forEach((s) => {
+      const key = s.name.trim();
+      if (key && !frequencyMap[key]) {
+        frequencyMap[key] = { id: s.id, name: key, count: 0 };
+      }
+    });
+
+    // 3. Sort descending by popularity / frequency count, then alphabetically
+    return Object.values(frequencyMap).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  }, [candidates, skills]);
+
+  const handleToggleCategorySkill = (skillName: string) => {
+    setSelectedCategorySkills((prev) =>
+      prev.includes(skillName) ? prev.filter((s) => s !== skillName) : [...prev, skillName]
+    );
+    setCurrentPage(1);
+  };
 
   const toggleTeach = (userId: string) => {
     setExpandedSkills((prev) => ({
@@ -179,17 +216,30 @@ export default function DiscoveryPage() {
     }
   };
 
-  // Filter and sort candidates: highest matchScore first (top recommendations)
+  // Filter and sort candidates: strictly by name/username with debounce + multi-category skill filter, highest matchScore first
   const filteredCandidates = candidates
     .filter((c) => {
-      if (!debouncedKeyword.trim()) return true;
-      const q = debouncedKeyword.toLowerCase();
-      return (
-        c.user.name.toLowerCase().includes(q) ||
-        c.user.country?.toLowerCase().includes(q) ||
-        c.teachSkills.some((s) => s.name.toLowerCase().includes(q)) ||
-        c.learnSkills.some((s) => s.name.toLowerCase().includes(q))
-      );
+      // 1. Quick search by username / name
+      if (debouncedKeyword.trim()) {
+        const q = debouncedKeyword.toLowerCase().trim();
+        const nameMatch = c.user.name.toLowerCase().includes(q);
+        const usernameMatch = c.user.username?.toLowerCase().includes(q) ?? false;
+        if (!nameMatch && !usernameMatch) return false;
+      }
+
+      // 2. Multi-select category skill filter
+      if (selectedCategorySkills.length > 0) {
+        const candidateSkillNames = [
+          ...c.teachSkills.map((s) => s.name.toLowerCase().trim()),
+          ...c.learnSkills.map((s) => s.name.toLowerCase().trim()),
+        ];
+        const hasMatch = selectedCategorySkills.some((sel) =>
+          candidateSkillNames.includes(sel.toLowerCase().trim())
+        );
+        if (!hasMatch) return false;
+      }
+
+      return true;
     })
     .sort((a, b) => b.matchScore - a.matchScore);
 
@@ -267,7 +317,7 @@ export default function DiscoveryPage() {
                   <div className="flex items-center gap-2">
                     <SlidersHorizontal className="w-4 h-4 text-[#FF6B30]" />
                     <span>Search Filters</span>
-                    {(selectedSkillId || selectedCountry || searchKeyword) && (
+                    {(selectedCountry || searchKeyword || selectedCategorySkills.length > 0) && (
                       <span className="w-2 h-2 rounded-full bg-[#FF6B30]" />
                     )}
                   </div>
@@ -286,11 +336,12 @@ export default function DiscoveryPage() {
                 </button>
 
                 {/* Reset button on desktop */}
-                {(selectedSkillId || selectedCountry || searchKeyword) && (
+                {(selectedCountry || searchKeyword || selectedCategorySkills.length > 0) && (
                   <button
                     onClick={() => {
                       setSearchKeyword('');
-                      handleFilter('', 'All Countries');
+                      setSelectedCategorySkills([]);
+                      handleFilter(undefined, 'All Countries');
                     }}
                     className="hidden lg:block text-xs font-bold text-[#FF6B30] hover:underline cursor-pointer"
                   >
@@ -309,12 +360,13 @@ export default function DiscoveryPage() {
               >
                 <div className="overflow-hidden space-y-3.5 pt-2 border-t border-slate-100">
                   {/* Reset button inside mobile dropdown */}
-                  {(selectedSkillId || selectedCountry || searchKeyword) && (
+                  {(selectedCountry || searchKeyword || selectedCategorySkills.length > 0) && (
                     <div className="flex justify-end lg:hidden">
                       <button
                         onClick={() => {
                           setSearchKeyword('');
-                          handleFilter('', 'All Countries');
+                          setSelectedCategorySkills([]);
+                          handleFilter(undefined, 'All Countries');
                         }}
                         className="text-xs font-bold text-[#FF6B30] hover:underline cursor-pointer"
                       >
@@ -332,7 +384,7 @@ export default function DiscoveryPage() {
                         type="text"
                         value={searchKeyword}
                         onChange={(e) => setSearchKeyword(e.target.value)}
-                        placeholder="Name / skill..."
+                        placeholder="Search by username..."
                         className="w-full pl-9 pr-3.5 py-2 text-xs bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-200 font-medium focus:outline-hidden focus:border-[#FF6B30] focus:bg-white transition"
                       />
                     </div>
@@ -355,16 +407,16 @@ export default function DiscoveryPage() {
                     </select>
                   </div>
 
-                  {/* Skill Filter */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700">Specific Skill</label>
-                    <SearchableSkillSelect
-                      skills={skills}
-                      selectedSkillId={selectedSkillId}
-                      onSelectSkill={(id) => handleFilter(id, undefined)}
-                      placeholder="Select a skill..."
-                    />
-                  </div>
+                  {/* Category Specific Skill Multi-Select Pills */}
+                  <CategorySkillFilterBar
+                    skills={popularSkills}
+                    selectedSkills={selectedCategorySkills}
+                    onToggleSkill={handleToggleCategorySkill}
+                    onClearAll={() => {
+                      setSelectedCategorySkills([]);
+                      setCurrentPage(1);
+                    }}
+                  />
 
                   {/* Result Counter */}
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-bold">
@@ -399,7 +451,8 @@ export default function DiscoveryPage() {
                   <button
                     onClick={() => {
                       setSearchKeyword('');
-                      handleFilter('', 'All Countries');
+                      setSelectedCategorySkills([]);
+                      handleFilter(undefined, 'All Countries');
                     }}
                     className="soft-button text-xs px-6 py-2.5 inline-flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   >

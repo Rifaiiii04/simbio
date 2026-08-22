@@ -156,3 +156,18 @@ body {
   0%, 100% { transform: scale(1); opacity: 0.8; }
   50% { transform: scale(1.25); opacity: 0.3; }
 }
+
+/* Thin scrollbar for compact containers */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 3px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
