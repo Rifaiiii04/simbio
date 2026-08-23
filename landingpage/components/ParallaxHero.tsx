@@ -19,7 +19,7 @@ export function ParallaxHero() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
   return (
-    <section className="relative min-h-[100vh] flex flex-col pt-48 sm:pt-60 pb-20 overflow-hidden px-4 sm:px-6 lg:px-8 text-center bg-[#FAF9F6]">
+    <section className="relative min-h-[100vh] flex flex-col pt-36 sm:pt-44 pb-20 overflow-hidden px-4 sm:px-6 lg:px-8 text-center bg-[#FAF9F6]">
 
       {/* 1. BACKGROUND MEDIA - LIGHTFALL */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden bg-[#FAF9F6]">
@@ -145,7 +145,9 @@ export function ParallaxHero() {
         </div>
 
         {/* Staggered Cards with Capybara */}
-        <HeroCards />
+        <div className="mt-12 sm:mt-16">
+          <HeroCards />
+        </div>
 
       </div>
 
