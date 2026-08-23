@@ -19,6 +19,7 @@ import { reviewsRouter } from './modules/reviews/reviews.router.js';
 import { discoveryRouter } from './modules/discovery/discovery.router.js';
 import { aiRouter } from './modules/ai/ai.router.js';
 import { reportsRouter } from './modules/reports/reports.router.js';
+import { waitlistRouter } from './modules/waitlist/waitlist.router.js';
 import path from 'path';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -54,6 +55,7 @@ app.use('/api/v1/reviews', reviewsRouter);
 app.use('/api/v1/discovery', discoveryRouter);
 app.use('/api/v1/ai', aiRouter);
 app.use('/api/v1/reports', reportsRouter);
+app.use('/api/v1/waitlist', waitlistRouter);
 
 app.use(notFound);
 app.use(errorHandler);

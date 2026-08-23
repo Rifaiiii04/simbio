@@ -32,16 +32,10 @@ export function LandingNavbar() {
         {/* Action Buttons */}
         <div className="flex items-center gap-1 sm:gap-3">
           <a
-            href={`${APP_URL}/login`}
-            className="text-[11px] sm:text-xs font-semibold text-slate-700 hover:text-slate-900 px-2 sm:px-3 py-1.5 rounded-full transition cursor-pointer whitespace-nowrap"
+            href="#waitlist"
+            className="px-4 sm:px-6 py-1.5 sm:py-2.5 rounded-full bg-[#FF6B30] hover:bg-[#E0531A] text-white text-[11px] sm:text-xs font-semibold transition-all shadow-[0_4px_14px_0_rgb(255,107,48,39%)] hover:shadow-[0_6px_20px_rgba(255,107,48,23%)] active:scale-95 cursor-pointer whitespace-nowrap"
           >
-            Sign In
-          </a>
-          <a
-            href={`${APP_URL}/register`}
-            className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-full bg-[#FF6B30] hover:bg-[#E0531A] text-white text-[11px] sm:text-xs font-semibold transition shadow-xs active:scale-95 cursor-pointer whitespace-nowrap"
-          >
-            Get Early Access
+            Join Waitlist
           </a>
         </div>
       </div>

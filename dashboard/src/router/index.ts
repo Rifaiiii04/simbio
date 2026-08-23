@@ -5,6 +5,7 @@ import SkillsView from '../views/SkillsView.vue'
 import PartnershipsView from '../views/PartnershipsView.vue'
 import AiMonitoringView from '../views/AiMonitoringView.vue'
 import ReportManagementView from '../views/ReportManagementView.vue'
+import InterestedUsersView from '../views/InterestedUsersView.vue'
 import LoginView from '../views/LoginView.vue'
 
 declare module 'vue-router' {
@@ -19,6 +20,7 @@ const router = createRouter({
     { path: '/login', name: 'login', component: LoginView, meta: { public: true } },
     { path: '/', name: 'overview', component: OverviewView },
     { path: '/users', name: 'users', component: UsersView },
+    { path: '/waitlist', name: 'waitlist', component: InterestedUsersView },
     { path: '/skills', name: 'skills', component: SkillsView },
     { path: '/partnerships', name: 'partnerships', component: PartnershipsView },
     { path: '/reports', name: 'reports', component: ReportManagementView },

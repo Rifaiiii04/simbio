@@ -29,21 +29,68 @@ export function EarlyAccessCTA() {
           </p>
         </div>
 
-        {/* Action Button */}
-        <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-          <a
-            href={`${APP_URL}/register`}
-            className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FF6B30] hover:bg-[#E0531A] text-white text-sm font-black transition-all shadow-lg shadow-orange-500/25 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+        {/* Waitlist Form */}
+        <div className="relative z-10 max-w-2xl mx-auto pt-4 w-full">
+          <form 
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const name = formData.get('name');
+              const profession = formData.get('profession');
+              const email = formData.get('email');
+              
+              try {
+                const res = await fetch('http://127.0.0.1:3001/api/v1/waitlist', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ name, profession, email })
+                });
+                
+                if (res.ok) {
+                  alert('Thank you for joining our waitlist! We will notify you when Simbioly is ready.');
+                  (e.target as HTMLFormElement).reset();
+                } else {
+                  const err = await res.json();
+                  alert(err.error || 'Something went wrong, please try again.');
+                }
+              } catch (err) {
+                alert('Failed to connect to the server. Please try again later.');
+              }
+            }}
+            className="flex flex-col gap-3 bg-slate-900/50 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-slate-800"
           >
-            <span>Get Early Access Now</span>
-            <ArrowRight className="w-4 h-4" />
-          </a>
-          <a
-            href={`${APP_URL}/login`}
-            className="w-full sm:w-auto px-7 py-4 rounded-full bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-sm font-bold border border-slate-700 transition flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <span>Sign In to Account</span>
-          </a>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input 
+                type="text" 
+                name="name" 
+                required 
+                placeholder="Your Name" 
+                className="w-full px-4 py-3 rounded-xl bg-slate-950/50 border border-slate-800 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+              />
+              <input 
+                type="text" 
+                name="profession" 
+                required 
+                placeholder="Profession" 
+                className="w-full px-4 py-3 rounded-xl bg-slate-950/50 border border-slate-800 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input 
+                type="email" 
+                name="email" 
+                required 
+                placeholder="Email Address" 
+                className="flex-1 px-4 py-3 rounded-xl bg-slate-950/50 border border-slate-800 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+              />
+              <button 
+                type="submit"
+                className="px-8 py-3 rounded-xl bg-[#FF6B30] hover:bg-[#E0531A] text-white font-bold text-sm transition-all shadow-lg shadow-orange-500/25 active:scale-95 whitespace-nowrap"
+              >
+                Notify Me
+              </button>
+            </div>
+          </form>
         </div>
 
         {/* Micro Trust Points */}

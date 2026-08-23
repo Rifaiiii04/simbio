@@ -61,20 +61,70 @@ export function ParallaxHero() {
           Zero-cost 1-on-1 skill exchange. Find your ideal study partner, create mutual study agreements, and master new capabilities together with Simbi AI.
         </p>
 
-        {/* Clean Minimalist CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 w-full sm:w-auto">
-          <a
-            href={`${APP_URL}/register`}
-            className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#1E1E1E] text-white hover:bg-black font-semibold text-sm transition-all duration-200 shadow-md flex items-center justify-center cursor-pointer active:scale-95"
+        {/* Waitlist Form */}
+        <div id="waitlist" className="w-full max-w-4xl mt-8 px-4 sm:px-0">
+          <form 
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const name = formData.get('name');
+              const profession = formData.get('profession');
+              const email = formData.get('email');
+              
+              try {
+                // Submit to backend Waitlist API
+                const res = await fetch('http://127.0.0.1:3001/api/v1/waitlist', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ name, profession, email })
+                });
+                
+                if (res.ok) {
+                  alert('Thank you for joining our waitlist! We will notify you when Simbioly is ready.');
+                  (e.target as HTMLFormElement).reset();
+                } else {
+                  const err = await res.json();
+                  alert(err.error || 'Something went wrong, please try again.');
+                }
+              } catch (err) {
+                alert('Failed to connect to the server. Please try again later.');
+              }
+            }}
+            className="flex flex-col gap-3 bg-white/70 backdrop-blur-md p-4 sm:p-5 rounded-2xl sm:rounded-[2rem] shadow-lg border border-slate-200/60"
           >
-            Start Here
-          </a>
-          <a
-            href={`${APP_URL}/discovery`}
-            className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 font-semibold text-sm shadow-sm flex items-center justify-center cursor-pointer border border-slate-100"
-          >
-            Explore
-          </a>
+            <div className="flex flex-col sm:flex-row gap-3 items-center">
+              <input 
+                type="text" 
+                name="name" 
+                required 
+                placeholder="Your Name" 
+                className="w-full sm:w-[22%] px-4 py-2.5 sm:py-3.5 rounded-xl bg-white/90 border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all"
+              />
+              <input 
+                type="text" 
+                name="profession" 
+                required 
+                placeholder="Profession" 
+                className="w-full sm:w-[22%] px-4 py-2.5 sm:py-3.5 rounded-xl bg-white/90 border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all"
+              />
+              <input 
+                type="email" 
+                name="email" 
+                required 
+                placeholder="Email Address" 
+                className="w-full sm:flex-1 px-4 py-2.5 sm:py-3.5 rounded-xl bg-white/90 border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/30 transition-all"
+              />
+              <button 
+                type="submit"
+                className="w-full sm:w-auto px-8 py-2.5 sm:py-3.5 rounded-xl bg-[#1E1E1E] text-white font-semibold text-sm hover:bg-black transition-all shadow-md active:scale-95 whitespace-nowrap"
+              >
+                Notify Me
+              </button>
+            </div>
+            <p className="text-[10px] sm:text-xs text-slate-400 text-center mt-1">
+              Be the first to know when our app launches. No spam, ever.
+            </p>
+          </form>
         </div>
 
         {/* Staggered Cards with Capybara */}

@@ -10,7 +10,7 @@ const server = http.createServer(app);
 // Attach Socket.IO WebSocket server for real-time partner direct messaging
 initWebSocketServer(server);
 
-server.listen(env.PORT, () => {
+server.listen(env.PORT, '0.0.0.0', () => {
   logger.info(`🚀 Simbioly API & Real-time WebSocket running on http://localhost:${env.PORT}`);
   logger.info(`   Environment: ${env.NODE_ENV}`);
 });
