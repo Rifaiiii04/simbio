@@ -19,8 +19,8 @@ export function CrossPlatformBanner() {
           transition={{ duration: 0.7 }}
           className="text-center max-w-2xl mx-auto space-y-3"
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
-            Cross-Platform Learning <span className="text-[#FF6B30]">Experience</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-slate-900 tracking-tight">
+            Cross-Platform Learning <span className="text-orange-500">Experience</span>
           </h2>
           <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
             Simbioly is intentionally architected to deliver seamless skill exchanges, whether you are on a full desktop workstation or carrying your phone on the go.

@@ -55,7 +55,7 @@ export function ParallaxHero() {
   }, []);
 
   return (
-    <section className="relative min-h-[100vh] flex flex-col justify-center items-center overflow-hidden px-4 sm:px-6 lg:px-8 py-20 text-center bg-[#060010]">
+    <section className="relative min-h-[100vh] flex flex-col justify-center items-center overflow-hidden px-4 sm:px-6 lg:px-8 py-20 text-center bg-[#F8FAFC]">
       {/* 1. BACKGROUND MEDIA - DRIFT WALL */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
         <DriftWall
@@ -73,25 +73,28 @@ export function ParallaxHero() {
           variance={0.45}
           parallax={isMobile ? 0 : 0.6}
           lift={isMobile ? 32 : 64}
-          fade={0.6}
-          dim={isMobile ? 0.45 : 0.35}
-          overlayColor="#060010"
+          fade={0.4}
+          dim={isMobile ? 0.9 : 0.7}
+          overlayColor="#F8FAFC"
         />
         {/* Extra gradient to ensure text remains readable */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/80 pointer-events-none" />
       </div>
+
+      {/* Bottom Soft Transition to White */}
+      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#F8FAFC] to-transparent pointer-events-none z-10" />
 
       {/* 3. MINIMALIST CENTERED CONTENT */}
       <div className="relative z-10 max-w-5xl mx-auto space-y-5 sm:space-y-6">
         {/* Main Headline */}
-        <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight sm:leading-tight">
-          Everyone has something to teach.
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-extrabold tracking-tight text-slate-900 leading-tight sm:leading-tight">
+          Everyone has something to <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">teach</span>.
           <br className="hidden sm:inline" />{' '}
-          <span className="text-slate-100">Everyone has something to learn.</span>
+          <span className="text-slate-800">Everyone has something to <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500">learn</span>.</span>
         </h1>
 
         {/* Subtitle */}
-        <p className="text-sm sm:text-base text-slate-300 font-normal leading-relaxed max-w-xl mx-auto pt-1">
+        <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-xl mx-auto pt-1">
           Zero-cost 1-on-1 skill exchange. Find your ideal study partner, create mutual study agreements, and master new capabilities together with Simbi AI.
         </p>
 
@@ -99,16 +102,16 @@ export function ParallaxHero() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-4">
           <a
             href={`${APP_URL}/register`}
-            className="w-full sm:w-auto px-7 py-3 rounded-full bg-white text-slate-900 hover:bg-slate-100 font-semibold text-xs sm:text-sm transition-all duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+            className="w-full sm:w-auto px-7 py-3 rounded-full bg-slate-900 text-white hover:bg-slate-800 font-semibold text-xs sm:text-sm transition-all duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
           >
             <span>Get Early Access</span>
-            <ArrowRight className="w-4 h-4 text-slate-900" />
+            <ArrowRight className="w-4 h-4 text-white" />
           </a>
           <a
             href={`${APP_URL}/login`}
-            className="w-full sm:w-auto px-7 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/20 transition-all duration-200 backdrop-blur-sm flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-7 py-3 rounded-full bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm border border-slate-200 transition-all duration-200 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
           >
-            <Compass className="w-4 h-4 text-slate-300" />
+            <Compass className="w-4 h-4 text-slate-400" />
             <span>Sign In</span>
           </a>
         </div>

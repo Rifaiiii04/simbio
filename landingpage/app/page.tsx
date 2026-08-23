@@ -45,9 +45,9 @@ export default function LandingPage() {
           fontWeight={800}
           letterSpacing={2}
           uppercase
-          color="#ffffff"
+          color="#FF6B30"
           ribbon
-          ribbonColor="#FF5A00"
+          ribbonColor="rgba(255, 107, 48, 0.08)"
           ribbonWidth={86}
           pauseOnHover={false}
         />

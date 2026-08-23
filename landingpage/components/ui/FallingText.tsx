@@ -41,7 +41,7 @@ const FallingText = ({
         const isFalling = fallingWords.some(fw => cleanWord.toLowerCase() === fw.toLowerCase());
         
         return `<span
-          class="inline-block mx-[3px] select-none ${isFalling ? 'text-slate-400/50 is-falling' : 'text-slate-900 font-bold'}"
+          class="inline-block mx-[3px] select-none font-display ${isFalling ? 'text-orange-500 font-bold is-falling' : 'text-slate-900 font-extrabold'}"
         >
           ${word}
         </span>`;

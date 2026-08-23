@@ -22,7 +22,8 @@ export function CommunitySection() {
         <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 md:p-10 lg:p-16 shadow-sm border border-slate-200/60 overflow-hidden relative">
           
           {/* Subtle background decoration */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-orange-100/40 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-orange-100/50 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-sky-100/50 to-transparent rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-20 items-center relative z-10">
             
@@ -41,7 +42,7 @@ export function CommunitySection() {
 
             {/* Right: Text & CTA */}
             <div className="flex flex-col items-center md:items-start text-center md:text-left mt-8 md:mt-0">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mb-4 md:mb-6">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold text-slate-900 tracking-tight leading-[1.15] mb-4 md:mb-6">
                 Master any skill <br className="hidden md:block" />
                 <span className="text-orange-500">together, for free.</span>
               </h2>
