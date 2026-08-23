@@ -51,7 +51,7 @@ export function ParallaxHero() {
 
         {/* Main Headline */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-medium tracking-tight text-slate-900 leading-[1.1] sm:leading-[1.1] mt-8">
-          Everyone has something to <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">teach</span>
+          Everyone has something to <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">teach,</span>
           <br className="hidden sm:block" />{' '}
           <span className="text-slate-800">Everyone has something to <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500">learn</span></span>
         </h1>

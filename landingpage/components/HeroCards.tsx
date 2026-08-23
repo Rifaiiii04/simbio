@@ -48,9 +48,9 @@ export function HeroCards() {
           animate={{ opacity: 1, y: card.yOffset, rotate: card.rotate }}
           transition={{ duration: 0.8, delay: i * 0.15 + 0.3, type: "spring", bounce: 0.4 }}
           style={{ zIndex: card.zIndex }}
-          className={`absolute w-[220px] sm:w-[260px] flex flex-col items-center text-center ${
-            i === 0 ? '-translate-x-[140px] sm:-translate-x-[200px]' : 
-            i === 2 ? 'translate-x-[140px] sm:translate-x-[200px]' : ''
+          className={`absolute w-[200px] sm:w-[260px] flex flex-col items-center text-center ${
+            i === 0 ? '-translate-x-[85px] sm:-translate-x-[200px]' : 
+            i === 2 ? 'translate-x-[85px] sm:translate-x-[200px]' : ''
           }`}
         >
           {card.hasMascot && (
@@ -64,7 +64,7 @@ export function HeroCards() {
             </motion.div>
           )}
 
-          <div className="relative z-10 w-full h-[320px] sm:h-[380px] bg-white rounded-3xl p-6 sm:p-8 shadow-[0_24px_50px_-12px_rgba(0,0,0,0.08)] border border-slate-100/50 flex flex-col items-center justify-start pt-8 sm:pt-10">
+          <div className="relative z-10 w-full h-[320px] sm:h-[380px] bg-white rounded-3xl p-5 sm:p-8 shadow-[0_24px_50px_-12px_rgba(0,0,0,0.08)] border border-slate-100/50 flex flex-col items-center justify-start pt-6 sm:pt-10">
             <img 
               src={card.avatar} 
               alt="User Avatar" 
