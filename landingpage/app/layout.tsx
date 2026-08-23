@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
+import { Toaster } from 'sonner';
 
 const poppins = Poppins({
   variable: "--font-sans",
@@ -107,6 +108,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-full flex flex-col bg-[#FAF9F6] text-slate-900 overflow-x-hidden selection:bg-orange-100 selection:text-[#FF6B30]">
         {children}
+        <Toaster richColors position="bottom-center" />
       </body>
     </html>
   );

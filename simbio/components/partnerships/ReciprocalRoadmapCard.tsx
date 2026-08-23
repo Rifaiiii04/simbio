@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Socket } from 'socket.io-client';
 import { apiFetch } from '@/lib/api/client';
+import { toast } from 'sonner';
 import {
   Sparkles,
   CheckSquare,
@@ -90,7 +91,7 @@ export function ReciprocalRoadmapCard({
 
   const handleGenerateAiTopics = async () => {
     if (hasIncompleteTopics) {
-      alert(
+      toast.warning(
         'You currently have an active roadmap with in-progress topics! Please complete all topics in the checklist first before generating a new AI roadmap, or manage them manually.'
       );
       return;
@@ -109,11 +110,11 @@ export function ReciprocalRoadmapCard({
           content: res.message.content,
         });
       }
-      alert('AI Roadmap proposal sent to room chat! Review the draft and click Approve in the conversation.');
+      toast.success('AI Roadmap proposal sent to room chat! Review the draft and click Approve in the conversation.');
     } catch (err: unknown) {
       console.error('Failed to generate AI proposal:', err);
       const errMsg = err instanceof Error ? err.message : 'Failed to generate AI proposal. Please try again.';
-      alert(errMsg);
+      toast.error(errMsg);
     } finally {
       setGenerating(false);
     }

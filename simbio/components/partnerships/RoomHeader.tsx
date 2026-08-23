@@ -10,6 +10,7 @@ import {
   BookOpen,
   X,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface RoomHeaderProps {
   partner: {
@@ -47,7 +48,7 @@ export function RoomHeader({
           onClick={(e) => {
             if (isFocusModeActive) {
               e.preventDefault();
-              alert('Focus Mode is active. You cannot leave until the session ends.');
+              toast.warning('Focus Mode is active. You cannot leave until the session ends.');
             }
           }}
           className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700 transition shrink-0 cursor-pointer"

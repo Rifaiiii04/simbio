@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { apiFetch } from '@/lib/api/client';
 import { Star, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface PeerReviewModalProps {
   partnershipId: string;
@@ -43,7 +44,7 @@ export function PeerReviewModal({
       onClose();
     } catch (err: unknown) {
       console.error(err);
-      alert(err instanceof Error ? err.message : 'Failed to submit review');
+      toast.error(err instanceof Error ? err.message : 'Failed to submit review');
     } finally {
       setSubmitting(false);
     }

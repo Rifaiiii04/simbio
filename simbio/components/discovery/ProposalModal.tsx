@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api/client';
 import { Sparkles, UserCheck, X, BookOpen, GraduationCap, MessageSquare } from 'lucide-react';
 
@@ -134,7 +135,7 @@ export function ProposalModal({ candidate, onClose, onSuccess }: ProposalModalPr
       onClose();
     } catch (err: unknown) {
       console.error('Failed to send proposal:', err);
-      alert(err instanceof Error ? err.message : 'Failed to send proposal request');
+      toast.error(err instanceof Error ? err.message : 'Failed to send proposal request');
     } finally {
       setSubmitting(false);
     }

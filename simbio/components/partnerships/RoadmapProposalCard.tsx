@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
 import { apiFetch } from '@/lib/api/client';
+import { toast } from 'sonner';
 import {
   Sparkles,
   CheckCircle2,
@@ -166,9 +167,9 @@ export function RoadmapProposalCard({
       if (onApproved) onApproved();
     } catch (err: unknown) {
       if (err instanceof Error) {
-        alert(err.message);
+        toast.error(err.message);
       } else {
-        alert('Failed to approve proposal');
+        toast.error('Failed to approve proposal');
       }
     } finally {
       setSubmitting(false);

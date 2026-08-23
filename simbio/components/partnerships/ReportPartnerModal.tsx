@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { apiFetch } from '@/lib/api/client';
 import { ShieldAlert, X, AlertTriangle, Send } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ReportPartnerModalProps {
   partnershipId: string;
@@ -40,7 +41,7 @@ export function ReportPartnerModal({
       onClose();
     } catch (err: unknown) {
       console.error(err);
-      alert(err instanceof Error ? err.message : 'Failed to submit report');
+      toast.error(err instanceof Error ? err.message : 'Failed to submit report');
     } finally {
       setLoading(false);
     }

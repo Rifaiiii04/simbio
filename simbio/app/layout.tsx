@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import QueryProvider from "@/lib/providers/QueryProvider";
 import "./globals.css";
+import { Toaster } from 'sonner';
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${poppins.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col bg-[#FFFEFE] text-gray-800" suppressHydrationWarning>
         <QueryProvider>{children}</QueryProvider>
+        <Toaster richColors position="bottom-center" />
       </body>
     </html>
   );
