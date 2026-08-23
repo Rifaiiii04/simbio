@@ -25,7 +25,7 @@ export function UsecaseSection() {
   ];
 
   return (
-    <section id="usecases" className="pt-20 pb-12 relative overflow-hidden bg-[#F8FAFC]">
+    <section id="usecases" className="pt-20 pb-12 relative overflow-hidden bg-[#FAF9F6]">
       {/* Subtle Dot Grid Background */}
       <div 
         className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none"

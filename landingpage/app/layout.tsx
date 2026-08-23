@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins, Plus_Jakarta_Sans } from "next/font/google";
+import { Poppins, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -8,7 +8,7 @@ const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const bricolage = Bricolage_Grotesque({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["500", "600", "700", "800"],
@@ -97,7 +97,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${poppins.variable} ${plusJakartaSans.variable} font-sans h-full antialiased scroll-smooth`}
+      className={`${poppins.variable} ${bricolage.variable} font-sans h-full antialiased scroll-smooth`}
     >
       <head>
         <script
@@ -105,7 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#F8FAFC] text-slate-900 overflow-x-hidden selection:bg-orange-100 selection:text-[#FF6B30]">
+      <body className="min-h-full flex flex-col bg-[#FAF9F6] text-slate-900 overflow-x-hidden selection:bg-orange-100 selection:text-[#FF6B30]">
         {children}
       </body>
     </html>

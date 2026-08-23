@@ -11,7 +11,7 @@ export function CommunitySection() {
   const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
   return (
-    <section className="w-full pt-4 pb-16 sm:pt-8 sm:pb-24 px-4 sm:px-6 lg:px-8 bg-white">
+    <section className="w-full pt-4 pb-16 sm:pt-8 sm:pb-24 px-4 sm:px-6 lg:px-8 bg-[#FAF9F6]">
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -19,7 +19,7 @@ export function CommunitySection() {
         transition={{ duration: 0.8 }}
         className="max-w-7xl mx-auto"
       >
-        <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 md:p-10 lg:p-16 shadow-sm border border-slate-200/60 overflow-hidden relative">
+        <div className="bg-[#FAF9F6] rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 md:p-10 lg:p-16 shadow-sm border border-slate-200/60 overflow-hidden relative">
           
           {/* Subtle background decoration */}
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-orange-100/50 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
@@ -44,7 +44,7 @@ export function CommunitySection() {
             <div className="flex flex-col items-center md:items-start text-center md:text-left mt-8 md:mt-0">
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-extrabold text-slate-900 tracking-tight leading-[1.15] mb-4 md:mb-6">
                 Master any skill <br className="hidden md:block" />
-                <span className="text-orange-500">together, for free.</span>
+                <span className="text-orange-500">together, for free</span>
               </h2>
               
               <div className="space-y-4 md:space-y-5 mb-6 md:mb-8 text-xs sm:text-sm md:text-base text-slate-500 font-medium leading-relaxed">

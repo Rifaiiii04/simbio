@@ -5,7 +5,7 @@ import { Smartphone, Globe, CheckCircle2, Clock } from 'lucide-react';
 
 export function CrossPlatformBanner() {
   return (
-    <section id="platforms" className="py-24 bg-white text-slate-900 relative overflow-hidden">
+    <section id="platforms" className="py-24 bg-[#FAF9F6] text-slate-900 relative overflow-hidden">
       {/* Ambient Glows */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-orange-100 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-sky-100 rounded-full blur-3xl pointer-events-none" />

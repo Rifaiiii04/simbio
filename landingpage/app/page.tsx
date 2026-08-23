@@ -13,7 +13,7 @@ import { LandingFooter } from '@/components/LandingFooter';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-orange-100 selection:text-[#FF6B30]">
+    <div className="min-h-screen bg-[#FAF9F6] text-slate-900 font-sans selection:bg-orange-100 selection:text-[#FF6B30]">
       {/* Floating Modern Pill Navbar */}
       <LandingNavbar />
 
