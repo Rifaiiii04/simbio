@@ -321,3 +321,12 @@ export async function getMapData(currentUserId: string, radius?: number) {
     })
     .filter((u) => radius == null || u.distanceKm == null || u.distanceKm <= radius);
 }
+
+export async function findCandidateById(
+  currentUserId: string,
+  targetUserId: string,
+): Promise<CandidateResult | null> {
+  const candidates = await findCandidates(currentUserId, {});
+  return candidates.find((c) => c.user.id === targetUserId) || null;
+}
+

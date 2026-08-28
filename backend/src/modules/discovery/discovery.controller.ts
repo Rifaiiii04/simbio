@@ -19,6 +19,15 @@ export async function peopleHandler(req: Request, res: Response, next: NextFunct
   } catch (err) { next(err); }
 }
 
+export async function personDetailHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params as { id: string };
+    const candidate = await repo.findCandidateById(uid(req), id);
+    if (!candidate) throw new AppError(ErrorCode.NOT_FOUND, 'Candidate not found', 404);
+    sendSuccess(res, { candidate });
+  } catch (err) { next(err); }
+}
+
 export async function matchesHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const candidates = await repo.findCandidates(uid(req), {});

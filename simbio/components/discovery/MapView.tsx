@@ -15,6 +15,7 @@ import {
   Crosshair,
   MessageCircle,
   Sparkles,
+  ExternalLink,
 } from 'lucide-react';
 
 interface MapCandidate {
@@ -490,12 +491,13 @@ export function MapView() {
             </div>
 
             <div className="pt-3 border-t border-neutral-800 flex gap-2">
-              <button
-                onClick={() => setSelectedUser(null)}
-                className="flex-1 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-neutral-300 transition cursor-pointer"
+              <Link
+                href={`/discovery/${selectedUser.id}`}
+                className="flex-1 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-neutral-200 transition flex items-center justify-center gap-1.5"
               >
-                Close
-              </button>
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Profile</span>
+              </Link>
 
               {selectedUser.isConnected && selectedUser.partnershipId ? (
                 <Link
