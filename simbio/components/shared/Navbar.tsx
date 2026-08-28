@@ -30,7 +30,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 /** Pages that use a dark background */
-const DARK_PAGES = ['/explore'];
+const DARK_PAGES = ['/explore', '/discovery'];
 
 interface NavbarProps {
   hideBottomNav?: boolean;

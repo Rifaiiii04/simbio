@@ -2,44 +2,20 @@
 
 import { useEffect, useRef, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { createPortal } from 'react-dom';
 import { apiFetch, getAvatarUrl } from '@/lib/api/client';
 import { ProposalModal } from '@/components/discovery/ProposalModal';
+import { MapPartnerSidebar, type MapUser } from '@/components/discovery/MapPartnerSidebar';
 import {
   MapPin,
   MapPinOff,
   X,
   UserCheck,
-  BookOpen,
-  Award,
   Loader2,
   ShieldCheck,
   Crosshair,
-  Users,
-  Handshake,
   MessageCircle,
-  ExternalLink,
-  Search,
   Sparkles,
-  CheckCircle2,
-  Compass,
 } from 'lucide-react';
-
-interface MapUser {
-  id: string;
-  name: string;
-  username: string | null;
-  avatarUrl: string | null;
-  country: string | null;
-  bio?: string | null;
-  latitude: number;
-  longitude: number;
-  teachSkills: Array<{ id: string; name: string }>;
-  distanceKm: number | null;
-  isConnected?: boolean;
-  isPending?: boolean;
-  partnershipId?: string | null;
-}
 
 interface MapCandidate {
   user: {
@@ -62,80 +38,79 @@ interface LocationStatus {
   longitude: number | null;
 }
 
-// Self Marker (Blue Pulse)
+// Self Marker (Glowing Blue / Orange Pulse)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createSelfMarker(L: any, lat: number, lng: number): any {
   const selfHtml = `
-    <div style="position:relative;width:50px;height:50px;display:flex;align-items:center;justify-content:center;">
+    <div style="position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;">
       <div style="
         position:absolute;inset:0;border-radius:50%;
-        background:rgba(59,130,246,0.25);border:2px solid #3B82F6;
+        background:rgba(255,107,48,0.25);border:2px solid #FF6B30;
         animation:selfPulse 2s ease-in-out infinite;
       "></div>
       <div style="
-        position:relative;width:26px;height:26px;border-radius:50%;
-        background:#2563EB;border:3px solid #FFFFFF;
-        box-shadow:0 3px 10px rgba(37,99,235,0.7);
+        position:relative;width:22px;height:22px;border-radius:50%;
+        background:#FF6B30;border:3px solid #FFFFFF;
+        box-shadow:0 0 15px rgba(255,107,48,0.8);
         display:flex;align-items:center;justify-content:center;
       ">
-        <div style="width:8px;height:8px;border-radius:50%;background:#FFFFFF;"></div>
+        <div style="width:6px;height:6px;border-radius:50%;background:#FFFFFF;"></div>
       </div>
       <div style="
-        position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);
-        background:#1E293B;color:#FFFFFF;font-size:10px;font-weight:900;
+        position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);
+        background:#18181B;border:1px solid rgba(255,255,255,0.15);color:#FFFFFF;font-size:9px;font-weight:900;
         padding:2px 8px;border-radius:99px;white-space:nowrap;
-        box-shadow:0 2px 6px rgba(0,0,0,0.3);letter-spacing:0.3px;
+        box-shadow:0 2px 8px rgba(0,0,0,0.5);letter-spacing:0.3px;
       ">You</div>
     </div>
   `;
   const icon = L.divIcon({
     html: selfHtml,
     className: 'custom-self-marker',
-    iconSize: [50, 50],
-    iconAnchor: [25, 25],
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
   });
   return L.marker([lat, lng], { icon, zIndexOffset: 1000 });
 }
 
-// Partner Marker: Differentiates Connected vs Non-Connected
+// Partner Marker (Glowing Avatar Pin)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createPartnerMarker(L: any, u: MapUser): any {
-  const avatarSrc = getAvatarUrl(u.avatarUrl, u.id);
+  const avatarSrc = getAvatarUrl(u.avatarUrl, u.name);
   const isConnected = !!u.isConnected;
   const isPending = !!u.isPending;
 
   const ringColor = isConnected ? '#10B981' : isPending ? '#F59E0B' : '#FF6B30';
   const shadowColor = isConnected
-    ? 'rgba(16,185,129,0.5)'
+    ? 'rgba(16,185,129,0.6)'
     : isPending
-    ? 'rgba(245,158,11,0.5)'
-    : 'rgba(255,107,48,0.45)';
+    ? 'rgba(245,158,11,0.6)'
+    : 'rgba(255,107,48,0.5)';
 
   const badgeText = isConnected
     ? 'Connected'
     : isPending
     ? 'Pending'
     : u.teachSkills[0]?.name
-    ? u.teachSkills[0].name.slice(0, 13)
+    ? u.teachSkills[0].name.slice(0, 12)
     : 'Partner';
 
-  const badgeBg = isConnected ? '#065F46' : isPending ? '#78350F' : 'rgba(15,23,42,0.9)';
+  const badgeBg = isConnected ? '#065F46' : isPending ? '#78350F' : '#27272A';
 
   const markerHtml = `
-    <div style="position:relative;display:flex;flex-direction:column;align-items:center;cursor:pointer;transform:translateY(0);transition:transform 0.2s ease;">
+    <div style="position:relative;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform 0.2s ease;">
       <div style="
-        width:46px;height:46px;border-radius:50%;
-        border:3.5px solid ${ringColor};background:#FFFFFF;
-        box-shadow:0 4px 14px ${shadowColor};
+        width:42px;height:42px;border-radius:50%;
+        border:3px solid ${ringColor};background:#121214;
+        box-shadow:0 0 14px ${shadowColor};
         overflow:hidden;
       ">
-        <img src="${avatarSrc}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://api.dicebear.com/7.x/thumbs/svg?seed=${u.id}'" />
+        <img src="${avatarSrc}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://api.dicebear.com/7.x/thumbs/svg?seed=${u.name}'" />
       </div>
       <div style="
-        margin-top:3px;background:${badgeBg};backdrop-filter:blur(4px);
-        color:#FFFFFF;font-size:9px;font-weight:800;padding:2px 8px;
-        border-radius:99px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.25);
-        display:flex;align-items:center;gap:3px;
+        margin-top:3px;background:${badgeBg};border:1px solid rgba(255,255,255,0.15);
+        color:#FFFFFF;font-size:9px;font-weight:800;padding:2px 7px;
+        border-radius:99px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.5);
       ">
         <span>${badgeText}</span>
       </div>
@@ -144,8 +119,8 @@ function createPartnerMarker(L: any, u: MapUser): any {
   const icon = L.divIcon({
     html: markerHtml,
     className: 'custom-partner-marker',
-    iconSize: [46, 66],
-    iconAnchor: [23, 23],
+    iconSize: [42, 62],
+    iconAnchor: [21, 21],
   });
   return L.marker([u.latitude, u.longitude], { icon });
 }
@@ -166,19 +141,10 @@ export function MapView() {
   const [locationStatus, setLocationStatus] = useState<LocationStatus | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [mapLoading, setMapLoading] = useState(true);
-  const [geoError, setGeoError] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
-
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Initial load
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Load initial location and users with automatic GPS permission verification
-  useEffect(() => {
-    let permObj: PermissionStatus | null = null;
-
     async function init() {
       try {
         const [meRes, mapRes] = await Promise.all([
@@ -186,44 +152,10 @@ export function MapView() {
           apiFetch<{ users: MapUser[] }>('/discovery/map'),
         ]);
 
-        let isEnabled = meRes.user.locationEnabled;
-
-        // Auto turn off if browser permission is denied
-        if (typeof window !== 'undefined' && 'permissions' in navigator) {
-          try {
-            const perm = await navigator.permissions.query({ name: 'geolocation' });
-            permObj = perm;
-            if (perm.state === 'denied' && isEnabled) {
-              isEnabled = false;
-              apiFetch('/users/me/location', {
-                method: 'PUT',
-                body: JSON.stringify({ locationEnabled: false }),
-              }).catch(() => {});
-            }
-
-            // Real-time listener if user changes permission in browser settings
-            perm.onchange = () => {
-              if (perm.state === 'denied') {
-                setLocationStatus((prev) => (prev ? { ...prev, locationEnabled: false, latitude: null, longitude: null } : null));
-                if (selfMarkerRef.current) {
-                  selfMarkerRef.current.remove();
-                  selfMarkerRef.current = null;
-                }
-                apiFetch('/users/me/location', {
-                  method: 'PUT',
-                  body: JSON.stringify({ locationEnabled: false }),
-                }).catch(() => {});
-              }
-            };
-          } catch {
-            // Permissions API query not supported in some older browsers
-          }
-        }
-
         const loc = {
-          locationEnabled: isEnabled,
-          latitude: isEnabled ? (meRes.user.latitude ?? null) : null,
-          longitude: isEnabled ? (meRes.user.longitude ?? null) : null,
+          locationEnabled: meRes.user.locationEnabled,
+          latitude: meRes.user.latitude ?? null,
+          longitude: meRes.user.longitude ?? null,
         };
         setLocationStatus(loc);
         locationStatusRef.current = loc;
@@ -235,15 +167,9 @@ export function MapView() {
       }
     }
     init();
-
-    return () => {
-      if (permObj) {
-        permObj.onchange = null;
-      }
-    };
   }, []);
 
-  // Initialize Leaflet
+  // Initialize Leaflet with Carto Dark Matter Tiles
   useEffect(() => {
     if (mapLoading || !locationStatus?.locationEnabled || !mapContainerRef.current || mapRef.current) return;
 
@@ -264,7 +190,8 @@ export function MapView() {
         zoomControl: true,
       });
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      // Carto Dark Matter Tiles (Clean Dark Theme without watermarks)
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '© OpenStreetMap © CARTO',
         maxZoom: 19,
         subdomains: 'abcd',
@@ -272,10 +199,8 @@ export function MapView() {
 
       mapRef.current = { map, L };
 
-      // Multi-phase invalidateSize to guarantee tiles render on mobile & dynamic layouts
-      setTimeout(() => map.invalidateSize(), 50);
-      setTimeout(() => map.invalidateSize(), 200);
-      setTimeout(() => map.invalidateSize(), 500);
+      setTimeout(() => map.invalidateSize(), 100);
+      setTimeout(() => map.invalidateSize(), 300);
 
       if (myLoc?.locationEnabled && myLoc.latitude != null && myLoc.longitude != null) {
         selfMarkerRef.current = createSelfMarker(L, myLoc.latitude, myLoc.longitude).addTo(map);
@@ -290,21 +215,19 @@ export function MapView() {
     };
   }, [mapLoading, locationStatus?.locationEnabled]);
 
-  // Center on user position when location becomes available
+  // Update center when location becomes available
   useEffect(() => {
     if (!mapRef.current?.map) return;
     const { map, L } = mapRef.current;
 
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 200);
+    setTimeout(() => map.invalidateSize(), 150);
 
     if (locationStatus?.locationEnabled && locationStatus.latitude != null && locationStatus.longitude != null) {
       map.setView([locationStatus.latitude, locationStatus.longitude], 13, { animate: true });
       if (selfMarkerRef.current) selfMarkerRef.current.remove();
       selfMarkerRef.current = createSelfMarker(L, locationStatus.latitude, locationStatus.longitude).addTo(map);
     }
-  }, [locationStatus, mapLoading]);
+  }, [locationStatus]);
 
   // Render partner markers
   useEffect(() => {
@@ -325,522 +248,294 @@ export function MapView() {
     });
   }, [mapUsers]);
 
-  // Connected partners list
-  const connectedPartners = useMemo(() => {
-    return mapUsers.filter((u) => u.isConnected);
-  }, [mapUsers]);
-
-  // Filtered connected partners list for sidebar
-  const displayedSidebarUsers = useMemo(() => {
-    if (!searchQuery.trim()) return connectedPartners;
-    const q = searchQuery.toLowerCase();
-    return connectedPartners.filter(
-      (u) =>
-        u.name.toLowerCase().includes(q) ||
-        (u.username && u.username.toLowerCase().includes(q)) ||
-        u.teachSkills.some((s) => s.name.toLowerCase().includes(q))
-    );
-  }, [connectedPartners, searchQuery]);
-
-  const handleFocusUser = (u: MapUser) => {
-    setSelectedUser(u);
-    if (mapRef.current?.map) {
-      mapRef.current.map.flyTo([u.latitude, u.longitude], 15, { duration: 1 });
-    }
-  };
-
-  const handleCenterOnMe = () => {
-    if (mapRef.current?.map && locationStatus?.latitude != null && locationStatus.longitude != null) {
-      mapRef.current.map.flyTo([locationStatus.latitude, locationStatus.longitude], 14, { duration: 1 });
-    }
-  };
-
-  const handleEnableLocation = () => {
-    if (!navigator.geolocation) {
-      setGeoError('Your browser does not support geolocation.');
-      return;
-    }
+  const handleToggleLocation = async () => {
+    if (loadingLocation) return;
+    const currentEnabled = locationStatus?.locationEnabled ?? false;
     setLoadingLocation(true);
-    setGeoError(null);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        try {
-          await apiFetch('/users/me/location', {
-            method: 'PUT',
-            body: JSON.stringify({ latitude, longitude, locationEnabled: true }),
-          });
-          const newLoc = { locationEnabled: true, latitude, longitude };
-          setLocationStatus(newLoc);
-          locationStatusRef.current = newLoc;
 
-          const mapRes = await apiFetch<{ users: MapUser[] }>('/discovery/map');
-          setMapUsers(mapRes.users);
-
-          if (mapRef.current?.map) {
-            const { map, L } = mapRef.current;
-            if (selfMarkerRef.current) selfMarkerRef.current.remove();
-            selfMarkerRef.current = createSelfMarker(L, latitude, longitude).addTo(map);
-            map.flyTo([latitude, longitude], 14, { duration: 1.2 });
+    if (!currentEnabled) {
+      if (!('geolocation' in navigator)) {
+        setLoadingLocation(false);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          try {
+            await apiFetch('/users/me/location', {
+              method: 'PUT',
+              body: JSON.stringify({ locationEnabled: true, latitude: lat, longitude: lng }),
+            });
+            const newLoc = { locationEnabled: true, latitude: lat, longitude: lng };
+            setLocationStatus(newLoc);
+            locationStatusRef.current = newLoc;
+            const mapRes = await apiFetch<{ users: MapUser[] }>('/discovery/map');
+            setMapUsers(mapRes.users);
+          } catch (err) {
+            console.error(err);
+          } finally {
+            setLoadingLocation(false);
           }
-        } catch (err) {
-          console.error(err);
-          setGeoError('Failed to save location. Please try again.');
-        } finally {
+        },
+        () => {
           setLoadingLocation(false);
         }
-      },
-      async (err) => {
-        setLoadingLocation(false);
-        setLocationStatus((prev) => (prev ? { ...prev, locationEnabled: false, latitude: null, longitude: null } : null));
+      );
+    } else {
+      try {
+        await apiFetch('/users/me/location', {
+          method: 'PUT',
+          body: JSON.stringify({ locationEnabled: false }),
+        });
+        const newLoc = { locationEnabled: false, latitude: null, longitude: null };
+        setLocationStatus(newLoc);
+        locationStatusRef.current = newLoc;
         if (selfMarkerRef.current) {
           selfMarkerRef.current.remove();
           selfMarkerRef.current = null;
         }
-        apiFetch('/users/me/location', {
-          method: 'PUT',
-          body: JSON.stringify({ locationEnabled: false }),
-        }).catch(() => {});
-
-        setGeoError(
-          err.code === 1
-            ? 'Location access denied by browser. Live Location disabled.'
-            : 'Failed to retrieve GPS location coordinates. Live Location disabled.',
-        );
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
-    );
-  };
-
-  const handleDisableLocation = async () => {
-    try {
-      await apiFetch('/users/me/location', {
-        method: 'PUT',
-        body: JSON.stringify({ locationEnabled: false }),
-      });
-      setLocationStatus((prev) => (prev ? { ...prev, locationEnabled: false, latitude: null, longitude: null } : null));
-      if (selfMarkerRef.current) {
-        selfMarkerRef.current.remove();
-        selfMarkerRef.current = null;
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingLocation(false);
       }
-    } catch (err) {
-      console.error(err);
     }
   };
 
-  const toCandidate = (u: MapUser): MapCandidate => ({
-    user: { id: u.id, name: u.name, username: u.username, avatarUrl: u.avatarUrl, bio: u.bio ?? null, country: u.country },
-    teachSkills: u.teachSkills.map((s) => ({ id: s.id, name: s.name, level: 'INTERMEDIATE' })),
-    learnSkills: [],
-    matchScore: 0,
-    distanceKm: u.distanceKm,
-  });
+  const handleCenterMyLocation = () => {
+    if (
+      locationStatus?.locationEnabled &&
+      locationStatus.latitude != null &&
+      locationStatus.longitude != null &&
+      mapRef.current?.map
+    ) {
+      mapRef.current.map.flyTo([locationStatus.latitude, locationStatus.longitude], 14, { duration: 0.8 });
+    }
+  };
+
+  const handleSelectUserFromSidebar = (u: MapUser) => {
+    setSelectedUser(u);
+    if (mapRef.current?.map) {
+      mapRef.current.map.flyTo([u.latitude, u.longitude], 14, { duration: 0.8 });
+    }
+  };
+
+  if (mapLoading) {
+    return (
+      <div className="h-[600px] rounded-3xl bg-[#121214] border border-neutral-800 flex flex-col items-center justify-center text-white">
+        <Sparkles className="w-8 h-8 text-[#FF6B30] animate-pulse mb-3" />
+        <p className="text-sm font-bold text-neutral-300">Loading interactive map...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-3 w-full select-none">
-      {/* 1. TOP LOCATION CONTROL BAR (SIMPLE & COMPACT) */}
-      <div className="bg-white rounded-2xl px-3.5 py-2 sm:py-2.5 border border-slate-200/80 shadow-xs flex items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-          <div
-            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shrink-0 ${
-              locationStatus?.locationEnabled
-                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                : 'bg-slate-100 text-slate-500 border border-slate-200'
-            }`}
-          >
-            <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </div>
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span
-              className={`w-2 h-2 rounded-full shrink-0 ${
-                locationStatus?.locationEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
-              }`}
-            />
-            <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-              {locationStatus?.locationEnabled
-                ? 'Location Status: Active'
-                : 'Location Status: Disabled'}
-            </h3>
+    <div className="flex flex-col gap-3 h-full min-h-0 text-white overflow-hidden">
+      {/* 1. Map Top Control Bar */}
+      <div className="shrink-0 bg-[#121214] border border-neutral-800/80 rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-xl">
+        <div className="flex items-center gap-3">
+          <div className={`w-3 h-3 rounded-full ${locationStatus?.locationEnabled ? 'bg-emerald-400 shadow-sm shadow-emerald-400 animate-pulse' : 'bg-neutral-600'}`} />
+          <div>
+            <span className="text-xs font-bold text-white">
+              Location Status: {locationStatus?.locationEnabled ? 'Active' : 'Disabled'}
+            </span>
+            <p className="text-[10px] text-neutral-400 font-medium">
+              {locationStatus?.locationEnabled ? 'Discovering study partners in your area' : 'Enable GPS to see nearby distance'}
+            </p>
           </div>
         </div>
 
-        {/* Action Toggle Buttons */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {geoError && <span className="text-[11px] font-bold text-red-600 hidden sm:inline">{geoError}</span>}
-
-          {locationStatus?.locationEnabled && locationStatus.latitude != null && (
+        <div className="flex items-center gap-2.5">
+          {locationStatus?.locationEnabled && (
             <button
-              onClick={handleCenterOnMe}
-              className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
-              title="Center map on your location"
+              onClick={handleCenterMyLocation}
+              className="px-3 py-1.5 rounded-xl bg-[#18181B] hover:bg-neutral-800 border border-neutral-700 text-xs font-bold text-neutral-200 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
-              <Crosshair className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600" />
-              <span className="hidden sm:inline">My Location</span>
+              <Crosshair className="w-3.5 h-3.5 text-[#FF6B30]" />
+              <span>My Location</span>
             </button>
           )}
 
-          {/* Modern Toggle Switch */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={!!locationStatus?.locationEnabled}
-              aria-label="Toggle Live Location"
-              onClick={
-                locationStatus?.locationEnabled
-                  ? handleDisableLocation
-                  : handleEnableLocation
-              }
-              disabled={loadingLocation}
-              className={`relative inline-flex h-6 w-12 sm:h-7 sm:w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#FF6B30] disabled:cursor-not-allowed disabled:opacity-60 ${
-                locationStatus?.locationEnabled
-                  ? 'bg-emerald-500 shadow-sm shadow-emerald-500/20'
-                  : 'bg-slate-300'
-              }`}
-            >
-              <span
-                aria-hidden="true"
-                className={`pointer-events-none flex items-center justify-center h-5 w-5 sm:h-6 sm:w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-300 ease-in-out ${
-                  locationStatus?.locationEnabled ? 'translate-x-6 sm:translate-x-7' : 'translate-x-0'
-                }`}
-              >
-                {loadingLocation ? (
-                  <Loader2 className="w-3 h-3 animate-spin text-[#FF6B30]" />
-                ) : (
-                  <span
-                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-colors ${
-                      locationStatus?.locationEnabled ? 'bg-emerald-500' : 'bg-slate-400'
-                    }`}
-                  />
-                )}
-              </span>
-            </button>
-          </div>
+          <button
+            onClick={handleToggleLocation}
+            disabled={loadingLocation}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              locationStatus?.locationEnabled
+                ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
+                : 'bg-[#FF6B30] hover:bg-[#E0531A] text-white shadow-md shadow-[#FF6B30]/20'
+            }`}
+          >
+            {loadingLocation ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : locationStatus?.locationEnabled ? (
+              <MapPin className="w-3.5 h-3.5" />
+            ) : (
+              <MapPinOff className="w-3.5 h-3.5" />
+            )}
+            <span>{locationStatus?.locationEnabled ? 'Sharing Active' : 'Enable Location'}</span>
+          </button>
         </div>
       </div>
 
-      {/* 2. DISABLED STATE OR SPLIT MAP LAYOUT */}
-      {!locationStatus?.locationEnabled ? (
-        <div className="w-full lg:h-[calc(100vh-220px)] max-h-[540px] min-h-[360px] bg-white rounded-3xl border border-slate-200/80 shadow-xs flex flex-col items-center justify-center p-6 text-center space-y-4">
-          <div className="w-16 h-16 rounded-3xl bg-orange-50 border-2 border-orange-200 text-[#FF6B30] flex items-center justify-center shadow-md animate-pulse">
-            <MapPinOff className="w-8 h-8" />
-          </div>
+      {/* 2. Main Map Grid Area */}
+      <div className="flex-1 min-h-0 grid lg:grid-cols-3 gap-3 overflow-hidden">
+        {/* Map Container */}
+        <div className="lg:col-span-2 relative rounded-3xl overflow-hidden border border-neutral-800/80 bg-[#121214] shadow-2xl">
+          {locationStatus?.locationEnabled ? (
+            <div ref={mapContainerRef} className="w-full h-full z-0" />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#0E0E10]">
+              <div className="w-16 h-16 rounded-2xl bg-neutral-800 flex items-center justify-center mb-4">
+                <MapPinOff className="w-8 h-8 text-neutral-400" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-1">GPS Location Is Disabled</h3>
+              <p className="text-xs text-neutral-400 max-w-sm mb-5">
+                Enable your location to view nearby study partners and see relative distance on the interactive dark map.
+              </p>
+              <button
+                onClick={handleToggleLocation}
+                className="px-5 py-2.5 rounded-xl bg-[#FF6B30] hover:bg-[#E0531A] text-white text-xs font-bold transition shadow-lg shadow-[#FF6B30]/25 flex items-center gap-2 cursor-pointer"
+              >
+                <MapPin className="w-4 h-4" />
+                <span>Enable My Location</span>
+              </button>
+            </div>
+          )}
 
-          <div className="max-w-md space-y-1.5">
-            <span className="soft-badge bg-slate-100 text-slate-700 border-slate-200 text-xs font-black">
-              Location Access Disabled
-            </span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Live Location is Off
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
-              To view the interactive map and discover reciprocal learning partners near you, please turn on your live location.
-            </p>
-          </div>
-
-          <button
-            onClick={handleEnableLocation}
-            disabled={loadingLocation}
-            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#FF6B30] to-orange-500 hover:from-[#E0531A] hover:to-orange-600 text-white text-xs font-black transition flex items-center gap-2 shadow-lg hover:shadow-orange-200 active:scale-95 disabled:opacity-60 cursor-pointer"
-          >
-            {loadingLocation ? (
-              <Loader2 className="w-4 h-4 animate-spin text-white" />
-            ) : (
-              <MapPin className="w-4 h-4 text-white" />
-            )}
-            <span>Enable Live Location</span>
-          </button>
-
-          {geoError && (
-            <p className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-4 py-2 rounded-xl max-w-sm">
-              {geoError}
-            </p>
+          {/* Map Legend Overlay */}
+          {locationStatus?.locationEnabled && (
+            <div className="absolute top-3 left-14 z-[400] bg-[#121214]/90 backdrop-blur-md border border-neutral-800 rounded-xl px-3 py-1.5 flex items-center gap-3 text-[10px] font-bold text-neutral-300 shadow-xl pointer-events-none">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-[#FF6B30]" /> You
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" /> Connected
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-amber-500" /> Available
+              </span>
+            </div>
           )}
         </div>
-      ) : (
-        /* SPLIT LAYOUT: MAP CANVAS (LEFT/MAIN) + CONNECTED PARTNERS SIDEBAR (RIGHT) */
-        <div className="flex flex-col lg:flex-row gap-4 w-full lg:h-[calc(100vh-220px)] lg:max-h-[580px]">
-          {/* MAP CANVAS CONTAINER */}
-          <div className="w-full h-[400px] sm:h-[460px] lg:h-full lg:flex-1 relative rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm bg-slate-100 shrink-0">
-            {mapLoading && (
-              <div className="absolute inset-0 z-30 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-8 h-8 animate-spin text-[#FF6B30]" />
-                  <span className="text-xs font-black text-slate-700">Loading interactive map...</span>
+
+        {/* Right Side Partner List */}
+        <div className="hidden lg:block h-full min-h-0">
+          <MapPartnerSidebar
+            users={mapUsers}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onSelectUser={handleSelectUserFromSidebar}
+            selectedUserId={selectedUser?.id}
+          />
+        </div>
+      </div>
+
+      {/* Selected Partner Modal */}
+      {selectedUser && (
+        <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-[#121214] border border-neutral-800 text-white rounded-3xl p-6 shadow-2xl relative space-y-4">
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <img
+                  src={getAvatarUrl(selectedUser.avatarUrl, selectedUser.name)}
+                  alt={selectedUser.name}
+                  className="w-12 h-12 rounded-2xl object-cover border border-neutral-700 shrink-0"
+                />
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-1 truncate">
+                    {selectedUser.name}
+                    <ShieldCheck className="w-4 h-4 text-[#FF6B30]" />
+                  </h3>
+                  <p className="text-xs text-neutral-400 font-medium truncate flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3 h-3 text-neutral-500" />
+                    <span>{selectedUser.country || 'Global'}</span>
+                    {selectedUser.distanceKm !== null && (
+                      <>
+                        <span className="text-neutral-600">•</span>
+                        <span>{Math.round(selectedUser.distanceKm)} km away</span>
+                      </>
+                    )}
+                  </p>
                 </div>
+              </div>
+              <button
+                onClick={() => setSelectedUser(null)}
+                className="p-2 rounded-xl bg-neutral-800 text-neutral-400 hover:text-white transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {selectedUser.bio && (
+              <div>
+                <p className="text-xs text-neutral-300 leading-relaxed">{selectedUser.bio}</p>
               </div>
             )}
 
-            <div ref={mapContainerRef} className="w-full h-full min-h-[400px] sm:min-h-[460px] lg:min-h-0" />
-
-            {/* Floating Map Legend (Top Left) */}
-            <div className="absolute top-3.5 left-14 z-[400] bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-2xl shadow-md border border-slate-200/80 flex items-center gap-3 text-[10px] font-black text-slate-700">
-              <div className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-600 border border-white" />
-                <span>You</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
-                <span>Connected ({connectedPartners.length})</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#FF6B30] border border-white" />
-                <span>Available</span>
+            <div>
+              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block mb-1.5">
+                Can Teach:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedUser.teachSkills.map((s) => (
+                  <span
+                    key={s.id}
+                    className="px-2.5 py-1 rounded-xl bg-[#FF6B30]/15 border border-[#FF6B30]/30 text-xs font-medium text-[#FF8F60]"
+                  >
+                    {s.name}
+                  </span>
+                ))}
               </div>
             </div>
 
-            {/* Floating Center On Me Button */}
-            <button
-              onClick={handleCenterOnMe}
-              className="absolute bottom-4 right-4 z-[400] bg-white/95 backdrop-blur-md text-slate-800 text-xs font-black px-3.5 py-2.5 rounded-2xl shadow-xl border border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 transition active:scale-95 group hover:border-blue-400 cursor-pointer"
-              title="Center map on my location"
-            >
-              <Crosshair className="w-4 h-4 text-blue-600 group-hover:rotate-90 transition-transform duration-300" />
-              <span>My Location</span>
-            </button>
-          </div>
+            <div className="pt-3 border-t border-neutral-800 flex gap-2">
+              <button
+                onClick={() => setSelectedUser(null)}
+                className="flex-1 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-neutral-300 transition cursor-pointer"
+              >
+                Close
+              </button>
 
-          {/* CONNECTED PARTNERS SIDEBAR CONTAINER (Right Box) */}
-          <div className="w-full lg:w-[340px] bg-white rounded-3xl border border-slate-200/80 shadow-sm flex flex-col overflow-hidden shrink-0">
-            {/* Sidebar Header */}
-            <div className="p-3.5 border-b border-slate-100 space-y-2.5 bg-slate-50/50">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <Handshake className="w-4 h-4 text-emerald-600" />
-                  <h4 className="text-xs font-black text-slate-900">Connected Partners</h4>
-                </div>
-                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                  {connectedPartners.length} Connected
-                </span>
-              </div>
-
-              {/* Quick Search inside Sidebar */}
-              <div className="relative">
-                <Search className="w-3 h-3 text-slate-400 absolute left-3 top-2.5" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search name or skill..."
-                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-white rounded-xl border border-slate-200 font-medium focus:outline-hidden focus:border-emerald-500"
-                />
-              </div>
-            </div>
-
-            {/* List Scroll Area */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-2">
-              {displayedSidebarUsers.length === 0 ? (
-                <div className="text-center py-12 px-4 space-y-2 text-slate-400">
-                  <Handshake className="w-8 h-8 mx-auto text-slate-300" />
-                  <p className="text-xs font-bold text-slate-700">No Connected Partners Yet</p>
-                  <p className="text-[11px] text-slate-500 leading-relaxed">
-                    Click an available partner pin on the map to propose a skill exchange with nearby peers!
-                  </p>
-                </div>
+              {selectedUser.isConnected && selectedUser.partnershipId ? (
+                <Link
+                  href={`/partnerships/${selectedUser.partnershipId}`}
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Open Chat</span>
+                </Link>
               ) : (
-                displayedSidebarUsers.map((u) => {
-                  const isSelected = selectedUser?.id === u.id;
-
-                  return (
-                    <div
-                      key={u.id}
-                      onClick={() => handleFocusUser(u)}
-                      className={`p-3 rounded-2xl border transition-all cursor-pointer space-y-2.5 ${
-                        isSelected
-                          ? 'bg-emerald-50/90 border-emerald-400 shadow-xs'
-                          : 'bg-emerald-50/30 border-emerald-200/70 hover:bg-emerald-50/60'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-10 h-10 rounded-xl font-bold flex items-center justify-center text-xs shrink-0 overflow-hidden border border-emerald-400 bg-emerald-100 text-emerald-800">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={getAvatarUrl(u.avatarUrl, u.id)} alt={u.name} className="w-full h-full object-cover" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1">
-                              <h5 className="text-xs font-black text-slate-900 truncate">{u.name}</h5>
-                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                            </div>
-                            <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium">
-                              <MapPin className="w-3 h-3 text-[#FF6B30]" />
-                              <span>{u.distanceKm != null ? `${u.distanceKm} km` : u.country || 'Global'}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Status Tag */}
-                        <span className="text-[9px] font-black px-2 py-0.5 rounded-md shrink-0 bg-emerald-100 text-emerald-800 border border-emerald-300">
-                          Connected
-                        </span>
-                      </div>
-
-                      {/* Skill preview */}
-                      {u.teachSkills.length > 0 && (
-                        <div className="flex flex-wrap gap-1 pt-1 border-t border-emerald-100/60">
-                          {u.teachSkills.slice(0, 3).map((s) => (
-                            <span
-                              key={s.id}
-                              className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-100/70 text-emerald-800"
-                            >
-                              {s.name}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Chat action button */}
-                      <div className="pt-1">
-                        <Link
-                          href={`/partnerships/${u.partnershipId || ''}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="w-full py-1.5 px-3 rounded-xl bg-emerald-600 text-white text-[11px] font-black hover:bg-emerald-700 flex items-center justify-center gap-1.5 shadow-2xs transition"
-                        >
-                          <MessageCircle className="w-3.5 h-3.5" />
-                          <span>Open Chat</span>
-                        </Link>
-                      </div>
-                    </div>
-                  );
-                })
+                <button
+                  onClick={() => {
+                    setProposalCandidate({
+                      user: {
+                        id: selectedUser.id,
+                        name: selectedUser.name,
+                        username: selectedUser.username,
+                        avatarUrl: selectedUser.avatarUrl,
+                        bio: selectedUser.bio ?? null,
+                        country: selectedUser.country,
+                      },
+                      teachSkills: selectedUser.teachSkills.map((s) => ({ id: s.id, name: s.name, level: 'INTERMEDIATE' })),
+                      learnSkills: [],
+                      matchScore: 80,
+                      distanceKm: selectedUser.distanceKm,
+                    });
+                    setSelectedUser(null);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-[#FF6B30] hover:bg-[#E0531A] text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-[#FF6B30]/25 cursor-pointer"
+                >
+                  <UserCheck className="w-4 h-4" />
+                  <span>Connect</span>
+                </button>
               )}
             </div>
           </div>
         </div>
       )}
 
-      {/* 3. USER DETAIL MODAL POP-UP (In Portal above everything) */}
-      {mounted &&
-        selectedUser &&
-        !proposalCandidate &&
-        typeof document !== 'undefined' &&
-        createPortal(
-          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-black/65 backdrop-blur-xs animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg sm:max-w-2xl overflow-hidden border border-slate-200 flex flex-col sm:grid sm:grid-cols-12 animate-in zoom-in-95 duration-200 relative">
-              {/* Close Button Top Right */}
-              <button
-                onClick={() => setSelectedUser(null)}
-                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-md transition cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-
-              {/* LEFT COLUMN: Large Avatar Cover (5 cols) */}
-              <div className="sm:col-span-5 relative h-48 sm:h-auto min-h-[220px] bg-slate-900 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={getAvatarUrl(selectedUser.avatarUrl, selectedUser.id)}
-                  alt={selectedUser.name}
-                  className="w-full h-full object-cover object-top"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent sm:bg-gradient-to-t sm:from-slate-950/60 sm:via-transparent sm:to-transparent" />
-
-                {/* Bottom floating badge on photo */}
-                <div className="absolute bottom-3.5 left-3.5 right-3.5 flex items-center justify-between">
-                  <span
-                    className={`text-[10px] font-black px-2.5 py-1 rounded-xl backdrop-blur-md shadow-md flex items-center gap-1 ${
-                      selectedUser.isConnected
-                        ? 'bg-emerald-600/90 text-white'
-                        : 'bg-[#FF6B30]/90 text-white'
-                    }`}
-                  >
-                    {selectedUser.isConnected ? 'Connected Partner' : 'New Partner'}
-                  </span>
-                </div>
-              </div>
-
-              {/* RIGHT COLUMN: Profile Info & Actions (7 cols) */}
-              <div className="sm:col-span-7 p-6 sm:p-7 flex flex-col justify-between space-y-5 bg-white">
-                {/* User Header Info */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-black text-slate-900 text-xl sm:text-2xl tracking-tight">
-                      {selectedUser.name}
-                    </h3>
-                    <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" />
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-bold">
-                    {selectedUser.username && (
-                      <span className="text-slate-400">@{selectedUser.username}</span>
-                    )}
-                    <span>•</span>
-                    <div className="flex items-center gap-1 text-[#FF6B30]">
-                      <MapPin className="w-3.5 h-3.5 shrink-0" />
-                      <span>
-                        {selectedUser.distanceKm != null
-                          ? `${selectedUser.distanceKm} km away`
-                          : selectedUser.country || 'Global'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {selectedUser.bio && (
-                    <p className="text-xs text-slate-600 italic font-medium bg-slate-50 p-2.5 rounded-xl border border-slate-100 mt-1">
-                      &quot;{selectedUser.bio}&quot;
-                    </p>
-                  )}
-                </div>
-
-                {/* Skills Section */}
-                <div className="bg-slate-50 rounded-2xl p-4 space-y-2.5 border border-slate-100">
-                  <span className="text-[11px] font-black uppercase text-emerald-700 flex items-center gap-1.5">
-                    <BookOpen className="w-4 h-4 text-emerald-600" />
-                    <span>Skills Offered to Teach:</span>
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectedUser.teachSkills.length === 0 ? (
-                      <span className="text-xs text-slate-400 italic">No skills listed yet</span>
-                    ) : (
-                      selectedUser.teachSkills.map((s) => (
-                        <span
-                          key={s.id}
-                          className="soft-badge bg-emerald-50 text-emerald-800 border-emerald-300 text-xs px-3 py-1 font-bold shadow-2xs"
-                        >
-                          {s.name}
-                        </span>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2.5 pt-2">
-                  <button
-                    onClick={() => setSelectedUser(null)}
-                    className="w-1/3 h-12 rounded-2xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-100 transition flex items-center justify-center cursor-pointer"
-                  >
-                    Close
-                  </button>
-
-                  {selectedUser.isConnected ? (
-                    <Link
-                      href={`/partnerships/${selectedUser.partnershipId || ''}`}
-                      className="w-2/3 h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition flex items-center justify-center gap-2 shadow-md"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      <span>Open Chat Room</span>
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setProposalCandidate(toCandidate(selectedUser));
-                        setSelectedUser(null);
-                      }}
-                      className="w-2/3 h-12 rounded-2xl bg-gradient-to-r from-[#FF6B30] to-orange-500 text-white text-xs font-black hover:from-[#E0531A] hover:to-orange-600 transition flex items-center justify-center gap-2 shadow-md cursor-pointer"
-                    >
-                      <UserCheck className="w-4 h-4" />
-                      <span>Connect Exchange</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
-
-      {/* Connection Proposal Modal */}
+      {/* Match Proposal Modal */}
       {proposalCandidate && (
         <ProposalModal
           candidate={proposalCandidate}

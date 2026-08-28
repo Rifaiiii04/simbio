@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { LogOut, LogIn, UserPlus } from 'lucide-react';
 import { getAvatarUrl } from '@/lib/api/client';
 
-const DARK_PAGES = ['/explore'];
+const DARK_PAGES = ['/explore', '/discovery'];
 
 export function NavUserProfile() {
   const pathname = usePathname();
