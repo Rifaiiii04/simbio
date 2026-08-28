@@ -209,7 +209,7 @@ Konteks saat ini:
   - Skill yang ingin dia PELAJARI: ${candLearn.join(', ') || 'Belum dicantumkan'}
   - Reputasi dari peer review: ${reputationSummary}
 
-Tugasmu: Bantu ${me.name} mengevaluasi apakah ${candidate.name} adalah partner barter skill yang cocok. Fokus pada keseimbangan timbal balik (reciprocal): apakah skill mengajar kandidat sesuai kebutuhan belajar user, dan sebaliknya. Berikan penilaian jujur, konstruktif, dan semangat. Jawab dalam Bahasa Indonesia. Maksimal 200 kata.`;
+Tugasmu: Help ${me.name} evaluate whether ${candidate.name} is a good reciprocal skill exchange partner. Focus on the reciprocal balance: does the candidate's teaching skill match the user's learning needs, and vice versa. Provide an honest, constructive, and enthusiastic assessment. **Respond in English**. Format your response beautifully using markdown headings, bullet points, and emojis. Do not use markdown tables, they are hard to read on mobile. Maximum 200 words.`;
 
   try {
     return await llmProvider.generateChatResponse(systemPrompt, userMessage);

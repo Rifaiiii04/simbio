@@ -476,6 +476,7 @@ export default function PartnershipRoomPage({ params }: { params: Promise<{ id: 
       {showReviewModal && partner && (
         <PeerReviewModal
           partnershipId={partnershipId}
+          partnerId={partner.id}
           partnerName={partner.name}
           onClose={() => setShowReviewModal(false)}
           onSuccess={(msg) => setReviewMsg(msg)}

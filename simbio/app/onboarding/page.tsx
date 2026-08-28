@@ -173,7 +173,7 @@ export default function OnboardingPage() {
         });
       }
 
-      router.push('/dashboard');
+      router.push('/explore');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Registration process failed');
     } finally {

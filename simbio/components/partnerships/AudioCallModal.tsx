@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
-import { apiFetch } from '@/lib/api/client';
+import { apiFetch, getAvatarUrl } from '@/lib/api/client';
 import { useWebRTCAudio } from '@/hooks/useWebRTCAudio';
 import {
   Phone as PhoneIcon,
@@ -287,12 +287,11 @@ export function AudioCallModal({
         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#FF6B30] to-orange-400 text-white font-bold flex items-center justify-center text-base shadow-sm shrink-0 overflow-hidden">
-              {partner.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={partner.avatarUrl} alt={partner.name} className="w-full h-full object-cover" />
-              ) : (
-                partner.name.charAt(0).toUpperCase()
-              )}
+              <img 
+                src={getAvatarUrl(partner.avatarUrl, partner.name)} 
+                alt={partner.name} 
+                className="w-full h-full object-cover" 
+              />
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 leading-snug">{partner.name}</h2>

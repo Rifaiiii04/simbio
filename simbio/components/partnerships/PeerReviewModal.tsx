@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 interface PeerReviewModalProps {
   partnershipId: string;
+  partnerId: string;
   partnerName: string;
   onClose: () => void;
   onSuccess: (msg: string) => void;
@@ -14,6 +15,7 @@ interface PeerReviewModalProps {
 
 export function PeerReviewModal({
   partnershipId,
+  partnerId,
   partnerName,
   onClose,
   onSuccess,
@@ -29,9 +31,11 @@ export function PeerReviewModal({
     e.preventDefault();
     setSubmitting(true);
     try {
-      await apiFetch(`/partnerships/${partnershipId}/reviews`, {
+      await apiFetch(`/reviews`, {
         method: 'POST',
         body: JSON.stringify({
+          partnershipId,
+          revieweeId: partnerId,
           consistency,
           communication,
           knowledgeSharing,

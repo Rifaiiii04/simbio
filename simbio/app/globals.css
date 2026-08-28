@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 @import "leaflet/dist/leaflet.css";
 
 @theme {
@@ -6,7 +7,7 @@
 }
 
 :root {
-  /* Clean Minimalist Soft-UI Design Tokens & Variables */
+  /* Light Theme Tokens */
   --bg-app: #F8FAFC;
   --bg-surface: #FFFFFF;
   --bg-surface-subtle: #F1F5F9;
@@ -32,6 +33,22 @@
   --shadow-soft-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
   --shadow-soft-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
   --shadow-soft-lg: 0 12px 28px -4px rgba(15, 23, 42, 0.12), 0 4px 8px -4px rgba(15, 23, 42, 0.06);
+
+  /* Dark Theme Palette Tokens (Sleek Onyx / Charcoal / Accent Orange) */
+  --dark-bg-canvas: #0A0A0A;
+  --dark-bg-card: #121214;
+  --dark-bg-surface: #18181B;
+  --dark-bg-input: #1F1F23;
+  --dark-bg-hover: #27272A;
+
+  --dark-border-subtle: rgba(255, 255, 255, 0.07);
+  --dark-border-medium: rgba(255, 255, 255, 0.12);
+  --dark-border-accent: rgba(255, 107, 48, 0.4);
+
+  --dark-text-primary: #FFFFFF;
+  --dark-text-secondary: #D4D4D8;
+  --dark-text-muted: #71717A;
+  --dark-text-subtle: #52525B;
 }
 
 *, *::before, *::after {
@@ -89,85 +106,42 @@ body {
   border: 1px solid var(--border-color);
 }
 
-/* Soft-UI Aliases for Seamless Backward Compatibility */
-.neo-box {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-soft-sm);
-  border-radius: 1.25rem;
-  transition: all 0.2s ease;
-}
-
-.neo-box-sm {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-soft-sm);
-  border-radius: 1rem;
-}
-
-.neo-button {
-  background-color: var(--color-brand-primary);
-  color: #FFFFFF;
-  border: 1px solid transparent;
-  box-shadow: var(--shadow-soft-sm);
-  border-radius: 0.875rem;
-  font-weight: 700;
-  transition: all 0.2s ease;
-}
-
-.neo-button:hover {
-  background-color: var(--color-brand-primary-hover);
-  box-shadow: var(--shadow-soft-md);
-}
-
-.neo-badge {
-  border: 1px solid var(--border-color);
-  border-radius: 9999px;
-  font-weight: 700;
-}
-
-/* Soft Animations */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-app);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: rgba(255, 255, 255, 0.25);
 }
 
-/* Self location marker pulse animation */
-@keyframes selfPulse {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.25); opacity: 0.3; }
-}
-
-/* Thin scrollbar for compact containers */
+/* Thin scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
-  width: 3px;
+  width: 4px;
 }
 .scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 9999px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

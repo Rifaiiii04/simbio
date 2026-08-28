@@ -10,6 +10,7 @@ import {
   BookOpen,
   X,
 } from 'lucide-react';
+import { getAvatarUrl } from '@/lib/api/client';
 import { toast } from 'sonner';
 
 interface RoomHeaderProps {
@@ -59,12 +60,11 @@ export function RoomHeader({
 
         <div className="relative shrink-0">
           <div className="w-9 h-9 rounded-xl bg-[#FF6B30] text-white font-bold flex items-center justify-center text-sm overflow-hidden shadow-2xs">
-            {partner.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={partner.avatarUrl} alt={partner.name} className="w-full h-full object-cover" />
-            ) : (
-              partner.name.charAt(0).toUpperCase()
-            )}
+            <img 
+              src={getAvatarUrl(partner.avatarUrl, partner.name)} 
+              alt={partner.name} 
+              className="w-full h-full object-cover" 
+            />
           </div>
           <span
             className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${

@@ -10,7 +10,7 @@ export default function RootPage() {
   useEffect(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('simbioly_token') : null;
     if (token) {
-      router.replace('/dashboard');
+      router.replace('/explore');
     } else {
       router.replace('/login');
     }

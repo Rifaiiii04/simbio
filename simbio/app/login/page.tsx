@@ -38,7 +38,7 @@ export default function LoginPage() {
 
       localStorage.setItem('simbioly_token', res.token);
       localStorage.setItem('simbioly_user', JSON.stringify(res.user));
-      router.push('/dashboard');
+      router.push('/explore');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Login failed';
       if (msg.includes('fetch') || msg.includes('Failed to fetch') || msg.includes('NetworkError')) {

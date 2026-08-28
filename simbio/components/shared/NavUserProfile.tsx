@@ -7,6 +7,8 @@ import { motion } from 'framer-motion';
 import { LogOut, LogIn, UserPlus } from 'lucide-react';
 import { getAvatarUrl } from '@/lib/api/client';
 
+const DARK_PAGES = ['/explore'];
+
 export function NavUserProfile() {
   const pathname = usePathname();
   const router = useRouter();
@@ -14,6 +16,8 @@ export function NavUserProfile() {
   const [token, setToken] = useState<string | null>(null);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+
+  const isDarkPage = DARK_PAGES.some((p) => pathname.startsWith(p));
 
   useEffect(() => {
     setMounted(true);
@@ -44,7 +48,7 @@ export function NavUserProfile() {
   if (!mounted) {
     return (
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-xl bg-slate-100 animate-pulse" />
+        <div className={`w-8 h-8 rounded-xl animate-pulse ${isDarkPage ? 'bg-neutral-800' : 'bg-slate-100'}`} />
       </div>
     );
   }
@@ -54,7 +58,11 @@ export function NavUserProfile() {
       <div className="flex items-center gap-1.5 sm:gap-2">
         <Link
           href="/login"
-          className="text-xs font-black text-slate-700 hover:text-slate-900 px-3 py-1.5 rounded-xl hover:bg-slate-100 transition flex items-center gap-1.5"
+          className={`text-xs font-black px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 ${
+            isDarkPage
+              ? 'text-neutral-300 hover:text-white hover:bg-neutral-800/80'
+              : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+          }`}
         >
           <LogIn className="w-3.5 h-3.5" />
           <span>Log In</span>
@@ -76,10 +84,12 @@ export function NavUserProfile() {
     <div className="flex items-center gap-1.5 sm:gap-2">
       <Link
         href="/profile"
-        className={`flex items-center gap-2 p-1 pr-2.5 sm:pr-3 rounded-2xl transition-all shadow-2xs group ${
+        className={`flex items-center gap-2 p-1 pr-2.5 sm:pr-3 rounded-2xl transition-all shadow-2xs group border ${
           isProfileActive
-            ? 'bg-orange-50/90 border border-orange-300 ring-2 ring-orange-500/20 text-[#FF6B30]'
-            : 'bg-slate-50 hover:bg-slate-100/90 border border-slate-200/80 text-slate-800 hover:text-[#FF6B30]'
+            ? 'bg-[#FF6B30]/15 border-[#FF6B30]/40 text-[#FF6B30]'
+            : isDarkPage
+            ? 'bg-neutral-900/90 hover:bg-neutral-800 border-neutral-800 text-neutral-200 hover:text-white'
+            : 'bg-slate-50 hover:bg-slate-100/90 border-slate-200/80 text-slate-800 hover:text-[#FF6B30]'
         }`}
         title="View My Profile"
       >
@@ -103,7 +113,11 @@ export function NavUserProfile() {
         whileHover={{ scale: 1.04 }}
         whileTap={{ scale: 0.96 }}
         onClick={handleLogout}
-        className="p-1.5 sm:px-2.5 sm:py-2 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+        className={`p-1.5 sm:px-2.5 sm:py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer border ${
+          isDarkPage
+            ? 'bg-neutral-900/90 border-neutral-800 text-neutral-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/30'
+            : 'bg-slate-50 border-slate-200/80 text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200'
+        }`}
         title="Sign out of Simbioly"
       >
         <LogOut className="w-3.5 h-3.5" />
